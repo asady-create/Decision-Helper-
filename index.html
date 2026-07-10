@@ -715,8 +715,29 @@
           row.className =
             "flex items-start justify-between gap-3 rounded-xl bg-white/90 px-3 py-2.5 text-sm font-medium text-slate-800 shadow-sm dark:bg-slate-950/80 dark:text-slate-100";
 
-          const text = document.createElement("span");
-          text.textContent = item;
+          const text = document.createElement("input");
+          text.type = "text";
+          text.value = item;
+          text.placeholder = type === "pros" ? "Edit this pro" : "Edit this con";
+          text.ariaLabel = `Edit ${type === "pros" ? "pro" : "con"}: ${item}`;
+          text.className =
+            "min-h-8 min-w-0 flex-1 rounded-lg bg-transparent px-2 py-1 text-sm font-medium text-slate-800 outline-none transition placeholder:text-slate-400 focus:bg-white focus:ring-4 focus:ring-teal-500/10 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:bg-slate-900";
+          text.addEventListener("input", () => {
+            option[type][index] = text.value;
+            button.ariaLabel = `Remove ${text.value || type.slice(0, -1)}`;
+            persistCurrentState();
+          });
+          text.addEventListener("blur", () => {
+            const trimmedValue = text.value.trim();
+            if (!trimmedValue) {
+              option[type].splice(index, 1);
+              persistAndRender();
+              return;
+            }
+            option[type][index] = trimmedValue;
+            text.value = trimmedValue;
+            persistCurrentState();
+          });
 
           const button = document.createElement("button");
           button.type = "button";

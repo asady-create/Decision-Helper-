@@ -1,0 +1,831 @@
+<!doctype html>
+<html lang="en" class="scroll-smooth">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Decision Helper</title>
+    <meta
+      name="description"
+      content="A calm, modern decision-making helper for comparing options, pros, cons, and scores."
+    />
+    <script>
+      window.tailwind = {
+        config: {
+          darkMode: "class",
+          theme: {
+            extend: {
+              fontFamily: {
+                sans: ["Inter", "ui-sans-serif", "system-ui", "sans-serif"],
+              },
+              boxShadow: {
+                soft: "0 24px 70px -35px rgba(15, 23, 42, 0.35)",
+              },
+            },
+          },
+        },
+      };
+    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        color-scheme: light;
+      }
+
+      html.dark {
+        color-scheme: dark;
+      }
+
+      body {
+        min-height: 100vh;
+        background:
+          radial-gradient(circle at top left, rgba(45, 212, 191, 0.22), transparent 34rem),
+          radial-gradient(circle at top right, rgba(125, 211, 252, 0.2), transparent 32rem),
+          linear-gradient(135deg, #f8fafc 0%, #eef7f4 50%, #f8fafc 100%);
+      }
+
+      html.dark body {
+        background:
+          radial-gradient(circle at top left, rgba(20, 184, 166, 0.18), transparent 34rem),
+          radial-gradient(circle at top right, rgba(56, 189, 248, 0.14), transparent 32rem),
+          linear-gradient(135deg, #08111f 0%, #0f172a 55%, #111827 100%);
+      }
+
+      .glass-panel {
+        backdrop-filter: blur(24px);
+      }
+
+      input[type="range"] {
+        accent-color: #0f766e;
+      }
+
+      html.dark input[type="range"] {
+        accent-color: #5eead4;
+      }
+    </style>
+  </head>
+  <body class="font-sans text-slate-900 antialiased transition-colors duration-300 dark:text-slate-100">
+    <div class="mx-auto flex min-h-screen w-full max-w-7xl flex-col px-4 py-6 sm:px-6 lg:px-8">
+      <header class="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <a href="#" class="inline-flex items-center gap-3" aria-label="Decision Helper home">
+          <span
+            class="grid h-11 w-11 place-items-center rounded-2xl bg-teal-600 text-xl font-black text-white shadow-lg shadow-teal-600/25"
+            >D</span
+          >
+          <span>
+            <span class="block text-lg font-bold tracking-tight">Decision Helper</span>
+            <span class="block text-sm text-slate-600 dark:text-slate-400">Think clearly. Choose calmly.</span>
+          </span>
+        </a>
+        <button
+          id="themeToggle"
+          type="button"
+          class="inline-flex items-center justify-center gap-2 rounded-full border border-white/70 bg-white/75 px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:-translate-y-0.5 hover:bg-white focus:outline-none focus:ring-4 focus:ring-teal-500/20 dark:border-slate-700 dark:bg-slate-900/75 dark:text-slate-200 dark:hover:bg-slate-800"
+          aria-pressed="false"
+        >
+          <span id="themeIcon" aria-hidden="true">🌙</span>
+          <span id="themeLabel">Dark mode</span>
+        </button>
+      </header>
+
+      <main class="grid flex-1 gap-6 lg:grid-cols-[minmax(0,1.2fr)_minmax(340px,0.8fr)]">
+        <section class="space-y-6">
+          <div
+            class="glass-panel overflow-hidden rounded-[2rem] border border-white/75 bg-white/80 p-6 shadow-soft dark:border-slate-700/80 dark:bg-slate-900/78 sm:p-8"
+          >
+            <div class="max-w-3xl">
+              <p class="mb-3 inline-flex rounded-full bg-teal-50 px-3 py-1 text-sm font-semibold text-teal-700 dark:bg-teal-400/10 dark:text-teal-200">
+                Guided decision workspace
+              </p>
+              <h1 class="text-4xl font-extrabold tracking-tight text-slate-950 dark:text-white sm:text-5xl">
+                Compare your options with a calmer framework.
+              </h1>
+              <p class="mt-4 text-base leading-7 text-slate-600 dark:text-slate-300 sm:text-lg">
+                Add your question, list each option, capture pros and cons, then score the factors that matter.
+                Decision Helper saves your work locally in this browser and highlights the strongest option.
+              </p>
+            </div>
+          </div>
+
+          <div class="grid gap-6 xl:grid-cols-[minmax(0,0.95fr)_minmax(360px,1.05fr)]">
+            <section
+              class="glass-panel rounded-[1.75rem] border border-white/75 bg-white/80 p-5 shadow-soft dark:border-slate-700/80 dark:bg-slate-900/78 sm:p-6"
+              aria-labelledby="decisionFormTitle"
+            >
+              <div class="mb-5 flex items-start justify-between gap-4">
+                <div>
+                  <h2 id="decisionFormTitle" class="text-xl font-bold text-slate-950 dark:text-white">
+                    1. Frame the decision
+                  </h2>
+                  <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">
+                    Keep the question specific and time-bound if you can.
+                  </p>
+                </div>
+                <button
+                  id="resetDecision"
+                  type="button"
+                  class="rounded-full px-3 py-1.5 text-sm font-semibold text-slate-500 transition hover:bg-slate-100 hover:text-slate-800 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100"
+                >
+                  Reset
+                </button>
+              </div>
+
+              <label for="decisionQuestion" class="mb-2 block text-sm font-semibold text-slate-700 dark:text-slate-200">
+                Decision question
+              </label>
+              <input
+                id="decisionQuestion"
+                type="text"
+                placeholder="Should I study abroad?"
+                class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-base text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/15 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:placeholder:text-slate-500"
+              />
+
+              <div class="mt-6 rounded-2xl bg-teal-50/80 p-4 text-sm text-teal-900 dark:bg-teal-400/10 dark:text-teal-100">
+                <h3 class="font-bold">How to use it</h3>
+                <ol class="mt-2 list-decimal space-y-1 pl-5">
+                  <li>Write one clear decision question.</li>
+                  <li>Add two or more realistic options.</li>
+                  <li>List the most important pros and cons for each option.</li>
+                  <li>Rate every factor from 1 to 10, then review the recommendation.</li>
+                </ol>
+              </div>
+
+              <form id="addOptionForm" class="mt-6">
+                <label for="optionName" class="mb-2 block text-sm font-semibold text-slate-700 dark:text-slate-200">
+                  Add an option
+                </label>
+                <div class="flex flex-col gap-3 sm:flex-row">
+                  <input
+                    id="optionName"
+                    type="text"
+                    placeholder="Go to UK"
+                    class="min-w-0 flex-1 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-base text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/15 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:placeholder:text-slate-500"
+                  />
+                  <button
+                    type="submit"
+                    class="rounded-2xl bg-teal-600 px-5 py-3 font-bold text-white shadow-lg shadow-teal-600/20 transition hover:-translate-y-0.5 hover:bg-teal-700 focus:outline-none focus:ring-4 focus:ring-teal-500/30"
+                  >
+                    Add option
+                  </button>
+                </div>
+              </form>
+            </section>
+
+            <section
+              class="glass-panel rounded-[1.75rem] border border-white/75 bg-white/80 p-5 shadow-soft dark:border-slate-700/80 dark:bg-slate-900/78 sm:p-6"
+              aria-labelledby="factorsTitle"
+            >
+              <div class="mb-5">
+                <h2 id="factorsTitle" class="text-xl font-bold text-slate-950 dark:text-white">
+                  2. Score key factors
+                </h2>
+                <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">
+                  Adjust the factor names to match your decision.
+                </p>
+              </div>
+              <div id="factorsList" class="space-y-3"></div>
+              <form id="addFactorForm" class="mt-5 flex flex-col gap-3 sm:flex-row">
+                <input
+                  id="factorName"
+                  type="text"
+                  placeholder="Add a factor, e.g. Career growth"
+                  class="min-w-0 flex-1 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-base text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/15 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:placeholder:text-slate-500"
+                />
+                <button
+                  type="submit"
+                  class="rounded-2xl border border-teal-200 bg-teal-50 px-5 py-3 font-bold text-teal-800 transition hover:-translate-y-0.5 hover:bg-teal-100 focus:outline-none focus:ring-4 focus:ring-teal-500/20 dark:border-teal-400/30 dark:bg-teal-400/10 dark:text-teal-100 dark:hover:bg-teal-400/20"
+                >
+                  Add factor
+                </button>
+              </form>
+            </section>
+          </div>
+
+          <section class="space-y-4" aria-labelledby="optionsTitle">
+            <div class="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <h2 id="optionsTitle" class="text-2xl font-bold tracking-tight text-slate-950 dark:text-white">
+                  3. Compare options
+                </h2>
+                <p class="text-sm text-slate-600 dark:text-slate-400">
+                  Pros and cons help you qualify the numbers; scores help you compare consistently.
+                </p>
+              </div>
+              <p id="saveStatus" class="text-sm font-medium text-slate-500 dark:text-slate-400" role="status"></p>
+            </div>
+            <div id="optionsList" class="grid gap-4"></div>
+          </section>
+        </section>
+
+        <aside class="space-y-6 lg:sticky lg:top-6 lg:self-start">
+          <section
+            class="glass-panel rounded-[2rem] border border-white/75 bg-white/85 p-6 shadow-soft dark:border-slate-700/80 dark:bg-slate-900/82"
+            aria-labelledby="recommendationTitle"
+          >
+            <h2 id="recommendationTitle" class="text-xl font-bold text-slate-950 dark:text-white">
+              Recommendation
+            </h2>
+            <div id="recommendation" class="mt-5"></div>
+          </section>
+
+          <section
+            class="glass-panel rounded-[1.75rem] border border-white/75 bg-white/80 p-5 shadow-soft dark:border-slate-700/80 dark:bg-slate-900/78"
+            aria-labelledby="savedTitle"
+          >
+            <div class="mb-4 flex items-center justify-between gap-3">
+              <div>
+                <h2 id="savedTitle" class="text-lg font-bold text-slate-950 dark:text-white">Saved decisions</h2>
+                <p class="text-sm text-slate-600 dark:text-slate-400">Stored locally on this device.</p>
+              </div>
+              <button
+                id="saveSnapshot"
+                type="button"
+                class="rounded-full bg-slate-900 px-4 py-2 text-sm font-bold text-white transition hover:-translate-y-0.5 hover:bg-slate-700 focus:outline-none focus:ring-4 focus:ring-slate-500/20 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-200"
+              >
+                Save
+              </button>
+            </div>
+            <div id="savedDecisions" class="space-y-3"></div>
+          </section>
+        </aside>
+      </main>
+    </div>
+
+    <template id="optionTemplate">
+      <article
+        class="glass-panel rounded-[1.75rem] border border-white/75 bg-white/85 p-5 shadow-soft transition dark:border-slate-700/80 dark:bg-slate-900/82 sm:p-6"
+      >
+        <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <div class="min-w-0">
+            <input
+              type="text"
+              class="option-title w-full rounded-xl border border-transparent bg-transparent px-0 py-1 text-2xl font-bold tracking-tight text-slate-950 outline-none transition focus:border-teal-400 focus:bg-white focus:px-3 focus:ring-4 focus:ring-teal-500/15 dark:text-white dark:focus:bg-slate-950"
+            />
+            <p class="score-summary mt-1 text-sm font-medium text-slate-500 dark:text-slate-400"></p>
+          </div>
+          <button
+            type="button"
+            class="delete-option rounded-full px-3 py-1.5 text-sm font-semibold text-rose-600 transition hover:bg-rose-50 dark:text-rose-300 dark:hover:bg-rose-400/10"
+          >
+            Remove
+          </button>
+        </div>
+
+        <div class="mt-5 grid gap-4 md:grid-cols-2">
+          <div class="rounded-2xl bg-emerald-50/80 p-4 dark:bg-emerald-400/10">
+            <h3 class="font-bold text-emerald-900 dark:text-emerald-100">Pros</h3>
+            <ul class="pros-list mt-3 space-y-2"></ul>
+            <form class="add-item-form mt-3 flex gap-2" data-type="pros">
+              <input
+                type="text"
+                placeholder="Add a positive point"
+                class="min-w-0 flex-1 rounded-xl border border-emerald-100 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/15 dark:border-emerald-400/20 dark:bg-slate-950 dark:text-white"
+              />
+              <button type="submit" class="rounded-xl bg-emerald-600 px-3 py-2 text-sm font-bold text-white">Add</button>
+            </form>
+          </div>
+          <div class="rounded-2xl bg-amber-50/90 p-4 dark:bg-amber-400/10">
+            <h3 class="font-bold text-amber-900 dark:text-amber-100">Cons</h3>
+            <ul class="cons-list mt-3 space-y-2"></ul>
+            <form class="add-item-form mt-3 flex gap-2" data-type="cons">
+              <input
+                type="text"
+                placeholder="Add a concern"
+                class="min-w-0 flex-1 rounded-xl border border-amber-100 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-amber-500 focus:ring-4 focus:ring-amber-500/15 dark:border-amber-400/20 dark:bg-slate-950 dark:text-white"
+              />
+              <button type="submit" class="rounded-xl bg-amber-600 px-3 py-2 text-sm font-bold text-white">Add</button>
+            </form>
+          </div>
+        </div>
+
+        <div class="scores mt-5 space-y-3"></div>
+      </article>
+    </template>
+
+    <script>
+      const STORAGE_KEY = "decision-helper-current";
+      const SAVED_KEY = "decision-helper-saved";
+      const THEME_KEY = "decision-helper-theme";
+
+      const defaultState = {
+        question: "",
+        factors: ["Impact", "Cost fit", "Confidence"],
+        options: [
+          {
+            id: createId(),
+            name: "Option A",
+            pros: ["Clear path forward"],
+            cons: ["Needs more research"],
+            scores: {},
+          },
+          {
+            id: createId(),
+            name: "Option B",
+            pros: ["Interesting opportunity"],
+            cons: ["Some uncertainty"],
+            scores: {},
+          },
+        ],
+      };
+
+      let state = loadState();
+      let savedDecisions = loadSavedDecisions();
+      let saveTimer;
+
+      const elements = {
+        question: document.querySelector("#decisionQuestion"),
+        addOptionForm: document.querySelector("#addOptionForm"),
+        optionName: document.querySelector("#optionName"),
+        factorsList: document.querySelector("#factorsList"),
+        addFactorForm: document.querySelector("#addFactorForm"),
+        factorName: document.querySelector("#factorName"),
+        optionsList: document.querySelector("#optionsList"),
+        optionTemplate: document.querySelector("#optionTemplate"),
+        recommendation: document.querySelector("#recommendation"),
+        saveStatus: document.querySelector("#saveStatus"),
+        resetDecision: document.querySelector("#resetDecision"),
+        saveSnapshot: document.querySelector("#saveSnapshot"),
+        savedDecisions: document.querySelector("#savedDecisions"),
+        themeToggle: document.querySelector("#themeToggle"),
+        themeIcon: document.querySelector("#themeIcon"),
+        themeLabel: document.querySelector("#themeLabel"),
+      };
+
+      initializeTheme();
+      render();
+
+      elements.question.addEventListener("input", (event) => {
+        state.question = event.target.value;
+        persistCurrentState();
+      });
+
+      elements.addOptionForm.addEventListener("submit", (event) => {
+        event.preventDefault();
+        const name = elements.optionName.value.trim();
+        if (!name) return;
+
+        state.options.push({
+          id: createId(),
+          name,
+          pros: [],
+          cons: [],
+          scores: Object.fromEntries(state.factors.map((factor) => [factor, 5])),
+        });
+        elements.optionName.value = "";
+        persistAndRender();
+      });
+
+      elements.addFactorForm.addEventListener("submit", (event) => {
+        event.preventDefault();
+        const factor = elements.factorName.value.trim();
+        if (!factor || state.factors.some((existing) => existing.toLowerCase() === factor.toLowerCase())) return;
+
+        state.factors.push(factor);
+        state.options.forEach((option) => {
+          option.scores[factor] = 5;
+        });
+        elements.factorName.value = "";
+        persistAndRender();
+      });
+
+      elements.resetDecision.addEventListener("click", () => {
+        if (!confirm("Reset the current decision workspace? Saved decisions will stay available.")) return;
+        state = createDefaultState();
+        persistAndRender("Workspace reset");
+      });
+
+      elements.saveSnapshot.addEventListener("click", () => {
+        const snapshot = {
+          ...deepClone(state),
+          savedAt: new Date().toISOString(),
+          title: state.question.trim() || "Untitled decision",
+        };
+        savedDecisions = [snapshot, ...savedDecisions].slice(0, 12);
+        localStorage.setItem(SAVED_KEY, JSON.stringify(savedDecisions));
+        showSaveStatus("Decision saved");
+        renderSavedDecisions();
+      });
+
+      elements.themeToggle.addEventListener("click", () => {
+        const isDark = document.documentElement.classList.toggle("dark");
+        localStorage.setItem(THEME_KEY, isDark ? "dark" : "light");
+        updateThemeToggle(isDark);
+      });
+
+      function createDefaultState() {
+        const nextState = deepClone(defaultState);
+        nextState.options = nextState.options.map((option) => ({
+          ...option,
+          id: createId(),
+          scores: Object.fromEntries(nextState.factors.map((factor) => [factor, 5])),
+        }));
+        return nextState;
+      }
+
+      function loadState() {
+        try {
+          const stored = JSON.parse(localStorage.getItem(STORAGE_KEY));
+          if (!stored || !Array.isArray(stored.options) || !Array.isArray(stored.factors)) {
+            return createDefaultState();
+          }
+          return normalizeState(stored);
+        } catch {
+          return createDefaultState();
+        }
+      }
+
+      function loadSavedDecisions() {
+        try {
+          const stored = JSON.parse(localStorage.getItem(SAVED_KEY));
+          return Array.isArray(stored) ? stored : [];
+        } catch {
+          return [];
+        }
+      }
+
+      function normalizeState(rawState) {
+        const factors = rawState.factors.length ? rawState.factors : ["Impact", "Cost fit", "Confidence"];
+        const options = rawState.options.map((option) => ({
+          id: option.id || createId(),
+          name: option.name || "Untitled option",
+          pros: Array.isArray(option.pros) ? option.pros : [],
+          cons: Array.isArray(option.cons) ? option.cons : [],
+          scores: Object.fromEntries(
+            factors.map((factor) => [factor, clampScore(option.scores?.[factor] ?? 5)])
+          ),
+        }));
+        return {
+          question: rawState.question || "",
+          factors,
+          options,
+        };
+      }
+
+      function persistAndRender(message = "Saved locally") {
+        persistCurrentState(message);
+        render();
+      }
+
+      function persistCurrentState(message = "Saved locally") {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        showSaveStatus(message);
+      }
+
+      function showSaveStatus(message) {
+        clearTimeout(saveTimer);
+        elements.saveStatus.textContent = message;
+        saveTimer = setTimeout(() => {
+          elements.saveStatus.textContent = "";
+        }, 2200);
+      }
+
+      function render() {
+        elements.question.value = state.question;
+        renderFactors();
+        renderOptions();
+        renderRecommendation();
+        renderSavedDecisions();
+      }
+
+      function renderFactors() {
+        elements.factorsList.replaceChildren();
+
+        state.factors.forEach((factor, index) => {
+          const row = document.createElement("div");
+          row.className =
+            "flex items-center gap-3 rounded-2xl border border-slate-200 bg-white p-3 dark:border-slate-700 dark:bg-slate-950";
+
+          const input = document.createElement("input");
+          input.type = "text";
+          input.value = factor;
+          input.className =
+            "min-w-0 flex-1 bg-transparent text-sm font-semibold text-slate-800 outline-none dark:text-slate-100";
+          input.ariaLabel = `Factor ${index + 1}`;
+          input.addEventListener("change", () => renameFactor(index, input.value.trim()));
+
+          const button = document.createElement("button");
+          button.type = "button";
+          button.textContent = "Remove";
+          button.className =
+            "rounded-full px-3 py-1 text-xs font-bold text-slate-500 transition hover:bg-slate-100 hover:text-rose-600 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-rose-300";
+          button.addEventListener("click", () => removeFactor(index));
+          button.disabled = state.factors.length === 1;
+          if (button.disabled) {
+            button.classList.add("cursor-not-allowed", "opacity-40");
+          }
+
+          row.append(input, button);
+          elements.factorsList.append(row);
+        });
+      }
+
+      function renameFactor(index, nextName) {
+        const oldName = state.factors[index];
+        if (!nextName || nextName === oldName) {
+          renderFactors();
+          return;
+        }
+        if (state.factors.some((factor, factorIndex) => factorIndex !== index && factor.toLowerCase() === nextName.toLowerCase())) {
+          renderFactors();
+          return;
+        }
+
+        state.factors[index] = nextName;
+        state.options.forEach((option) => {
+          option.scores[nextName] = option.scores[oldName] ?? 5;
+          delete option.scores[oldName];
+        });
+        persistAndRender();
+      }
+
+      function removeFactor(index) {
+        if (state.factors.length === 1) return;
+        const [removedFactor] = state.factors.splice(index, 1);
+        state.options.forEach((option) => delete option.scores[removedFactor]);
+        persistAndRender();
+      }
+
+      function renderOptions() {
+        elements.optionsList.replaceChildren();
+
+        if (!state.options.length) {
+          const emptyState = document.createElement("div");
+          emptyState.className =
+            "rounded-[1.75rem] border border-dashed border-slate-300 bg-white/60 p-8 text-center text-slate-600 dark:border-slate-700 dark:bg-slate-900/60 dark:text-slate-400";
+          emptyState.textContent = "Add an option to start comparing your choices.";
+          elements.optionsList.append(emptyState);
+          return;
+        }
+
+        state.options.forEach((option) => {
+          const node = elements.optionTemplate.content.firstElementChild.cloneNode(true);
+          const title = node.querySelector(".option-title");
+          const scoreSummary = node.querySelector(".score-summary");
+
+          title.value = option.name;
+          title.addEventListener("input", () => {
+            option.name = title.value;
+            persistCurrentState();
+            scoreSummary.textContent = `${calculateOptionScore(option).toFixed(1)} / 10 average score`;
+            renderRecommendation();
+          });
+          scoreSummary.textContent = `${calculateOptionScore(option).toFixed(1)} / 10 average score`;
+
+          node.querySelector(".delete-option").addEventListener("click", () => {
+            state.options = state.options.filter((candidate) => candidate.id !== option.id);
+            persistAndRender();
+          });
+
+          renderItems(node.querySelector(".pros-list"), option, "pros");
+          renderItems(node.querySelector(".cons-list"), option, "cons");
+          renderScoreControls(node.querySelector(".scores"), option, () => {
+            scoreSummary.textContent = `${calculateOptionScore(option).toFixed(1)} / 10 average score`;
+            renderRecommendation();
+          });
+
+          node.querySelectorAll(".add-item-form").forEach((form) => {
+            form.addEventListener("submit", (event) => {
+              event.preventDefault();
+              const input = form.querySelector("input");
+              const value = input.value.trim();
+              if (!value) return;
+              option[form.dataset.type].push(value);
+              input.value = "";
+              persistAndRender();
+            });
+          });
+
+          elements.optionsList.append(node);
+        });
+      }
+
+      function renderItems(list, option, type) {
+        list.replaceChildren();
+        const items = option[type];
+
+        if (!items.length) {
+          const empty = document.createElement("li");
+          empty.className = "text-sm text-slate-500 dark:text-slate-400";
+          empty.textContent = type === "pros" ? "No pros yet." : "No cons yet.";
+          list.append(empty);
+          return;
+        }
+
+        items.forEach((item, index) => {
+          const row = document.createElement("li");
+          row.className =
+            "flex items-start justify-between gap-3 rounded-xl bg-white/80 px-3 py-2 text-sm text-slate-700 dark:bg-slate-950/70 dark:text-slate-200";
+
+          const text = document.createElement("span");
+          text.textContent = item;
+
+          const button = document.createElement("button");
+          button.type = "button";
+          button.textContent = "×";
+          button.ariaLabel = `Remove ${item}`;
+          button.className = "font-bold text-slate-400 transition hover:text-rose-600 dark:hover:text-rose-300";
+          button.addEventListener("click", () => {
+            option[type].splice(index, 1);
+            persistAndRender();
+          });
+
+          row.append(text, button);
+          list.append(row);
+        });
+      }
+
+      function renderScoreControls(container, option, onScoreChange) {
+        container.replaceChildren();
+
+        state.factors.forEach((factor) => {
+          const score = clampScore(option.scores[factor] ?? 5);
+          option.scores[factor] = score;
+
+          const wrapper = document.createElement("label");
+          wrapper.className =
+            "block rounded-2xl border border-slate-200 bg-slate-50/80 p-4 dark:border-slate-700 dark:bg-slate-950/70";
+
+          const header = document.createElement("span");
+          header.className = "mb-3 flex items-center justify-between gap-4";
+
+          const name = document.createElement("span");
+          name.className = "font-semibold text-slate-800 dark:text-slate-100";
+          name.textContent = factor;
+
+          const value = document.createElement("span");
+          value.className = "rounded-full bg-white px-3 py-1 text-sm font-bold text-teal-700 dark:bg-slate-800 dark:text-teal-200";
+          value.textContent = score;
+
+          const range = document.createElement("input");
+          range.type = "range";
+          range.min = "1";
+          range.max = "10";
+          range.value = score;
+          range.className = "w-full";
+          range.addEventListener("input", () => {
+            option.scores[factor] = Number(range.value);
+            value.textContent = range.value;
+            persistCurrentState();
+            onScoreChange();
+          });
+
+          header.append(name, value);
+          wrapper.append(header, range);
+          container.append(wrapper);
+        });
+      }
+
+      function renderRecommendation() {
+        const rankedOptions = [...state.options]
+          .map((option) => ({ option, score: calculateOptionScore(option) }))
+          .sort((a, b) => b.score - a.score);
+
+        elements.recommendation.replaceChildren();
+
+        if (!rankedOptions.length) {
+          elements.recommendation.append(createMessageCard("Add options to receive a recommendation."));
+          return;
+        }
+
+        const winner = rankedOptions[0];
+        const card = document.createElement("div");
+        card.className =
+          "rounded-3xl bg-gradient-to-br from-teal-600 to-cyan-600 p-5 text-white shadow-lg shadow-teal-600/20";
+        card.innerHTML = `
+          <p class="text-sm font-semibold uppercase tracking-[0.24em] text-teal-100">Best current fit</p>
+          <h3 class="mt-3 text-3xl font-extrabold">${escapeHtml(winner.option.name || "Untitled option")}</h3>
+          <p class="mt-3 text-teal-50">Average score: <strong>${winner.score.toFixed(1)} / 10</strong></p>
+          <p class="mt-4 text-sm leading-6 text-teal-50/95">
+            This recommendation is based on your factor ratings. Use it as a signal, then revisit the pros and cons before committing.
+          </p>
+        `;
+
+        const list = document.createElement("ol");
+        list.className = "mt-5 space-y-2";
+        rankedOptions.forEach(({ option, score }, index) => {
+          const item = document.createElement("li");
+          item.className =
+            "flex items-center justify-between gap-3 rounded-2xl bg-slate-50 px-4 py-3 text-sm dark:bg-slate-950/70";
+          item.innerHTML = `
+            <span class="font-semibold text-slate-700 dark:text-slate-200">${index + 1}. ${escapeHtml(option.name || "Untitled option")}</span>
+            <span class="font-bold text-teal-700 dark:text-teal-200">${score.toFixed(1)}</span>
+          `;
+          list.append(item);
+        });
+
+        elements.recommendation.append(card, list);
+      }
+
+      function renderSavedDecisions() {
+        elements.savedDecisions.replaceChildren();
+
+        if (!savedDecisions.length) {
+          elements.savedDecisions.append(createMessageCard("No saved decisions yet. Save a snapshot when you want to keep a version."));
+          return;
+        }
+
+        savedDecisions.forEach((decision, index) => {
+          const row = document.createElement("div");
+          row.className =
+            "rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-950";
+
+          const savedDate = decision.savedAt ? new Date(decision.savedAt).toLocaleString() : "Saved decision";
+          row.innerHTML = `
+            <p class="font-bold text-slate-900 dark:text-white">${escapeHtml(decision.title || "Untitled decision")}</p>
+            <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">${escapeHtml(savedDate)}</p>
+          `;
+
+          const actions = document.createElement("div");
+          actions.className = "mt-3 flex gap-2";
+
+          const loadButton = document.createElement("button");
+          loadButton.type = "button";
+          loadButton.textContent = "Load";
+          loadButton.className =
+            "rounded-full bg-teal-50 px-3 py-1.5 text-xs font-bold text-teal-800 transition hover:bg-teal-100 dark:bg-teal-400/10 dark:text-teal-100 dark:hover:bg-teal-400/20";
+          loadButton.addEventListener("click", () => {
+            state = normalizeState(decision);
+            persistAndRender("Saved decision loaded");
+          });
+
+          const deleteButton = document.createElement("button");
+          deleteButton.type = "button";
+          deleteButton.textContent = "Delete";
+          deleteButton.className =
+            "rounded-full px-3 py-1.5 text-xs font-bold text-slate-500 transition hover:bg-rose-50 hover:text-rose-600 dark:text-slate-400 dark:hover:bg-rose-400/10 dark:hover:text-rose-300";
+          deleteButton.addEventListener("click", () => {
+            savedDecisions.splice(index, 1);
+            localStorage.setItem(SAVED_KEY, JSON.stringify(savedDecisions));
+            renderSavedDecisions();
+          });
+
+          actions.append(loadButton, deleteButton);
+          row.append(actions);
+          elements.savedDecisions.append(row);
+        });
+      }
+
+      function createMessageCard(message) {
+        const card = document.createElement("p");
+        card.className =
+          "rounded-2xl border border-dashed border-slate-300 bg-slate-50/80 p-4 text-sm text-slate-600 dark:border-slate-700 dark:bg-slate-950/60 dark:text-slate-400";
+        card.textContent = message;
+        return card;
+      }
+
+      function calculateOptionScore(option) {
+        if (!state.factors.length) return 0;
+        const total = state.factors.reduce((sum, factor) => sum + clampScore(option.scores[factor] ?? 5), 0);
+        return total / state.factors.length;
+      }
+
+      function clampScore(value) {
+        const score = Number(value);
+        if (Number.isNaN(score)) return 5;
+        return Math.min(10, Math.max(1, score));
+      }
+
+      function initializeTheme() {
+        const savedTheme = localStorage.getItem(THEME_KEY);
+        const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+        const isDark = savedTheme ? savedTheme === "dark" : prefersDark;
+        document.documentElement.classList.toggle("dark", isDark);
+        updateThemeToggle(isDark);
+      }
+
+      function updateThemeToggle(isDark) {
+        elements.themeToggle.setAttribute("aria-pressed", String(isDark));
+        elements.themeIcon.textContent = isDark ? "☀️" : "🌙";
+        elements.themeLabel.textContent = isDark ? "Light mode" : "Dark mode";
+      }
+
+      function escapeHtml(value) {
+        return String(value)
+          .replaceAll("&", "&amp;")
+          .replaceAll("<", "&lt;")
+          .replaceAll(">", "&gt;")
+          .replaceAll('"', "&quot;")
+          .replaceAll("'", "&#039;");
+      }
+
+      function createId() {
+        if (window.crypto?.randomUUID) {
+          return window.crypto.randomUUID();
+        }
+        return `id-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+      }
+
+      function deepClone(value) {
+        if (window.structuredClone) {
+          return window.structuredClone(value);
+        }
+        return JSON.parse(JSON.stringify(value));
+      }
+    </script>
+  </body>
+</html>

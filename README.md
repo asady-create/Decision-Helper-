@@ -6,8 +6,8 @@ A clean, modern single-page web app for comparing decision options with pros, co
 
 - Add a decision question and multiple options
 - Capture pros and cons for every option
-- Customize scoring factors and rate each option from 1-10
-- See a recommendation based on the highest average score
+- Customize scoring factors, set each factor's importance weight from 1-10, and rate each option from 1-10
+- See a recommendation based on the highest weighted score
 - Save the current workspace and named snapshots to local storage
 - Toggle between light and dark mode
 - Responsive layout built with Tailwind CSS CDN and vanilla JavaScript

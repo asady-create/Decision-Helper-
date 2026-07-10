@@ -237,7 +237,7 @@
                   2. Score key factors
                 </h2>
                 <p class="mt-1 text-sm text-slate-700 dark:text-slate-300">
-                  Adjust the factor names to match your decision.
+                  Adjust factor names and importance weights to match your decision.
                 </p>
               </div>
               <div id="factorsList" class="space-y-3"></div>
@@ -366,7 +366,11 @@
 
       const defaultState = {
         question: "",
-        factors: ["Impact", "Cost fit", "Confidence"],
+        factors: [
+          { id: "impact", name: "Impact", weight: 8 },
+          { id: "cost-fit", name: "Cost fit", weight: 6 },
+          { id: "confidence", name: "Confidence", weight: 7 },
+        ],
         options: [
           {
             id: createId(),
@@ -426,7 +430,7 @@
           name,
           pros: [],
           cons: [],
-          scores: Object.fromEntries(state.factors.map((factor) => [factor, 5])),
+          scores: Object.fromEntries(state.factors.map((factor) => [factor.id, 5])),
         });
         elements.optionName.value = "";
         persistAndRender();
@@ -434,12 +438,13 @@
 
       elements.addFactorForm.addEventListener("submit", (event) => {
         event.preventDefault();
-        const factor = elements.factorName.value.trim();
-        if (!factor || state.factors.some((existing) => existing.toLowerCase() === factor.toLowerCase())) return;
+        const factorName = elements.factorName.value.trim();
+        if (!factorName || state.factors.some((existing) => existing.name.toLowerCase() === factorName.toLowerCase())) return;
 
+        const factor = { id: createUniqueFactorId(factorName), name: factorName, weight: 5 };
         state.factors.push(factor);
         state.options.forEach((option) => {
-          option.scores[factor] = 5;
+          option.scores[factor.id] = 5;
         });
         elements.factorName.value = "";
         persistAndRender();
@@ -474,7 +479,7 @@
         nextState.options = nextState.options.map((option) => ({
           ...option,
           id: createId(),
-          scores: Object.fromEntries(nextState.factors.map((factor) => [factor, 5])),
+          scores: Object.fromEntries(nextState.factors.map((factor) => [factor.id, 5])),
         }));
         return nextState;
       }
@@ -501,14 +506,24 @@
       }
 
       function normalizeState(rawState) {
-        const factors = rawState.factors.length ? rawState.factors : ["Impact", "Cost fit", "Confidence"];
+        const rawFactors = rawState.factors.length
+          ? rawState.factors
+          : [
+              { id: "impact", name: "Impact", weight: 8 },
+              { id: "cost-fit", name: "Cost fit", weight: 6 },
+              { id: "confidence", name: "Confidence", weight: 7 },
+            ];
+        const factors = rawFactors.map(normalizeFactor);
         const options = rawState.options.map((option) => ({
           id: option.id || createId(),
           name: option.name || "Untitled option",
           pros: Array.isArray(option.pros) ? option.pros : [],
           cons: Array.isArray(option.cons) ? option.cons : [],
           scores: Object.fromEntries(
-            factors.map((factor) => [factor, clampScore(option.scores?.[factor] ?? 5)])
+            factors.map((factor) => [
+              factor.id,
+              clampScore(option.scores?.[factor.id] ?? option.scores?.[factor.name] ?? 5),
+            ])
           ),
         }));
         return {
@@ -550,15 +565,46 @@
         state.factors.forEach((factor, index) => {
           const row = document.createElement("div");
           row.className =
-            "flex flex-col gap-3 rounded-2xl border border-slate-200 bg-white p-3 shadow-sm dark:border-slate-700 dark:bg-slate-950 sm:flex-row sm:items-center";
+            "grid gap-3 rounded-2xl border border-slate-200 bg-white p-3 shadow-sm dark:border-slate-700 dark:bg-slate-950 sm:grid-cols-[minmax(0,1fr)_minmax(170px,0.8fr)_auto] sm:items-center";
 
           const input = document.createElement("input");
           input.type = "text";
-          input.value = factor;
+          input.value = factor.name;
           input.className =
             "min-w-0 flex-1 rounded-xl bg-transparent px-2 text-sm font-semibold text-slate-900 outline-none focus:bg-slate-50 focus:ring-4 focus:ring-teal-500/10 dark:text-slate-50 dark:focus:bg-slate-900";
           input.ariaLabel = `Factor ${index + 1}`;
           input.addEventListener("change", () => renameFactor(index, input.value.trim()));
+
+          const weightWrapper = document.createElement("label");
+          weightWrapper.className = "block rounded-xl bg-slate-50 px-3 py-2 dark:bg-slate-900";
+
+          const weightHeader = document.createElement("span");
+          weightHeader.className = "mb-1 flex items-center justify-between gap-3 text-xs font-bold text-slate-600 dark:text-slate-300";
+
+          const weightLabel = document.createElement("span");
+          weightLabel.textContent = "Importance";
+
+          const weightValue = document.createElement("span");
+          weightValue.className = "rounded-full bg-white px-2 py-0.5 text-teal-700 dark:bg-slate-800 dark:text-teal-200";
+          weightValue.textContent = factor.weight;
+
+          const weightRange = document.createElement("input");
+          weightRange.type = "range";
+          weightRange.min = "1";
+          weightRange.max = "10";
+          weightRange.value = factor.weight;
+          weightRange.className = "w-full cursor-pointer";
+          weightRange.ariaLabel = `${factor.name} importance weight`;
+          weightRange.addEventListener("input", () => {
+            factor.weight = clampScore(weightRange.value);
+            weightValue.textContent = factor.weight;
+            persistCurrentState();
+            renderOptions();
+            renderRecommendation();
+          });
+
+          weightHeader.append(weightLabel, weightValue);
+          weightWrapper.append(weightHeader, weightRange);
 
           const button = document.createElement("button");
           button.type = "button";
@@ -571,34 +617,30 @@
             button.classList.add("cursor-not-allowed", "opacity-40");
           }
 
-          row.append(input, button);
+          row.append(input, weightWrapper, button);
           elements.factorsList.append(row);
         });
       }
 
       function renameFactor(index, nextName) {
-        const oldName = state.factors[index];
+        const oldName = state.factors[index].name;
         if (!nextName || nextName === oldName) {
           renderFactors();
           return;
         }
-        if (state.factors.some((factor, factorIndex) => factorIndex !== index && factor.toLowerCase() === nextName.toLowerCase())) {
+        if (state.factors.some((factor, factorIndex) => factorIndex !== index && factor.name.toLowerCase() === nextName.toLowerCase())) {
           renderFactors();
           return;
         }
 
-        state.factors[index] = nextName;
-        state.options.forEach((option) => {
-          option.scores[nextName] = option.scores[oldName] ?? 5;
-          delete option.scores[oldName];
-        });
+        state.factors[index].name = nextName;
         persistAndRender();
       }
 
       function removeFactor(index) {
         if (state.factors.length === 1) return;
         const [removedFactor] = state.factors.splice(index, 1);
-        state.options.forEach((option) => delete option.scores[removedFactor]);
+        state.options.forEach((option) => delete option.scores[removedFactor.id]);
         persistAndRender();
       }
 
@@ -623,10 +665,10 @@
           title.addEventListener("input", () => {
             option.name = title.value;
             persistCurrentState();
-            scoreSummary.textContent = `${calculateOptionScore(option).toFixed(1)} / 10 average score`;
+            scoreSummary.textContent = formatScoreSummary(option);
             renderRecommendation();
           });
-          scoreSummary.textContent = `${calculateOptionScore(option).toFixed(1)} / 10 average score`;
+          scoreSummary.textContent = formatScoreSummary(option);
 
           node.querySelector(".delete-option").addEventListener("click", () => {
             state.options = state.options.filter((candidate) => candidate.id !== option.id);
@@ -636,7 +678,7 @@
           renderItems(node.querySelector(".pros-list"), option, "pros");
           renderItems(node.querySelector(".cons-list"), option, "cons");
           renderScoreControls(node.querySelector(".scores"), option, () => {
-            scoreSummary.textContent = `${calculateOptionScore(option).toFixed(1)} / 10 average score`;
+            scoreSummary.textContent = formatScoreSummary(option);
             renderRecommendation();
           });
 
@@ -695,8 +737,8 @@
         container.replaceChildren();
 
         state.factors.forEach((factor) => {
-          const score = clampScore(option.scores[factor] ?? 5);
-          option.scores[factor] = score;
+          const score = clampScore(option.scores[factor.id] ?? 5);
+          option.scores[factor.id] = score;
 
           const wrapper = document.createElement("label");
           wrapper.className =
@@ -707,11 +749,11 @@
 
           const name = document.createElement("span");
           name.className = "font-semibold text-slate-800 dark:text-slate-100";
-          name.textContent = factor;
+          name.textContent = factor.name;
 
           const value = document.createElement("span");
           value.className = "rounded-full bg-white px-3 py-1 text-sm font-bold text-teal-700 dark:bg-slate-800 dark:text-teal-200";
-          value.textContent = score;
+          value.textContent = `${score} × ${factor.weight}`;
 
           const range = document.createElement("input");
           range.type = "range";
@@ -719,9 +761,10 @@
           range.max = "10";
           range.value = score;
           range.className = "w-full cursor-pointer";
+          range.ariaLabel = `${factor.name} score for ${option.name || "this option"}`;
           range.addEventListener("input", () => {
-            option.scores[factor] = Number(range.value);
-            value.textContent = range.value;
+            option.scores[factor.id] = Number(range.value);
+            value.textContent = `${range.value} × ${factor.weight}`;
             persistCurrentState();
             onScoreChange();
           });
@@ -735,7 +778,7 @@
       function renderRecommendation() {
         const rankedOptions = [...state.options]
           .map((option) => ({ option, score: calculateOptionScore(option) }))
-          .sort((a, b) => b.score - a.score);
+          .sort((a, b) => b.score.weightedTotal - a.score.weightedTotal);
 
         elements.recommendation.replaceChildren();
 
@@ -749,11 +792,16 @@
         card.className =
           "reveal rounded-3xl bg-gradient-to-br from-teal-700 to-cyan-700 p-5 text-white shadow-lg shadow-teal-700/20 dark:from-teal-500 dark:to-cyan-500 dark:text-slate-950";
         card.innerHTML = `
-          <p class="text-sm font-semibold uppercase tracking-[0.24em] text-teal-50 dark:text-teal-950">Best current fit</p>
+          <p class="text-sm font-semibold uppercase tracking-[0.24em] text-teal-50 dark:text-teal-950">Best recommendation</p>
           <h3 class="mt-3 text-3xl font-extrabold">${escapeHtml(winner.option.name || "Untitled option")}</h3>
-          <p class="mt-3 text-teal-50 dark:text-slate-900">Average score: <strong>${winner.score.toFixed(1)} / 10</strong></p>
+          <p class="mt-3 text-teal-50 dark:text-slate-900">
+            Weighted score: <strong>${winner.score.normalized.toFixed(1)} / 10</strong>
+          </p>
+          <p class="mt-1 text-sm font-semibold text-teal-50 dark:text-slate-900">
+            ${winner.score.weightedTotal.toFixed(0)} of ${winner.score.maxTotal.toFixed(0)} weighted points
+          </p>
           <p class="mt-4 text-sm leading-6 text-teal-50 dark:text-slate-900">
-            This recommendation is based on your factor ratings. Use it as a signal, then revisit the pros and cons before committing.
+            This option has the highest weighted total after multiplying each factor score by its importance.
           </p>
         `;
 
@@ -762,10 +810,18 @@
         rankedOptions.forEach(({ option, score }, index) => {
           const item = document.createElement("li");
           item.className =
-            "flex items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm shadow-sm dark:border-slate-700 dark:bg-slate-950/80";
+            index === 0
+              ? "flex items-center justify-between gap-3 rounded-2xl border border-teal-200 bg-teal-50 px-4 py-3 text-sm shadow-sm dark:border-teal-300/30 dark:bg-teal-400/10"
+              : "flex items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm shadow-sm dark:border-slate-700 dark:bg-slate-950/80";
           item.innerHTML = `
-            <span class="font-semibold text-slate-800 dark:text-slate-100">${index + 1}. ${escapeHtml(option.name || "Untitled option")}</span>
-            <span class="font-bold text-teal-700 dark:text-teal-200">${score.toFixed(1)}</span>
+            <span class="font-semibold text-slate-800 dark:text-slate-100">
+              ${index + 1}. ${escapeHtml(option.name || "Untitled option")}
+              ${index === 0 ? '<span class="ml-2 rounded-full bg-teal-700 px-2 py-0.5 text-xs text-white dark:bg-teal-300 dark:text-slate-950">Best</span>' : ""}
+            </span>
+            <span class="text-right font-bold text-teal-700 dark:text-teal-200">
+              ${score.normalized.toFixed(1)} / 10
+              <span class="block text-xs text-slate-600 dark:text-slate-300">${score.weightedTotal.toFixed(0)} pts</span>
+            </span>
           `;
           list.append(item);
         });
@@ -831,15 +887,66 @@
       }
 
       function calculateOptionScore(option) {
-        if (!state.factors.length) return 0;
-        const total = state.factors.reduce((sum, factor) => sum + clampScore(option.scores[factor] ?? 5), 0);
-        return total / state.factors.length;
+        if (!state.factors.length) {
+          return { weightedTotal: 0, maxTotal: 0, normalized: 0 };
+        }
+
+        const weightedTotal = state.factors.reduce((sum, factor) => {
+          return sum + clampScore(option.scores[factor.id] ?? 5) * clampScore(factor.weight);
+        }, 0);
+        const maxTotal = state.factors.reduce((sum, factor) => sum + 10 * clampScore(factor.weight), 0);
+
+        return {
+          weightedTotal,
+          maxTotal,
+          normalized: maxTotal ? (weightedTotal / maxTotal) * 10 : 0,
+        };
+      }
+
+      function formatScoreSummary(option) {
+        const score = calculateOptionScore(option);
+        return `${score.normalized.toFixed(1)} / 10 weighted score · ${score.weightedTotal.toFixed(0)} pts`;
       }
 
       function clampScore(value) {
         const score = Number(value);
         if (Number.isNaN(score)) return 5;
         return Math.min(10, Math.max(1, score));
+      }
+
+      function normalizeFactor(factor) {
+        if (typeof factor === "string") {
+          return { id: createFactorId(factor), name: factor, weight: 5 };
+        }
+
+        const name = factor?.name || "Untitled factor";
+        return {
+          id: factor?.id || createFactorId(name),
+          name,
+          weight: clampScore(factor?.weight ?? 5),
+        };
+      }
+
+      function createFactorId(name) {
+        const slug = String(name)
+          .trim()
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/^-+|-+$/g, "");
+        return slug || createId();
+      }
+
+      function createUniqueFactorId(name) {
+        const baseId = createFactorId(name);
+        let candidate = baseId;
+        let suffix = 2;
+
+        while (state.factors.some((factor) => factor.id === candidate)) {
+          candidate = `${baseId}-${suffix}`;
+          suffix += 1;
+        }
+
+        return candidate;
       }
 
       function initializeTheme() {

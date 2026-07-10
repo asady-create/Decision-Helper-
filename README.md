@@ -1,10 +1,11 @@
 # Decision Helper
 
-A clean, modern single-page web app for comparing decision options with pros, cons, and simple 1-10 factor scoring.
+A clean, modern single-page web app for comparing decision options with pros, cons, emotional context, and weighted 1-10 factor scoring.
 
 ## Features
 
 - Add a decision question and multiple options
+- Check in with current stress level and emotions before comparing options
 - Capture pros and cons for every option
 - Customize scoring factors, set each factor's importance weight from 1-10, and rate each option from 1-10
 - See a recommendation based on the highest weighted score

@@ -5,6 +5,7 @@ A clean, modern single-page web app for comparing decision options with pros, co
 ## Features
 
 - Add a decision question and multiple options
+- Set an overall decision deadline with a color-coded countdown
 - Check in with current stress level and emotions before comparing options
 - Capture pros and cons for every option
 - Customize scoring factors, set each factor's importance weight from 1-10, and rate each option from 1-10

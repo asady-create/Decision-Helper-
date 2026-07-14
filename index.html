@@ -426,6 +426,21 @@
           </div>
         </div>
 
+        <details class="option-evidence-details mt-5 rounded-2xl border border-slate-200 bg-slate-50/90 p-4 dark:border-slate-700 dark:bg-slate-950/80">
+          <summary class="cursor-pointer select-none text-sm font-bold text-slate-800 transition hover:text-teal-700 dark:text-slate-100 dark:hover:text-teal-200">
+            Evidence / notes for this option
+          </summary>
+          <label class="mt-4 block">
+            <span class="mb-2 block text-sm font-semibold text-slate-700 dark:text-slate-200">
+              Links, notes, or supporting material
+            </span>
+            <textarea
+              class="option-evidence min-h-28 w-full resize-y rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-950 outline-none transition placeholder:text-slate-500 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/15 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:placeholder:text-slate-400"
+              placeholder="Paste links, research notes, quotes, reminders, or source material for this option..."
+            ></textarea>
+          </label>
+        </details>
+
         <div class="scores mt-5 space-y-3"></div>
       </article>
     </template>
@@ -451,15 +466,17 @@
           {
             id: createId(),
             name: "Option A",
-            pros: ["Clear path forward"],
-            cons: ["Needs more research"],
+            evidence: "",
+            pros: [{ text: "Clear path forward", evidence: "" }],
+            cons: [{ text: "Needs more research", evidence: "" }],
             scores: {},
           },
           {
             id: createId(),
             name: "Option B",
-            pros: ["Interesting opportunity"],
-            cons: ["Some uncertainty"],
+            evidence: "",
+            pros: [{ text: "Interesting opportunity", evidence: "" }],
+            cons: [{ text: "Some uncertainty", evidence: "" }],
             scores: {},
           },
         ],
@@ -529,6 +546,7 @@
         state.options.push({
           id: createId(),
           name,
+          evidence: "",
           pros: [],
           cons: [],
           scores: Object.fromEntries(state.factors.map((factor) => [factor.id, 5])),
@@ -618,8 +636,9 @@
         const options = rawState.options.map((option) => ({
           id: option.id || createId(),
           name: option.name || "Untitled option",
-          pros: Array.isArray(option.pros) ? option.pros : [],
-          cons: Array.isArray(option.cons) ? option.cons : [],
+          evidence: option.evidence || "",
+          pros: normalizeEvidenceItems(option.pros),
+          cons: normalizeEvidenceItems(option.cons),
           scores: Object.fromEntries(
             factors.map((factor) => [
               factor.id,
@@ -641,6 +660,21 @@
           stress: clampScore(mood?.stress ?? 5),
           emotions: mood?.emotions || "",
         };
+      }
+
+      function normalizeEvidenceItems(items) {
+        if (!Array.isArray(items)) return [];
+
+        return items.map((item) => {
+          if (typeof item === "string") {
+            return { text: item, evidence: "" };
+          }
+
+          return {
+            text: item?.text || "",
+            evidence: item?.evidence || "",
+          };
+        }).filter((item) => item.text || item.evidence);
       }
 
       function normalizeDeadline(deadline) {
@@ -790,6 +824,7 @@
           const node = elements.optionTemplate.content.firstElementChild.cloneNode(true);
           const title = node.querySelector(".option-title");
           const scoreSummary = node.querySelector(".score-summary");
+          const optionEvidence = node.querySelector(".option-evidence");
 
           title.value = option.name;
           title.addEventListener("input", () => {
@@ -799,6 +834,12 @@
             renderRecommendation();
           });
           scoreSummary.textContent = formatScoreSummary(option);
+
+          optionEvidence.value = option.evidence;
+          optionEvidence.addEventListener("input", () => {
+            option.evidence = optionEvidence.value;
+            persistCurrentState();
+          });
 
           node.querySelector(".delete-option").addEventListener("click", () => {
             state.options = state.options.filter((candidate) => candidate.id !== option.id);
@@ -818,7 +859,7 @@
               const input = form.querySelector("input");
               const value = input.value.trim();
               if (!value) return;
-              option[form.dataset.type].push(value);
+              option[form.dataset.type].push({ text: value, evidence: "" });
               input.value = "";
               persistAndRender();
             });
@@ -843,17 +884,20 @@
         items.forEach((item, index) => {
           const row = document.createElement("li");
           row.className =
-            "flex items-start justify-between gap-3 rounded-xl bg-white/90 px-3 py-2.5 text-sm font-medium text-slate-800 shadow-sm dark:bg-slate-950/80 dark:text-slate-100";
+            "rounded-xl bg-white/90 px-3 py-2.5 text-sm font-medium text-slate-800 shadow-sm dark:bg-slate-950/80 dark:text-slate-100";
+
+          const itemHeader = document.createElement("div");
+          itemHeader.className = "flex items-start justify-between gap-3";
 
           const text = document.createElement("input");
           text.type = "text";
-          text.value = item;
+          text.value = item.text;
           text.placeholder = type === "pros" ? "Edit this pro" : "Edit this con";
-          text.ariaLabel = `Edit ${type === "pros" ? "pro" : "con"}: ${item}`;
+          text.ariaLabel = `Edit ${type === "pros" ? "pro" : "con"}: ${item.text}`;
           text.className =
             "min-h-8 min-w-0 flex-1 rounded-lg bg-transparent px-2 py-1 text-sm font-medium text-slate-800 outline-none transition placeholder:text-slate-400 focus:bg-white focus:ring-4 focus:ring-teal-500/10 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:bg-slate-900";
           text.addEventListener("input", () => {
-            option[type][index] = text.value;
+            option[type][index].text = text.value;
             button.ariaLabel = `Remove ${text.value || type.slice(0, -1)}`;
             persistCurrentState();
           });
@@ -864,7 +908,7 @@
               persistAndRender();
               return;
             }
-            option[type][index] = trimmedValue;
+            option[type][index].text = trimmedValue;
             text.value = trimmedValue;
             persistCurrentState();
           });
@@ -872,14 +916,37 @@
           const button = document.createElement("button");
           button.type = "button";
           button.textContent = "×";
-          button.ariaLabel = `Remove ${item}`;
+          button.ariaLabel = `Remove ${item.text}`;
           button.className = "grid min-h-8 min-w-8 place-items-center rounded-full text-lg font-bold leading-none text-slate-500 transition hover:bg-rose-50 hover:text-rose-700 focus:outline-none focus:ring-4 focus:ring-rose-500/15 dark:text-slate-300 dark:hover:bg-rose-400/10 dark:hover:text-rose-200";
           button.addEventListener("click", () => {
             option[type].splice(index, 1);
             persistAndRender();
           });
 
-          row.append(text, button);
+          const evidenceDetails = document.createElement("details");
+          evidenceDetails.className =
+            "mt-2 rounded-xl border border-slate-200 bg-slate-50/90 px-3 py-2 dark:border-slate-700 dark:bg-slate-900";
+
+          const summary = document.createElement("summary");
+          summary.className =
+            "cursor-pointer select-none text-xs font-bold text-slate-600 transition hover:text-teal-700 dark:text-slate-300 dark:hover:text-teal-200";
+          summary.textContent = "Evidence / notes";
+
+          const evidence = document.createElement("textarea");
+          evidence.value = item.evidence;
+          evidence.rows = 3;
+          evidence.placeholder = "Add links, notes, source details, or supporting material...";
+          evidence.ariaLabel = `Evidence or notes for ${item.text || type.slice(0, -1)}`;
+          evidence.className =
+            "mt-3 w-full resize-y rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-950 outline-none transition placeholder:text-slate-500 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/15 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:placeholder:text-slate-400";
+          evidence.addEventListener("input", () => {
+            option[type][index].evidence = evidence.value;
+            persistCurrentState();
+          });
+
+          itemHeader.append(text, button);
+          evidenceDetails.append(summary, evidence);
+          row.append(itemHeader, evidenceDetails);
           list.append(row);
         });
       }

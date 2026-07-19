@@ -119,6 +119,31 @@
         accent-color: #f59e0b;
       }
 
+      /* high-contrast fields */
+      input[type="text"],
+      input[type="date"],
+      textarea {
+        color: #1c1917;
+      }
+
+      html.dark input[type="text"],
+      html.dark input[type="date"],
+      html.dark textarea {
+        color: #fafaf9;
+      }
+
+      input::placeholder,
+      textarea::placeholder {
+        color: #78716c;
+        opacity: 1;
+      }
+
+      html.dark input::placeholder,
+      html.dark textarea::placeholder {
+        color: #a8a29e;
+        opacity: 1;
+      }
+
       .brand-mark {
         background: linear-gradient(145deg, #9a3412 0%, #92400e 100%);
         box-shadow: 0 14px 28px -16px rgba(154, 52, 18, 0.55);
@@ -361,7 +386,7 @@
                   id="factorName"
                   type="text"
                   placeholder="Add a factor, e.g. Career growth"
-                  class="min-w-0 flex-1 rounded-2xl border border-stone-200 bg-ivory px-4 py-3.5 text-base text-stone-950 outline-none transition placeholder:text-stone-500 focus:border-orange-700 focus:ring-4 focus:ring-orange-700/15 dark:border-stone-700 dark:bg-espresso dark:text-white dark:placeholder:text-stone-400"
+                  class="min-w-0 flex-1 rounded-2xl border border-stone-400 bg-[#fffdf8] px-4 py-3.5 text-base font-medium text-stone-950 outline-none transition placeholder:text-stone-600 focus:border-orange-700 focus:ring-4 focus:ring-orange-700/15 dark:border-stone-500 dark:bg-stone-950 dark:text-stone-50 dark:placeholder:text-stone-400"
                 />
                 <button
                   type="submit"
@@ -476,26 +501,26 @@
         </div>
 
         <div class="mt-5 grid gap-4 md:grid-cols-2">
-          <div class="rounded-2xl border border-stone-300/80 bg-stone-100/80 p-4 dark:border-amber-300/15 dark:bg-stone-800/70">
+          <div class="rounded-2xl border border-stone-400/70 bg-stone-200/50 p-4 dark:border-stone-500 dark:bg-stone-800">
             <h3 class="font-bold text-stone-900 dark:text-stone-100">Pros</h3>
             <ul class="pros-list mt-3 space-y-2"></ul>
             <form class="add-item-form mt-3 flex flex-col gap-2 sm:flex-row" data-type="pros">
               <input
                 type="text"
                 placeholder="Add a positive point"
-                class="min-w-0 flex-1 rounded-xl border border-stone-300 bg-ivory px-3 py-2.5 text-sm text-stone-950 outline-none transition placeholder:text-stone-500 focus:border-stone-500 focus:ring-4 focus:ring-stone-500/15 dark:border-stone-600 dark:bg-espresso dark:text-white dark:placeholder:text-stone-400"
+                class="min-w-0 flex-1 rounded-xl border border-stone-400 bg-[#fffdf8] px-3 py-2.5 text-sm font-medium text-stone-950 outline-none transition placeholder:text-stone-600 focus:border-orange-700 focus:ring-4 focus:ring-orange-700/15 dark:border-stone-500 dark:bg-stone-950 dark:text-stone-50 dark:placeholder:text-stone-400"
               />
               <button type="submit" class="inline-flex items-center justify-center rounded-xl bg-stone-700 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-stone-800 focus:outline-none focus:ring-4 focus:ring-stone-500/20 dark:bg-stone-300 dark:text-stone-950 dark:hover:bg-stone-200">Add</button>
             </form>
           </div>
-          <div class="rounded-2xl border border-orange-100 bg-orange-50/70 p-4 dark:border-orange-300/15 dark:bg-orange-400/10">
+          <div class="rounded-2xl border border-orange-200 bg-orange-100/60 p-4 dark:border-orange-400/30 dark:bg-orange-950/40">
             <h3 class="font-bold text-orange-950 dark:text-orange-50">Cons</h3>
             <ul class="cons-list mt-3 space-y-2"></ul>
             <form class="add-item-form mt-3 flex flex-col gap-2 sm:flex-row" data-type="cons">
               <input
                 type="text"
                 placeholder="Add a concern"
-                class="min-w-0 flex-1 rounded-xl border border-amber-100 bg-ivory px-3 py-2.5 text-sm text-stone-950 outline-none transition placeholder:text-stone-500 focus:border-orange-600 focus:ring-4 focus:ring-orange-700/15 dark:border-orange-400/20 dark:bg-espresso dark:text-white dark:placeholder:text-stone-400"
+                class="min-w-0 flex-1 rounded-xl border border-orange-300 bg-[#fffdf8] px-3 py-2.5 text-sm font-medium text-stone-950 outline-none transition placeholder:text-stone-600 focus:border-orange-700 focus:ring-4 focus:ring-orange-700/15 dark:border-orange-400/40 dark:bg-stone-950 dark:text-stone-50 dark:placeholder:text-stone-400"
               />
               <button type="submit" class="inline-flex items-center justify-center rounded-xl bg-orange-800 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-orange-900 focus:outline-none focus:ring-4 focus:ring-orange-700/20 dark:bg-amber-300 dark:text-stone-950 dark:hover:bg-amber-200">Add</button>
             </form>
@@ -511,7 +536,7 @@
               Links, notes, or supporting material
             </span>
             <textarea
-              class="option-evidence min-h-28 w-full resize-y rounded-2xl border border-stone-200 bg-ivory px-4 py-3 text-sm text-stone-950 outline-none transition placeholder:text-stone-500 focus:border-orange-700 focus:ring-4 focus:ring-orange-700/15 dark:border-stone-700 dark:bg-espresso dark:text-white dark:placeholder:text-stone-400"
+              class="option-evidence min-h-28 w-full resize-y rounded-2xl border border-stone-400 bg-[#fffdf8] px-4 py-3 text-sm font-medium text-stone-950 outline-none transition placeholder:text-stone-600 focus:border-orange-700 focus:ring-4 focus:ring-orange-700/15 dark:border-stone-500 dark:bg-stone-950 dark:text-stone-50 dark:placeholder:text-stone-400"
               placeholder="Paste links, research notes, quotes, reminders, or source material for this option..."
             ></textarea>
           </label>
@@ -886,27 +911,27 @@
         state.factors.forEach((factor, index) => {
           const row = document.createElement("div");
           row.className =
-            "grid gap-3 rounded-2xl border border-stone-200 bg-ivory p-3 shadow-sm dark:border-stone-700 dark:bg-espresso md:grid-cols-[minmax(0,1fr)_auto] md:items-center";
+            "grid gap-3 rounded-2xl border border-stone-300 bg-stone-100 p-3 shadow-sm dark:border-stone-600 dark:bg-stone-900 md:grid-cols-[minmax(0,1fr)_auto] md:items-center";
 
           const input = document.createElement("input");
           input.type = "text";
           input.value = factor.name;
           input.className =
-            "w-full min-w-0 rounded-xl bg-transparent px-2 text-sm font-semibold text-stone-900 outline-none focus:bg-stone-50 focus:ring-4 focus:ring-orange-700/10 dark:text-stone-50 dark:focus:bg-cocoa md:col-span-2";
+            "w-full min-w-0 rounded-xl border border-stone-300 bg-[#fffdf8] px-3 py-2 text-sm font-semibold text-stone-950 outline-none focus:border-orange-700 focus:bg-white focus:ring-4 focus:ring-orange-700/15 dark:border-stone-500 dark:bg-stone-950 dark:text-stone-50 dark:focus:border-amber-500 dark:focus:bg-black md:col-span-2";
           input.ariaLabel = `Factor ${index + 1}`;
           input.addEventListener("change", () => renameFactor(index, input.value.trim()));
 
           const weightWrapper = document.createElement("label");
-          weightWrapper.className = "block rounded-xl bg-stone-50 px-3 py-2 dark:bg-stone-900";
+          weightWrapper.className = "block rounded-xl border border-stone-300 bg-[#fffdf8] px-3 py-2 dark:border-stone-500 dark:bg-stone-950";
 
           const weightHeader = document.createElement("span");
-          weightHeader.className = "mb-1 flex items-center justify-between gap-3 text-xs font-bold text-stone-600 dark:text-stone-300";
+          weightHeader.className = "mb-1 flex items-center justify-between gap-3 text-xs font-bold text-stone-700 dark:text-stone-200";
 
           const weightLabel = document.createElement("span");
           weightLabel.textContent = "Importance";
 
           const weightValue = document.createElement("span");
-          weightValue.className = "rounded-full bg-ivory px-2 py-0.5 text-orange-800 dark:bg-stone-800 dark:text-amber-200";
+          weightValue.className = "rounded-full bg-orange-100 px-2 py-0.5 text-orange-900 dark:bg-amber-400/20 dark:text-amber-100";
           weightValue.textContent = factor.weight;
 
           const weightRange = document.createElement("input");
@@ -1041,7 +1066,7 @@
         items.forEach((item, index) => {
           const row = document.createElement("li");
           row.className =
-            "rounded-xl bg-ivory/90 px-3 py-2.5 text-sm font-medium text-stone-800 shadow-sm dark:bg-espresso/80 dark:text-stone-100";
+            "rounded-xl border border-stone-300 bg-[#fffdf8] px-3 py-2.5 text-sm font-medium text-stone-950 shadow-sm dark:border-stone-500 dark:bg-stone-950 dark:text-stone-50";
 
           const itemHeader = document.createElement("div");
           itemHeader.className = "flex items-start justify-between gap-3";
@@ -1052,7 +1077,7 @@
           text.placeholder = type === "pros" ? "Edit this pro" : "Edit this con";
           text.ariaLabel = `Edit ${type === "pros" ? "pro" : "con"}: ${item.text}`;
           text.className =
-            "min-h-8 min-w-0 flex-1 rounded-lg bg-transparent px-2 py-1 text-sm font-medium text-stone-800 outline-none transition placeholder:text-stone-400 focus:bg-ivory focus:ring-4 focus:ring-orange-700/10 dark:text-stone-100 dark:placeholder:text-stone-500 dark:focus:bg-cocoa";
+            "min-h-8 min-w-0 flex-1 rounded-lg border border-transparent bg-[#fffdf8] px-2 py-1 text-sm font-medium text-stone-950 outline-none transition placeholder:text-stone-600 focus:border-orange-700 focus:bg-white focus:ring-4 focus:ring-orange-700/15 dark:bg-stone-950 dark:text-stone-50 dark:placeholder:text-stone-400 dark:focus:border-amber-500 dark:focus:bg-black";
           text.addEventListener("input", () => {
             option[type][index].text = text.value;
             button.ariaLabel = `Remove ${text.value || type.slice(0, -1)}`;
@@ -1082,7 +1107,7 @@
 
           const evidenceDetails = document.createElement("details");
           evidenceDetails.className =
-            "mt-2 rounded-xl border border-stone-200 bg-stone-50/90 px-3 py-2 dark:border-stone-700 dark:bg-stone-900";
+            "mt-2 rounded-xl border border-stone-300 bg-stone-100 px-3 py-2 dark:border-stone-500 dark:bg-stone-900";
 
           const summary = document.createElement("summary");
           summary.className =
@@ -1095,7 +1120,7 @@
           evidence.placeholder = "Add links, notes, source details, or supporting material...";
           evidence.ariaLabel = `Evidence or notes for ${item.text || type.slice(0, -1)}`;
           evidence.className =
-            "mt-3 w-full resize-y rounded-xl border border-stone-200 bg-ivory px-3 py-2 text-sm text-stone-950 outline-none transition placeholder:text-stone-500 focus:border-orange-700 focus:ring-4 focus:ring-orange-700/15 dark:border-stone-700 dark:bg-espresso dark:text-white dark:placeholder:text-stone-400";
+            "mt-3 w-full resize-y rounded-xl border border-stone-400 bg-[#fffdf8] px-3 py-2 text-sm font-medium text-stone-950 outline-none transition placeholder:text-stone-600 focus:border-orange-700 focus:ring-4 focus:ring-orange-700/15 dark:border-stone-500 dark:bg-stone-950 dark:text-stone-50 dark:placeholder:text-stone-400";
           evidence.addEventListener("input", () => {
             option[type][index].evidence = evidence.value;
             persistCurrentState();
@@ -1117,7 +1142,7 @@
 
           const wrapper = document.createElement("label");
           wrapper.className =
-            "block rounded-2xl border border-stone-200 bg-stone-50/90 p-4 shadow-sm transition hover:border-orange-200 dark:border-stone-700 dark:bg-espresso/80 dark:hover:border-orange-300/25";
+            "block rounded-2xl border border-stone-300 bg-stone-100 p-4 shadow-sm transition hover:border-orange-300 dark:border-stone-600 dark:bg-stone-900 dark:hover:border-orange-300/40";
 
           const header = document.createElement("span");
           header.className = "mb-3 flex items-center justify-between gap-4";
@@ -1127,7 +1152,7 @@
           name.textContent = factor.name;
 
           const value = document.createElement("span");
-          value.className = "rounded-full bg-ivory px-3 py-1 text-sm font-bold text-orange-800 dark:bg-stone-800 dark:text-amber-200";
+          value.className = "rounded-full bg-orange-100 px-3 py-1 text-sm font-bold text-orange-900 dark:bg-amber-400/20 dark:text-amber-100";
           value.textContent = `${score} × ${factor.weight}`;
 
           const range = document.createElement("input");

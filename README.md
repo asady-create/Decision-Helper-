@@ -13,7 +13,7 @@ A warm, reflective single-page decision journal for comparing options with pros,
 - Customize scoring factors, set each factor's importance weight from 1-10, and rate each option from 1-10
 - See a recommendation based on the highest weighted score
 - Save the current workspace and named snapshots to local storage
-- Toggle between light and dark mode
+- Warm dark-only interface styled as a reflective decision journal
 - Responsive layout built with Tailwind CSS CDN and vanilla JavaScript
 
 ## Run locally

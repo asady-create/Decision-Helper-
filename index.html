@@ -430,6 +430,23 @@
               </summary>
               <div id="mungerChecklist" class="mt-5 space-y-5"></div>
             </details>
+
+            <div class="mt-5 border-t border-amber-200/10 pt-5">
+              <div class="mb-3 flex flex-wrap items-center justify-between gap-3">
+                <h3 class="font-serif text-base font-semibold text-stone-50">Counterarguments</h3>
+                <button
+                  id="addCounterargument"
+                  type="button"
+                  class="inline-flex items-center justify-center rounded-full bg-[#241913] px-3 py-1.5 text-xs font-bold text-stone-200 ring-1 ring-amber-200/15 transition hover:bg-[#1a130f] hover:text-amber-100 focus:outline-none focus:ring-4 focus:ring-amber-500/15"
+                >
+                  Add counterargument
+                </button>
+              </div>
+              <p class="mb-3 text-sm text-stone-300">
+                Write a counterargument, rate how convincing it feels, respond to it, then rate it again.
+              </p>
+              <div id="counterargumentsList" class="space-y-3"></div>
+            </div>
           </section>
         </section>
 
@@ -581,6 +598,7 @@
           emotions: "",
         },
         mungerTendencies: createDefaultMungerState(),
+        counterarguments: [],
         factors: [
           { id: "impact", name: "Impact", weight: 8 },
           { id: "cost-fit", name: "Cost fit", weight: 6 },
@@ -624,6 +642,8 @@
         reflectionTip: document.querySelector("#reflectionTip"),
         mungerChecklist: document.querySelector("#mungerChecklist"),
         mungerChecklistDetails: document.querySelector("#mungerChecklistDetails"),
+        counterargumentsList: document.querySelector("#counterargumentsList"),
+        addCounterargument: document.querySelector("#addCounterargument"),
         factorsList: document.querySelector("#factorsList"),
         addFactorForm: document.querySelector("#addFactorForm"),
         factorName: document.querySelector("#factorName"),
@@ -700,6 +720,11 @@
           option.scores[factor.id] = 5;
         });
         elements.factorName.value = "";
+        persistAndRender();
+      });
+
+      elements.addCounterargument.addEventListener("click", () => {
+        state.counterarguments.push(createCounterargument());
         persistAndRender();
       });
 
@@ -781,9 +806,46 @@
           desiredOutcome: rawState.desiredOutcome || "",
           mood: normalizeMood(rawState.mood),
           mungerTendencies: normalizeMungerTendencies(rawState.mungerTendencies),
+          counterarguments: normalizeCounterarguments(rawState.counterarguments),
           factors,
           options,
         };
+      }
+
+      function createCounterargument() {
+        return {
+          id: createId(),
+          text: "",
+          initialRating: null,
+          response: "",
+          revisedRating: null,
+        };
+      }
+
+      function normalizeOptionalRating(value) {
+        if (value === null || value === undefined || value === "") return null;
+        const rating = Number(value);
+        if (!Number.isFinite(rating)) return null;
+        return Math.min(10, Math.max(1, Math.round(rating)));
+      }
+
+      function normalizeCounterarguments(items) {
+        if (!Array.isArray(items)) return [];
+        return items.map((item) => ({
+          id: item?.id || createId(),
+          text: typeof item?.text === "string" ? item.text : "",
+          initialRating: normalizeOptionalRating(item?.initialRating),
+          response: typeof item?.response === "string" ? item.response : "",
+          revisedRating: normalizeOptionalRating(item?.revisedRating),
+        }));
+      }
+
+      function formatConvincingDelta(initialRating, revisedRating) {
+        if (initialRating == null || revisedRating == null) return "";
+        const delta = revisedRating - initialRating;
+        if (delta < 0) return `Convincing power decreased by ${Math.abs(delta)}`;
+        if (delta > 0) return `Convincing power increased by ${delta}`;
+        return "No change in convincing power";
       }
 
       function normalizeMood(mood) {
@@ -859,10 +921,155 @@
         renderDeadlineCountdown();
         renderMoodCheckIn();
         renderMungerChecklist();
+        renderCounterarguments();
         renderFactors();
         renderOptions();
         renderRecommendation();
         renderSavedDecisions();
+      }
+
+      function renderCounterarguments() {
+        state.counterarguments = normalizeCounterarguments(state.counterarguments);
+        elements.counterargumentsList.replaceChildren();
+
+        if (!state.counterarguments.length) {
+          const empty = document.createElement("p");
+          empty.className = "text-sm text-stone-400";
+          empty.textContent = "No counterarguments yet. Add one to pressure-test your thinking.";
+          elements.counterargumentsList.append(empty);
+          return;
+        }
+
+        state.counterarguments.forEach((item, index) => {
+          const card = document.createElement("article");
+          card.className = "warm-inset space-y-3 rounded-2xl p-4";
+
+          const header = document.createElement("div");
+          header.className = "flex items-center justify-between gap-3";
+
+          const title = document.createElement("p");
+          title.className = "text-xs font-bold uppercase tracking-wide text-stone-400";
+          title.textContent = `Counterargument ${index + 1}`;
+
+          const removeButton = document.createElement("button");
+          removeButton.type = "button";
+          removeButton.textContent = "Remove";
+          removeButton.className =
+            "inline-flex items-center justify-center rounded-full px-2.5 py-1 text-xs font-bold text-stone-400 transition hover:bg-[#241913] hover:text-rose-300 focus:outline-none focus:ring-4 focus:ring-rose-500/15";
+          removeButton.addEventListener("click", () => {
+            state.counterarguments.splice(index, 1);
+            persistAndRender();
+          });
+
+          header.append(title, removeButton);
+
+          const textField = createLabeledTextarea(
+            "Possible counterargument",
+            item.text,
+            "What might someone argue against your preferred choice?",
+            (value) => {
+              item.text = value;
+              persistCurrentState();
+            }
+          );
+
+          const initialRatingField = createRatingSelect(
+            "How convincing is this right now?",
+            item.initialRating,
+            (value) => {
+              item.initialRating = value;
+              persistCurrentState();
+              updateDeltaLine();
+            }
+          );
+
+          const responseField = createLabeledTextarea(
+            "Your response",
+            item.response,
+            "How would you answer this counterargument?",
+            (value) => {
+              item.response = value;
+              persistCurrentState();
+            }
+          );
+
+          const revisedRatingField = createRatingSelect(
+            "How convincing is it after your response?",
+            item.revisedRating,
+            (value) => {
+              item.revisedRating = value;
+              persistCurrentState();
+              updateDeltaLine();
+            }
+          );
+
+          const deltaLine = document.createElement("p");
+          deltaLine.className = "text-sm font-medium text-amber-200/90";
+
+          function updateDeltaLine() {
+            const message = formatConvincingDelta(item.initialRating, item.revisedRating);
+            deltaLine.textContent = message;
+            deltaLine.classList.toggle("hidden", !message);
+          }
+
+          updateDeltaLine();
+
+          card.append(header, textField, initialRatingField, responseField, revisedRatingField, deltaLine);
+          elements.counterargumentsList.append(card);
+        });
+      }
+
+      function createLabeledTextarea(labelText, value, placeholder, onInput) {
+        const wrapper = document.createElement("label");
+        wrapper.className = "block space-y-1.5";
+
+        const label = document.createElement("span");
+        label.className = "text-sm font-semibold text-stone-200";
+        label.textContent = labelText;
+
+        const textarea = document.createElement("textarea");
+        textarea.rows = 2;
+        textarea.value = value;
+        textarea.placeholder = placeholder;
+        textarea.className =
+          "w-full resize-y rounded-xl border border-amber-200/15 bg-[#16100c] px-3 py-2 text-sm text-stone-100 placeholder:text-stone-500 focus:border-amber-400/40 focus:outline-none focus:ring-4 focus:ring-amber-500/10";
+        textarea.addEventListener("input", () => onInput(textarea.value));
+
+        wrapper.append(label, textarea);
+        return wrapper;
+      }
+
+      function createRatingSelect(labelText, value, onChange) {
+        const wrapper = document.createElement("label");
+        wrapper.className = "block space-y-1.5";
+
+        const label = document.createElement("span");
+        label.className = "text-sm font-semibold text-stone-200";
+        label.textContent = labelText;
+
+        const select = document.createElement("select");
+        select.className =
+          "w-full rounded-xl border border-amber-200/15 bg-[#16100c] px-3 py-2 text-sm text-stone-100 focus:border-amber-400/40 focus:outline-none focus:ring-4 focus:ring-amber-500/10 sm:w-40";
+
+        const blank = document.createElement("option");
+        blank.value = "";
+        blank.textContent = "Rate 1–10";
+        select.append(blank);
+
+        for (let rating = 1; rating <= 10; rating += 1) {
+          const option = document.createElement("option");
+          option.value = String(rating);
+          option.textContent = String(rating);
+          select.append(option);
+        }
+
+        select.value = value == null ? "" : String(value);
+        select.addEventListener("change", () => {
+          onChange(normalizeOptionalRating(select.value));
+        });
+
+        wrapper.append(label, select);
+        return wrapper;
       }
 
       function renderMungerChecklist() {

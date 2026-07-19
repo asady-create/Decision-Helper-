@@ -52,6 +52,7 @@
 
       body {
         min-height: 100vh;
+        font-family: Georgia, "Times New Roman", Times, serif;
         color: var(--ink);
         background:
           radial-gradient(circle at top left, rgba(217, 119, 6, 0.08), transparent 34rem),
@@ -506,32 +507,38 @@
       const SAVED_KEY = "decision-helper-saved";
 
       const MUNGER_TENDENCIES = [
-        "Reward and Punishment Super-response Tendency",
-        "Liking/Loving Tendency",
-        "Disliking/Hating Tendency",
-        "Doubt-Avoidance Tendency",
-        "Inconsistency-Avoidance Tendency",
-        "Curiosity Tendency",
-        "Kantian Fairness Tendency",
-        "Envy/Jealously Tendency",
-        "Reciprocation Tendency",
-        "Influence-from-Mere-Association Tendency",
-        "Simple, Pain-Avoiding Psychological Denial",
-        "Excessive Self-Regard Tendency",
-        "Overoptimism Tendency",
-        "Deprival-Superreaction Tendency",
-        "Social-Proof Tendency",
-        "Contrast-Misreaction Tendency",
-        "Stress-Influence Tendency",
-        "Availability-Misweighing Tendency",
-        "Use-It-or-Lose-It Tendency",
-        "Drug-Misinfluence Tendency",
-        "Senescence-Misinfluence Tendency",
-        "Authority-Misinfluence Tendency",
-        "Twaddle Tendency",
-        "Reason-Respecting Tendency",
-        "Lollapalooza Tendency",
+        { id: "reward-punishment", name: "Reward and Punishment Super-response Tendency", shortLabel: "Reward & Punishment", category: "incentives" },
+        { id: "liking-loving", name: "Liking/Loving Tendency", shortLabel: "Liking/Loving", category: "emotion" },
+        { id: "disliking-hating", name: "Disliking/Hating Tendency", shortLabel: "Disliking/Hating", category: "emotion" },
+        { id: "doubt-avoidance", name: "Doubt-Avoidance Tendency", shortLabel: "Doubt Avoidance", category: "avoidance" },
+        { id: "inconsistency-avoidance", name: "Inconsistency-Avoidance Tendency", shortLabel: "Inconsistency Avoidance", category: "avoidance" },
+        { id: "curiosity", name: "Curiosity Tendency", shortLabel: "Curiosity", category: "cognition" },
+        { id: "kantian-fairness", name: "Kantian Fairness Tendency", shortLabel: "Kantian Fairness", category: "social" },
+        { id: "envy-jealousy", name: "Envy/Jealously Tendency", shortLabel: "Envy/Jealousy", category: "emotion" },
+        { id: "reciprocation", name: "Reciprocation Tendency", shortLabel: "Reciprocation", category: "social" },
+        { id: "mere-association", name: "Influence-from-Mere-Association Tendency", shortLabel: "Mere Association", category: "influence" },
+        { id: "psychological-denial", name: "Simple, Pain-Avoiding Psychological Denial", shortLabel: "Psychological Denial", category: "avoidance" },
+        { id: "excessive-self-regard", name: "Excessive Self-Regard Tendency", shortLabel: "Self-Regard", category: "cognition" },
+        { id: "overoptimism", name: "Overoptimism Tendency", shortLabel: "Overoptimism", category: "cognition" },
+        { id: "deprival-superreaction", name: "Deprival-Superreaction Tendency", shortLabel: "Deprival Superreaction", category: "emotion" },
+        { id: "social-proof", name: "Social-Proof Tendency", shortLabel: "Social Proof", category: "social" },
+        { id: "contrast-misreaction", name: "Contrast-Misreaction Tendency", shortLabel: "Contrast Misreaction", category: "cognition" },
+        { id: "stress-influence", name: "Stress-Influence Tendency", shortLabel: "Stress Influence", category: "influence" },
+        { id: "availability-misweighing", name: "Availability-Misweighing Tendency", shortLabel: "Availability", category: "cognition" },
+        { id: "use-it-or-lose-it", name: "Use-It-or-Lose-It Tendency", shortLabel: "Use It or Lose It", category: "cognition" },
+        { id: "drug-misinfluence", name: "Drug-Misinfluence Tendency", shortLabel: "Drug Misinfluence", category: "influence" },
+        { id: "senescence-misinfluence", name: "Senescence-Misinfluence Tendency", shortLabel: "Senescence", category: "influence" },
+        { id: "authority-misinfluence", name: "Authority-Misinfluence Tendency", shortLabel: "Authority", category: "influence" },
+        { id: "twaddle", name: "Twaddle Tendency", shortLabel: "Twaddle", category: "cognition" },
+        { id: "reason-respecting", name: "Reason-Respecting Tendency", shortLabel: "Reason Respecting", category: "cognition" },
+        { id: "lollapalooza", name: "Lollapalooza Tendency", shortLabel: "Lollapalooza", category: "compound" },
       ];
+
+      function createDefaultMungerState() {
+        return Object.fromEntries(
+          MUNGER_TENDENCIES.map((tendency) => [tendency.id, { checked: false, note: "" }])
+        );
+      }
 
       const defaultState = {
         question: "",
@@ -540,7 +547,7 @@
           stress: 5,
           emotions: "",
         },
-        mungerTendencies: {},
+        mungerTendencies: createDefaultMungerState(),
         factors: [
           { id: "impact", name: "Impact", weight: 8 },
           { id: "cost-fit", name: "Cost fit", weight: 6 },
@@ -760,9 +767,24 @@
 
       function normalizeMungerTendencies(tendencies) {
         const source = tendencies && typeof tendencies === "object" ? tendencies : {};
-        return Object.fromEntries(
-          MUNGER_TENDENCIES.map((tendency) => [tendency, Boolean(source[tendency])])
-        );
+        const next = createDefaultMungerState();
+
+        MUNGER_TENDENCIES.forEach((tendency) => {
+          const byId = source[tendency.id];
+          const byName = source[tendency.name];
+          const raw = byId !== undefined ? byId : byName;
+
+          if (raw && typeof raw === "object") {
+            next[tendency.id] = {
+              checked: Boolean(raw.checked),
+              note: typeof raw.note === "string" ? raw.note : "",
+            };
+          } else if (typeof raw === "boolean") {
+            next[tendency.id] = { checked: raw, note: "" };
+          }
+        });
+
+        return next;
       }
 
       function persistAndRender(message = "Saved locally") {
@@ -800,25 +822,26 @@
         updateMungerChecklistSummary();
 
         MUNGER_TENDENCIES.forEach((tendency) => {
+          const entry = state.mungerTendencies[tendency.id];
           const label = document.createElement("label");
           label.className =
             "flex cursor-pointer items-start gap-3 rounded-xl border border-transparent px-2 py-3 transition hover:border-amber-200/20 hover:bg-[#1a130f]";
 
           const checkbox = document.createElement("input");
           checkbox.type = "checkbox";
-          checkbox.checked = Boolean(state.mungerTendencies[tendency]);
+          checkbox.checked = Boolean(entry.checked);
           checkbox.className =
             "mt-1 h-5 w-5 shrink-0 rounded border-amber-200/25 bg-[#16100c] text-amber-500 focus:ring-amber-600/25";
-          checkbox.ariaLabel = tendency;
+          checkbox.ariaLabel = tendency.name;
           checkbox.addEventListener("change", () => {
-            state.mungerTendencies[tendency] = checkbox.checked;
+            state.mungerTendencies[tendency.id].checked = checkbox.checked;
             persistCurrentState();
             updateMungerChecklistSummary();
           });
 
           const text = document.createElement("span");
           text.className = "text-sm font-medium leading-6 text-stone-100";
-          text.textContent = tendency;
+          text.textContent = tendency.name;
 
           label.append(checkbox, text);
           elements.mungerChecklist.append(label);
@@ -826,7 +849,9 @@
       }
 
       function updateMungerChecklistSummary() {
-        const checkedCount = MUNGER_TENDENCIES.filter((tendency) => state.mungerTendencies[tendency]).length;
+        const checkedCount = MUNGER_TENDENCIES.filter(
+          (tendency) => state.mungerTendencies[tendency.id]?.checked
+        ).length;
         const summary = elements.mungerChecklistDetails.querySelector("summary");
         if (!summary) return;
         summary.textContent =

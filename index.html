@@ -343,6 +343,38 @@
             </div>
             <div id="optionsList" class="grid gap-4"></div>
           </section>
+
+          <section
+            class="glass-panel interactive-surface reveal rounded-[1.75rem] border border-white/80 bg-white/90 p-5 shadow-calm dark:border-slate-700/80 dark:bg-slate-900/90 sm:p-6"
+            aria-labelledby="mungerTitle"
+          >
+            <div class="mb-4">
+              <p class="mb-2 inline-flex rounded-full bg-slate-100 px-3 py-1 text-sm font-semibold text-slate-700 ring-1 ring-slate-200 dark:bg-slate-800 dark:text-slate-200 dark:ring-slate-700">
+                Bias awareness check
+              </p>
+              <h2 id="mungerTitle" class="text-xl font-bold text-slate-950 dark:text-white">
+                Charlie Munger's the Psychology of Human Misjudgment
+              </h2>
+              <p class="mt-3 text-base italic leading-7 text-slate-700 dark:text-slate-200">
+                "Reality talks to only who listen"
+              </p>
+              <p class="mt-2 text-sm text-slate-700 dark:text-slate-300">
+                After comparing your options, review this checklist and mark any tendencies that may be distorting your judgment.
+              </p>
+            </div>
+
+            <details
+              id="mungerChecklistDetails"
+              class="rounded-2xl border border-slate-200 bg-slate-50/90 p-4 dark:border-slate-700 dark:bg-slate-950/80"
+            >
+              <summary
+                class="cursor-pointer select-none text-sm font-bold text-slate-800 transition hover:text-teal-700 dark:text-slate-100 dark:hover:text-teal-200"
+              >
+                Show tendency checklist
+              </summary>
+              <div id="mungerChecklist" class="mt-5 space-y-5"></div>
+            </details>
+          </section>
         </section>
 
         <aside class="space-y-6 lg:sticky lg:top-6 lg:self-start">
@@ -450,6 +482,34 @@
       const SAVED_KEY = "decision-helper-saved";
       const THEME_KEY = "decision-helper-theme";
 
+      const MUNGER_TENDENCIES = [
+        "Reward and Punishment Super-response Tendency",
+        "Liking/Loving Tendency",
+        "Disliking/Hating Tendency",
+        "Doubt-Avoidance Tendency",
+        "Inconsistency-Avoidance Tendency",
+        "Curiosity Tendency",
+        "Kantian Fairness Tendency",
+        "Envy/Jealously Tendency",
+        "Reciprocation Tendency",
+        "Influence-from-Mere-Association Tendency",
+        "Simple, Pain-Avoiding Psychological Denial",
+        "Excessive Self-Regard Tendency",
+        "Overoptimism Tendency",
+        "Deprival-Superreaction Tendency",
+        "Social-Proof Tendency",
+        "Contrast-Misreaction Tendency",
+        "Stress-Influence Tendency",
+        "Availability-Misweighing Tendency",
+        "Use-It-or-Lose-It Tendency",
+        "Drug-Misinfluence Tendency",
+        "Senescence-Misinfluence Tendency",
+        "Authority-Misinfluence Tendency",
+        "Twaddle Tendency",
+        "Reason-Respecting Tendency",
+        "Lollapalooza Tendency",
+      ];
+
       const defaultState = {
         question: "",
         deadline: "",
@@ -457,6 +517,7 @@
           stress: 5,
           emotions: "",
         },
+        mungerTendencies: {},
         factors: [
           { id: "impact", name: "Impact", weight: 8 },
           { id: "cost-fit", name: "Cost fit", weight: 6 },
@@ -496,6 +557,8 @@
         stressValue: document.querySelector("#stressValue"),
         emotionInput: document.querySelector("#emotionInput"),
         reflectionTip: document.querySelector("#reflectionTip"),
+        mungerChecklist: document.querySelector("#mungerChecklist"),
+        mungerChecklistDetails: document.querySelector("#mungerChecklistDetails"),
         factorsList: document.querySelector("#factorsList"),
         addFactorForm: document.querySelector("#addFactorForm"),
         factorName: document.querySelector("#factorName"),
@@ -650,6 +713,7 @@
           question: rawState.question || "",
           deadline: normalizeDeadline(rawState.deadline),
           mood: normalizeMood(rawState.mood),
+          mungerTendencies: normalizeMungerTendencies(rawState.mungerTendencies),
           factors,
           options,
         };
@@ -681,6 +745,13 @@
         return /^\d{4}-\d{2}-\d{2}$/.test(deadline || "") ? deadline : "";
       }
 
+      function normalizeMungerTendencies(tendencies) {
+        const source = tendencies && typeof tendencies === "object" ? tendencies : {};
+        return Object.fromEntries(
+          MUNGER_TENDENCIES.map((tendency) => [tendency, Boolean(source[tendency])])
+        );
+      }
+
       function persistAndRender(message = "Saved locally") {
         persistCurrentState(message);
         render();
@@ -703,10 +774,52 @@
         elements.question.value = state.question;
         renderDeadlineCountdown();
         renderMoodCheckIn();
+        renderMungerChecklist();
         renderFactors();
         renderOptions();
         renderRecommendation();
         renderSavedDecisions();
+      }
+
+      function renderMungerChecklist() {
+        elements.mungerChecklist.replaceChildren();
+        state.mungerTendencies = normalizeMungerTendencies(state.mungerTendencies);
+        updateMungerChecklistSummary();
+
+        MUNGER_TENDENCIES.forEach((tendency) => {
+          const label = document.createElement("label");
+          label.className =
+            "flex cursor-pointer items-start gap-3 rounded-xl border border-transparent px-2 py-3 transition hover:border-slate-200 hover:bg-white dark:hover:border-slate-700 dark:hover:bg-slate-900";
+
+          const checkbox = document.createElement("input");
+          checkbox.type = "checkbox";
+          checkbox.checked = Boolean(state.mungerTendencies[tendency]);
+          checkbox.className =
+            "mt-1 h-5 w-5 shrink-0 rounded border-slate-300 text-teal-700 focus:ring-teal-500/30 dark:border-slate-600 dark:bg-slate-950";
+          checkbox.ariaLabel = tendency;
+          checkbox.addEventListener("change", () => {
+            state.mungerTendencies[tendency] = checkbox.checked;
+            persistCurrentState();
+            updateMungerChecklistSummary();
+          });
+
+          const text = document.createElement("span");
+          text.className = "text-sm font-medium leading-6 text-slate-800 dark:text-slate-100";
+          text.textContent = tendency;
+
+          label.append(checkbox, text);
+          elements.mungerChecklist.append(label);
+        });
+      }
+
+      function updateMungerChecklistSummary() {
+        const checkedCount = MUNGER_TENDENCIES.filter((tendency) => state.mungerTendencies[tendency]).length;
+        const summary = elements.mungerChecklistDetails.querySelector("summary");
+        if (!summary) return;
+        summary.textContent =
+          checkedCount > 0
+            ? `Show tendency checklist (${checkedCount} marked)`
+            : "Show tendency checklist";
       }
 
       function renderMoodCheckIn() {

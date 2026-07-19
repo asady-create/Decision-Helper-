@@ -9,6 +9,7 @@ A clean, modern single-page web app for comparing decision options with pros, co
 - Check in with current stress level and emotions before comparing options
 - Capture editable pros and cons for every option
 - Add collapsible evidence, links, and notes for each option and each pro/con
+- Review Charlie Munger's Psychology of Human Misjudgment tendencies after comparing options
 - Customize scoring factors, set each factor's importance weight from 1-10, and rate each option from 1-10
 - See a recommendation based on the highest weighted score
 - Save the current workspace and named snapshots to local storage

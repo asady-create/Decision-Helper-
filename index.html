@@ -6,7 +6,7 @@
     <title>Decision Helper</title>
     <meta
       name="description"
-      content="A calm, modern decision-making helper for comparing options, pros, cons, and scores."
+      content="A warm, reflective decision journal for comparing options, pros, cons, and scores."
     />
     <script>
       window.tailwind = {
@@ -15,11 +15,18 @@
           theme: {
             extend: {
               fontFamily: {
-                sans: ["Inter", "ui-sans-serif", "system-ui", "sans-serif"],
+                sans: ["Source Sans 3", "ui-sans-serif", "system-ui", "sans-serif"],
+                serif: ["Fraunces", "ui-serif", "Georgia", "serif"],
               },
               boxShadow: {
-                soft: "0 24px 70px -38px rgba(15, 23, 42, 0.34)",
-                calm: "0 18px 48px -32px rgba(15, 23, 42, 0.42)",
+                soft: "0 24px 70px -38px rgba(61, 36, 22, 0.28)",
+                calm: "0 18px 48px -32px rgba(61, 36, 22, 0.34)",
+              },
+              colors: {
+                parchment: "#f7f1e8",
+                ivory: "#fbf7f0",
+                espresso: "#1c1410",
+                cocoa: "#2a1f18",
               },
             },
           },
@@ -30,35 +37,51 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;600;700&family=Source+Sans+3:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
     <style>
       :root {
         color-scheme: light;
+        --surface: rgba(251, 247, 240, 0.92);
+        --surface-strong: rgba(255, 251, 245, 0.96);
+        --ink: #2b2118;
+        --muted: #6b5b4d;
+        --accent: #9a3412;
+        --accent-soft: #c2410c;
+        --bronze: #92400e;
       }
 
       html.dark {
         color-scheme: dark;
+        --surface: rgba(42, 31, 24, 0.92);
+        --surface-strong: rgba(28, 20, 16, 0.96);
+        --ink: #f5efe6;
+        --muted: #d6c4b0;
+        --accent: #d97706;
+        --accent-soft: #f59e0b;
+        --bronze: #fbbf24;
       }
 
       body {
         min-height: 100vh;
+        color: var(--ink);
         background:
-          radial-gradient(circle at top left, rgba(20, 184, 166, 0.18), transparent 32rem),
-          radial-gradient(circle at top right, rgba(125, 211, 252, 0.16), transparent 30rem),
-          linear-gradient(135deg, #f8fafc 0%, #f0fdfa 48%, #f8fafc 100%);
+          radial-gradient(circle at top left, rgba(180, 120, 72, 0.12), transparent 34rem),
+          radial-gradient(circle at top right, rgba(146, 64, 14, 0.08), transparent 30rem),
+          linear-gradient(160deg, #fbf7f0 0%, #f3ebe0 48%, #f7f1e8 100%);
       }
 
       html.dark body {
         background:
-          radial-gradient(circle at top left, rgba(20, 184, 166, 0.14), transparent 32rem),
-          radial-gradient(circle at top right, rgba(56, 189, 248, 0.12), transparent 30rem),
-          linear-gradient(135deg, #07111f 0%, #0f172a 54%, #111827 100%);
+          radial-gradient(circle at top left, rgba(217, 119, 6, 0.1), transparent 34rem),
+          radial-gradient(circle at top right, rgba(146, 64, 14, 0.12), transparent 30rem),
+          linear-gradient(160deg, #1c1410 0%, #2a1f18 52%, #231a14 100%);
       }
 
       .glass-panel {
-        backdrop-filter: blur(24px);
+        backdrop-filter: blur(18px);
+        background-color: var(--surface);
       }
 
       .reveal {
@@ -78,7 +101,8 @@
       }
 
       button,
-      input {
+      input,
+      textarea {
         min-height: 44px;
       }
 
@@ -87,12 +111,32 @@
       }
 
       input[type="range"] {
-        accent-color: #0f766e;
+        accent-color: #9a3412;
         min-height: 32px;
       }
 
       html.dark input[type="range"] {
-        accent-color: #5eead4;
+        accent-color: #f59e0b;
+      }
+
+      .brand-mark {
+        background: linear-gradient(145deg, #9a3412 0%, #92400e 100%);
+        box-shadow: 0 14px 28px -16px rgba(154, 52, 18, 0.55);
+      }
+
+      html.dark .brand-mark {
+        background: linear-gradient(145deg, #d97706 0%, #b45309 100%);
+        box-shadow: 0 14px 28px -16px rgba(217, 119, 6, 0.45);
+      }
+
+      .recommendation-card {
+        background: linear-gradient(145deg, #7c2d12 0%, #92400e 58%, #78350f 100%);
+        box-shadow: 0 22px 40px -24px rgba(124, 45, 18, 0.55);
+      }
+
+      html.dark .recommendation-card {
+        background: linear-gradient(145deg, #b45309 0%, #d97706 55%, #92400e 100%);
+        box-shadow: 0 22px 40px -24px rgba(180, 83, 9, 0.45);
       }
 
       @keyframes fade-up {
@@ -121,23 +165,23 @@
       }
     </style>
   </head>
-  <body class="font-sans text-slate-900 antialiased transition-colors duration-300 dark:text-slate-100">
+  <body class="font-sans text-stone-900 antialiased transition-colors duration-300 dark:text-stone-100">
     <div class="mx-auto flex min-h-screen w-full max-w-7xl flex-col px-4 py-5 sm:px-6 sm:py-6 lg:px-8">
       <header class="reveal mb-7 flex flex-col gap-4 sm:mb-8 sm:flex-row sm:items-center sm:justify-between">
         <a href="#" class="inline-flex items-center gap-3" aria-label="Decision Helper home">
           <span
-            class="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-teal-600 to-cyan-600 text-xl font-black text-white shadow-lg shadow-teal-600/25"
+            class="brand-mark grid h-12 w-12 shrink-0 place-items-center rounded-2xl text-xl font-black text-white"
             >D</span
           >
           <span>
-            <span class="block text-lg font-bold tracking-tight text-slate-950 dark:text-white">Decision Helper</span>
-            <span class="block text-sm font-medium text-slate-600 dark:text-slate-300">Think clearly. Choose calmly.</span>
+            <span class="block font-serif text-xl font-semibold tracking-tight text-stone-950 dark:text-stone-50">Decision Helper</span>
+            <span class="block text-sm font-medium text-stone-600 dark:text-stone-300">A quiet space for clearer choices.</span>
           </span>
         </a>
         <button
           id="themeToggle"
           type="button"
-          class="inline-flex w-full items-center justify-center gap-2 rounded-full border border-slate-200/80 bg-white/85 px-5 py-3 text-sm font-semibold text-slate-800 shadow-sm transition hover:-translate-y-0.5 hover:bg-white focus:outline-none focus:ring-4 focus:ring-teal-500/20 dark:border-slate-700 dark:bg-slate-900/85 dark:text-slate-100 dark:hover:bg-slate-800 sm:w-auto"
+          class="inline-flex w-full items-center justify-center gap-2 rounded-full border border-stone-300/80 bg-ivory/90 px-5 py-3 text-sm font-semibold text-stone-800 shadow-sm transition hover:-translate-y-0.5 hover:bg-ivory focus:outline-none focus:ring-4 focus:ring-orange-700/20 dark:border-stone-600 dark:bg-cocoa/90 dark:text-stone-100 dark:hover:bg-stone-800 sm:w-auto"
           aria-pressed="false"
         >
           <span id="themeIcon" aria-hidden="true">🌙</span>
@@ -148,16 +192,16 @@
       <main class="grid flex-1 gap-6 lg:grid-cols-[minmax(0,1.2fr)_minmax(340px,0.8fr)]">
         <section class="space-y-6">
           <div
-            class="glass-panel interactive-surface reveal overflow-hidden rounded-[2rem] border border-white/80 bg-white/90 p-5 shadow-soft dark:border-slate-700/80 dark:bg-slate-900/90 sm:p-8"
+            class="glass-panel interactive-surface reveal overflow-hidden rounded-[2rem] border border-stone-300/70 bg-ivory/90 p-5 shadow-soft dark:border-stone-600/70 dark:bg-cocoa/90 sm:p-8"
           >
             <div class="max-w-3xl">
-              <p class="mb-3 inline-flex rounded-full bg-teal-50 px-3 py-1 text-sm font-semibold text-teal-800 ring-1 ring-teal-100 dark:bg-teal-400/10 dark:text-teal-100 dark:ring-teal-300/15">
+              <p class="mb-3 inline-flex rounded-full bg-orange-50 px-3 py-1 text-sm font-semibold text-orange-900 ring-1 ring-orange-100 dark:bg-orange-400/10 dark:text-amber-100 dark:ring-orange-300/20">
                 Guided decision workspace
               </p>
-              <h1 class="text-3xl font-extrabold tracking-tight text-slate-950 dark:text-white sm:text-5xl">
+              <h1 class="font-serif text-3xl font-semibold tracking-tight text-stone-950 dark:text-stone-50 sm:text-5xl">
                 Compare your options with a calmer framework.
               </h1>
-              <p class="mt-4 text-base leading-7 text-slate-700 dark:text-slate-200 sm:text-lg">
+              <p class="mt-4 text-base leading-7 text-stone-700 dark:text-stone-200 sm:text-lg">
                 Add your question, list each option, capture pros and cons, then score the factors that matter.
                 Decision Helper saves your work locally in this browser and highlights the strongest option.
               </p>
@@ -165,100 +209,100 @@
           </div>
 
           <section
-            class="glass-panel interactive-surface reveal rounded-[1.75rem] border border-white/80 bg-white/90 p-5 shadow-calm dark:border-slate-700/80 dark:bg-slate-900/90 sm:p-6"
+            class="glass-panel interactive-surface reveal rounded-[1.75rem] border border-stone-300/70 bg-ivory/90 p-5 shadow-calm dark:border-stone-600/70 dark:bg-cocoa/90 sm:p-6"
             aria-labelledby="feelingsTitle"
           >
             <div class="mb-5">
-              <p class="mb-2 inline-flex rounded-full bg-cyan-50 px-3 py-1 text-sm font-semibold text-cyan-800 ring-1 ring-cyan-100 dark:bg-cyan-400/10 dark:text-cyan-100 dark:ring-cyan-300/15">
+              <p class="mb-2 inline-flex rounded-full bg-amber-50 px-3 py-1 text-sm font-semibold text-amber-900 ring-1 ring-amber-100 dark:bg-amber-400/10 dark:text-amber-100 dark:ring-amber-300/20">
                 Quick emotional check-in
               </p>
-              <h2 id="feelingsTitle" class="text-xl font-bold text-slate-950 dark:text-white">
+              <h2 id="feelingsTitle" class="font-serif text-xl font-semibold text-stone-950 dark:text-stone-50">
                 How do you feel right now?
               </h2>
-              <p class="mt-1 text-sm text-slate-700 dark:text-slate-300">
+              <p class="mt-1 text-sm text-stone-700 dark:text-stone-300">
                 Notice your stress and emotions before comparing options. This can help you make a calmer choice.
               </p>
             </div>
 
             <div class="grid gap-4 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
-              <label class="block rounded-2xl border border-slate-200 bg-slate-50/90 p-4 dark:border-slate-700 dark:bg-slate-950/80">
+              <label class="block rounded-2xl border border-stone-200 bg-stone-50/90 p-4 dark:border-stone-700 dark:bg-espresso/80">
                 <span class="mb-3 flex items-center justify-between gap-4">
-                  <span class="font-semibold text-slate-800 dark:text-slate-100">Current stress level</span>
+                  <span class="font-semibold text-stone-800 dark:text-stone-100">Current stress level</span>
                   <span
                     id="stressValue"
-                    class="rounded-full bg-white px-3 py-1 text-sm font-bold text-cyan-700 dark:bg-slate-800 dark:text-cyan-200"
+                    class="rounded-full bg-ivory px-3 py-1 text-sm font-bold text-amber-800 dark:bg-stone-800 dark:text-amber-200"
                     >5</span
                   >
                 </span>
                 <input id="stressLevel" type="range" min="1" max="10" value="5" class="w-full cursor-pointer" />
-                <span class="mt-2 flex justify-between text-xs font-semibold text-slate-500 dark:text-slate-400">
+                <span class="mt-2 flex justify-between text-xs font-semibold text-stone-500 dark:text-stone-400">
                   <span>Calm</span>
                   <span>Very stressed</span>
                 </span>
               </label>
 
               <label for="emotionInput" class="block">
-                <span class="mb-2 block text-sm font-semibold text-slate-700 dark:text-slate-200">
+                <span class="mb-2 block text-sm font-semibold text-stone-700 dark:text-stone-200">
                   Emotions about this decision
                 </span>
                 <textarea
                   id="emotionInput"
                   rows="4"
                   placeholder="For example: excited, nervous, pressured, hopeful..."
-                  class="w-full resize-y rounded-2xl border border-slate-200 bg-white px-4 py-3.5 text-base text-slate-950 outline-none transition placeholder:text-slate-500 focus:border-cyan-500 focus:ring-4 focus:ring-cyan-500/15 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:placeholder:text-slate-400"
+                  class="w-full resize-y rounded-2xl border border-stone-200 bg-ivory px-4 py-3.5 text-base text-stone-950 outline-none transition placeholder:text-stone-500 focus:border-amber-700 focus:ring-4 focus:ring-amber-700/15 dark:border-stone-700 dark:bg-espresso dark:text-white dark:placeholder:text-stone-400"
                 ></textarea>
               </label>
             </div>
 
             <div
               id="reflectionTip"
-              class="mt-5 rounded-2xl border border-cyan-100 bg-cyan-50/80 p-4 text-sm font-medium leading-6 text-cyan-950 dark:border-cyan-300/15 dark:bg-cyan-400/10 dark:text-cyan-50"
+              class="mt-5 rounded-2xl border border-amber-100 bg-amber-50/80 p-4 text-sm font-medium leading-6 text-amber-950 dark:border-amber-300/20 dark:bg-amber-400/10 dark:text-amber-50"
               role="status"
             ></div>
           </section>
 
           <div class="space-y-10">
             <section
-              class="glass-panel interactive-surface reveal rounded-[1.75rem] border border-white/80 bg-white/90 p-5 shadow-calm dark:border-slate-700/80 dark:bg-slate-900/90 sm:p-6"
+              class="glass-panel interactive-surface reveal rounded-[1.75rem] border border-stone-300/70 bg-ivory/90 p-5 shadow-calm dark:border-stone-600/70 dark:bg-cocoa/90 sm:p-6"
               aria-labelledby="decisionFormTitle"
             >
               <div class="mb-5 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div>
-                  <h2 id="decisionFormTitle" class="text-xl font-bold text-slate-950 dark:text-white">
+                  <h2 id="decisionFormTitle" class="font-serif text-xl font-semibold text-stone-950 dark:text-stone-50">
                     1. Frame the decision
                   </h2>
-                  <p class="mt-1 text-sm text-slate-700 dark:text-slate-300">
+                  <p class="mt-1 text-sm text-stone-700 dark:text-stone-300">
                     Keep the question specific and time-bound if you can.
                   </p>
                 </div>
                 <button
                   id="resetDecision"
                   type="button"
-                  class="inline-flex w-full items-center justify-center rounded-full px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-100 hover:text-slate-900 focus:outline-none focus:ring-4 focus:ring-slate-500/15 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white sm:w-auto"
+                  class="inline-flex w-full items-center justify-center rounded-full px-4 py-2.5 text-sm font-semibold text-stone-600 transition hover:bg-stone-100 hover:text-stone-900 focus:outline-none focus:ring-4 focus:ring-stone-500/15 dark:text-stone-300 dark:hover:bg-stone-800 dark:hover:text-white sm:w-auto"
                 >
                   Reset
                 </button>
               </div>
 
-              <label for="decisionQuestion" class="mb-2 block text-sm font-semibold text-slate-700 dark:text-slate-200">
+              <label for="decisionQuestion" class="mb-2 block text-sm font-semibold text-stone-700 dark:text-stone-200">
                 Decision question
               </label>
               <input
                 id="decisionQuestion"
                 type="text"
                 placeholder="Should I study abroad?"
-                class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3.5 text-base text-slate-950 outline-none transition placeholder:text-slate-500 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/15 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:placeholder:text-slate-400"
+                class="w-full rounded-2xl border border-stone-200 bg-ivory px-4 py-3.5 text-base text-stone-950 outline-none transition placeholder:text-stone-500 focus:border-orange-700 focus:ring-4 focus:ring-orange-700/15 dark:border-stone-700 dark:bg-espresso dark:text-white dark:placeholder:text-stone-400"
               />
 
-              <div class="mt-5 grid gap-3 rounded-2xl border border-slate-200 bg-slate-50/90 p-4 dark:border-slate-700 dark:bg-slate-950/80 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end">
+              <div class="mt-5 grid gap-3 rounded-2xl border border-stone-200 bg-stone-50/90 p-4 dark:border-stone-700 dark:bg-espresso/80 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end">
                 <label for="decisionDeadline" class="block">
-                  <span class="mb-2 block text-sm font-semibold text-slate-700 dark:text-slate-200">
+                  <span class="mb-2 block text-sm font-semibold text-stone-700 dark:text-stone-200">
                     Decision deadline
                   </span>
                   <input
                     id="decisionDeadline"
                     type="date"
-                    class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3.5 text-base text-slate-950 outline-none transition focus:border-teal-500 focus:ring-4 focus:ring-teal-500/15 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
+                    class="w-full rounded-2xl border border-stone-200 bg-ivory px-4 py-3.5 text-base text-stone-950 outline-none transition focus:border-orange-700 focus:ring-4 focus:ring-orange-700/15 dark:border-stone-700 dark:bg-espresso dark:text-white"
                   />
                 </label>
                 <div
@@ -268,7 +312,7 @@
                 ></div>
               </div>
 
-              <div class="mt-6 rounded-2xl border border-teal-100 bg-teal-50/80 p-4 text-sm text-teal-950 dark:border-teal-300/15 dark:bg-teal-400/10 dark:text-teal-50">
+              <div class="mt-6 rounded-2xl border border-orange-100 bg-orange-50/80 p-4 text-sm text-orange-950 dark:border-orange-300/20 dark:bg-orange-400/10 dark:text-orange-50">
                 <h3 class="font-bold">How to use it</h3>
                 <ol class="mt-2 list-decimal space-y-1 pl-5">
                   <li>Write one clear decision question.</li>
@@ -279,7 +323,7 @@
               </div>
 
               <form id="addOptionForm" class="mt-6">
-                <label for="optionName" class="mb-2 block text-sm font-semibold text-slate-700 dark:text-slate-200">
+                <label for="optionName" class="mb-2 block text-sm font-semibold text-stone-700 dark:text-stone-200">
                   Add an option
                 </label>
                 <div class="flex flex-col gap-3 sm:flex-row">
@@ -287,11 +331,11 @@
                     id="optionName"
                     type="text"
                     placeholder="Go to UK"
-                    class="min-w-0 flex-1 rounded-2xl border border-slate-200 bg-white px-4 py-3.5 text-base text-slate-950 outline-none transition placeholder:text-slate-500 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/15 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:placeholder:text-slate-400"
+                    class="min-w-0 flex-1 rounded-2xl border border-stone-200 bg-ivory px-4 py-3.5 text-base text-stone-950 outline-none transition placeholder:text-stone-500 focus:border-orange-700 focus:ring-4 focus:ring-orange-700/15 dark:border-stone-700 dark:bg-espresso dark:text-white dark:placeholder:text-stone-400"
                   />
                   <button
                     type="submit"
-                    class="inline-flex w-full items-center justify-center rounded-2xl bg-teal-700 px-5 py-3.5 font-bold text-white shadow-lg shadow-teal-700/20 transition hover:-translate-y-0.5 hover:bg-teal-800 focus:outline-none focus:ring-4 focus:ring-teal-500/30 sm:w-auto dark:bg-teal-500 dark:text-slate-950 dark:hover:bg-teal-400"
+                    class="inline-flex w-full items-center justify-center rounded-2xl bg-orange-800 px-5 py-3.5 font-bold text-white shadow-lg shadow-orange-900/20 transition hover:-translate-y-0.5 hover:bg-orange-900 focus:outline-none focus:ring-4 focus:ring-orange-700/25 sm:w-auto dark:bg-amber-600 dark:text-stone-950 dark:hover:bg-amber-500"
                   >
                     Add option
                   </button>
@@ -300,14 +344,14 @@
             </section>
 
             <section
-              class="glass-panel interactive-surface reveal rounded-[1.75rem] border border-white/80 bg-white/90 p-5 shadow-calm dark:border-slate-700/80 dark:bg-slate-900/90 sm:p-6"
+              class="glass-panel interactive-surface reveal rounded-[1.75rem] border border-stone-300/70 bg-ivory/90 p-5 shadow-calm dark:border-stone-600/70 dark:bg-cocoa/90 sm:p-6"
               aria-labelledby="factorsTitle"
             >
               <div class="mb-5">
-                <h2 id="factorsTitle" class="text-xl font-bold text-slate-950 dark:text-white">
+                <h2 id="factorsTitle" class="font-serif text-xl font-semibold text-stone-950 dark:text-stone-50">
                   2. Score key factors
                 </h2>
-                <p class="mt-1 text-sm text-slate-700 dark:text-slate-300">
+                <p class="mt-1 text-sm text-stone-700 dark:text-stone-300">
                   Adjust factor names and importance weights to match your decision.
                 </p>
               </div>
@@ -317,11 +361,11 @@
                   id="factorName"
                   type="text"
                   placeholder="Add a factor, e.g. Career growth"
-                  class="min-w-0 flex-1 rounded-2xl border border-slate-200 bg-white px-4 py-3.5 text-base text-slate-950 outline-none transition placeholder:text-slate-500 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/15 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:placeholder:text-slate-400"
+                  class="min-w-0 flex-1 rounded-2xl border border-stone-200 bg-ivory px-4 py-3.5 text-base text-stone-950 outline-none transition placeholder:text-stone-500 focus:border-orange-700 focus:ring-4 focus:ring-orange-700/15 dark:border-stone-700 dark:bg-espresso dark:text-white dark:placeholder:text-stone-400"
                 />
                 <button
                   type="submit"
-                  class="inline-flex w-full items-center justify-center rounded-2xl border border-teal-200 bg-teal-50 px-5 py-3.5 font-bold text-teal-900 transition hover:-translate-y-0.5 hover:bg-teal-100 focus:outline-none focus:ring-4 focus:ring-teal-500/20 sm:w-auto dark:border-teal-300/30 dark:bg-teal-400/10 dark:text-teal-50 dark:hover:bg-teal-400/20"
+                  class="inline-flex w-full items-center justify-center rounded-2xl border border-orange-200 bg-orange-50 px-5 py-3.5 font-bold text-orange-950 transition hover:-translate-y-0.5 hover:bg-orange-100 focus:outline-none focus:ring-4 focus:ring-orange-700/20 sm:w-auto dark:border-orange-300/25 dark:bg-orange-400/10 dark:text-orange-50 dark:hover:bg-orange-400/20"
                 >
                   Add factor
                 </button>
@@ -332,43 +376,43 @@
           <section class="reveal space-y-4" aria-labelledby="optionsTitle">
             <div class="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
               <div>
-                <h2 id="optionsTitle" class="text-2xl font-bold tracking-tight text-slate-950 dark:text-white">
+                <h2 id="optionsTitle" class="font-serif text-2xl font-semibold tracking-tight text-stone-950 dark:text-stone-50">
                   3. Compare options
                 </h2>
-                <p class="text-sm text-slate-700 dark:text-slate-300">
+                <p class="text-sm text-stone-700 dark:text-stone-300">
                   Pros and cons help you qualify the numbers; scores help you compare consistently.
                 </p>
               </div>
-              <p id="saveStatus" class="text-sm font-semibold text-teal-700 dark:text-teal-200" role="status"></p>
+              <p id="saveStatus" class="text-sm font-semibold text-orange-800 dark:text-amber-200" role="status"></p>
             </div>
             <div id="optionsList" class="grid gap-4"></div>
           </section>
 
           <section
-            class="glass-panel interactive-surface reveal rounded-[1.75rem] border border-white/80 bg-white/90 p-5 shadow-calm dark:border-slate-700/80 dark:bg-slate-900/90 sm:p-6"
+            class="glass-panel interactive-surface reveal rounded-[1.75rem] border border-stone-300/70 bg-ivory/90 p-5 shadow-calm dark:border-stone-600/70 dark:bg-cocoa/90 sm:p-6"
             aria-labelledby="mungerTitle"
           >
             <div class="mb-4">
-              <p class="mb-2 inline-flex rounded-full bg-slate-100 px-3 py-1 text-sm font-semibold text-slate-700 ring-1 ring-slate-200 dark:bg-slate-800 dark:text-slate-200 dark:ring-slate-700">
+              <p class="mb-2 inline-flex rounded-full bg-stone-100 px-3 py-1 text-sm font-semibold text-stone-700 ring-1 ring-stone-200 dark:bg-stone-800 dark:text-stone-200 dark:ring-stone-700">
                 Bias awareness check
               </p>
-              <h2 id="mungerTitle" class="text-xl font-bold text-slate-950 dark:text-white">
+              <h2 id="mungerTitle" class="font-serif text-xl font-semibold text-stone-950 dark:text-stone-50">
                 Charlie Munger's the Psychology of Human Misjudgment
               </h2>
-              <p class="mt-3 text-base italic leading-7 text-slate-700 dark:text-slate-200">
+              <p class="mt-3 text-base italic leading-7 text-stone-700 dark:text-stone-200">
                 "Reality talks to only who listen"
               </p>
-              <p class="mt-2 text-sm text-slate-700 dark:text-slate-300">
+              <p class="mt-2 text-sm text-stone-700 dark:text-stone-300">
                 After comparing your options, review this checklist and mark any tendencies that may be distorting your judgment.
               </p>
             </div>
 
             <details
               id="mungerChecklistDetails"
-              class="rounded-2xl border border-slate-200 bg-slate-50/90 p-4 dark:border-slate-700 dark:bg-slate-950/80"
+              class="rounded-2xl border border-stone-200 bg-stone-50/90 p-4 dark:border-stone-700 dark:bg-espresso/80"
             >
               <summary
-                class="cursor-pointer select-none text-sm font-bold text-slate-800 transition hover:text-teal-700 dark:text-slate-100 dark:hover:text-teal-200"
+                class="cursor-pointer select-none text-sm font-bold text-stone-800 transition hover:text-orange-800 dark:text-stone-100 dark:hover:text-amber-200"
               >
                 Show tendency checklist
               </summary>
@@ -379,28 +423,28 @@
 
         <aside class="space-y-6 lg:sticky lg:top-6 lg:self-start">
           <section
-            class="glass-panel interactive-surface reveal rounded-[2rem] border border-white/80 bg-white/95 p-5 shadow-soft dark:border-slate-700/80 dark:bg-slate-900/90 sm:p-6"
+            class="glass-panel interactive-surface reveal rounded-[2rem] border border-stone-300/70 bg-ivory/95 p-5 shadow-soft dark:border-stone-600/70 dark:bg-cocoa/90 sm:p-6"
             aria-labelledby="recommendationTitle"
           >
-            <h2 id="recommendationTitle" class="text-xl font-bold text-slate-950 dark:text-white">
+            <h2 id="recommendationTitle" class="font-serif text-xl font-semibold text-stone-950 dark:text-stone-50">
               Recommendation
             </h2>
             <div id="recommendation" class="mt-5"></div>
           </section>
 
           <section
-            class="glass-panel interactive-surface reveal rounded-[1.75rem] border border-white/80 bg-white/90 p-5 shadow-calm dark:border-slate-700/80 dark:bg-slate-900/90"
+            class="glass-panel interactive-surface reveal rounded-[1.75rem] border border-stone-300/70 bg-ivory/90 p-5 shadow-calm dark:border-stone-600/70 dark:bg-cocoa/90"
             aria-labelledby="savedTitle"
           >
             <div class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <h2 id="savedTitle" class="text-lg font-bold text-slate-950 dark:text-white">Saved decisions</h2>
-                <p class="text-sm text-slate-700 dark:text-slate-300">Stored locally on this device.</p>
+                <h2 id="savedTitle" class="font-serif text-lg font-semibold text-stone-950 dark:text-stone-50">Saved decisions</h2>
+                <p class="text-sm text-stone-700 dark:text-stone-300">Stored locally on this device.</p>
               </div>
               <button
                 id="saveSnapshot"
                 type="button"
-                class="inline-flex w-full items-center justify-center rounded-full bg-slate-950 px-5 py-3 text-sm font-bold text-white transition hover:-translate-y-0.5 hover:bg-slate-800 focus:outline-none focus:ring-4 focus:ring-slate-500/20 sm:w-auto dark:bg-white dark:text-slate-950 dark:hover:bg-slate-200"
+                class="inline-flex w-full items-center justify-center rounded-full bg-orange-950 px-5 py-3 text-sm font-bold text-orange-50 transition hover:-translate-y-0.5 hover:bg-orange-900 focus:outline-none focus:ring-4 focus:ring-orange-700/20 sm:w-auto dark:bg-amber-200 dark:text-stone-950 dark:hover:bg-amber-100"
               >
                 Save
               </button>
@@ -413,15 +457,15 @@
 
     <template id="optionTemplate">
       <article
-        class="glass-panel interactive-surface reveal rounded-[1.75rem] border border-white/80 bg-white/95 p-5 shadow-calm dark:border-slate-700/80 dark:bg-slate-900/90 sm:p-6"
+        class="glass-panel interactive-surface reveal rounded-[1.75rem] border border-stone-300/70 bg-ivory/95 p-5 shadow-calm dark:border-stone-600/70 dark:bg-cocoa/90 sm:p-6"
       >
         <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div class="min-w-0">
             <input
               type="text"
-              class="option-title w-full rounded-xl border border-transparent bg-transparent px-0 py-1 text-2xl font-bold tracking-tight text-slate-950 outline-none transition focus:border-teal-400 focus:bg-white focus:px-3 focus:ring-4 focus:ring-teal-500/15 dark:text-white dark:focus:bg-slate-950"
+              class="option-title w-full rounded-xl border border-transparent bg-transparent px-0 py-1 font-serif text-2xl font-semibold tracking-tight text-stone-950 outline-none transition focus:border-orange-600 focus:bg-ivory focus:px-3 focus:ring-4 focus:ring-orange-700/15 dark:text-stone-50 dark:focus:bg-espresso"
             />
-            <p class="score-summary mt-1 text-sm font-semibold text-slate-600 dark:text-slate-300"></p>
+            <p class="score-summary mt-1 text-sm font-semibold text-stone-600 dark:text-stone-300"></p>
           </div>
           <button
             type="button"
@@ -432,42 +476,42 @@
         </div>
 
         <div class="mt-5 grid gap-4 md:grid-cols-2">
-          <div class="rounded-2xl border border-emerald-100 bg-emerald-50/80 p-4 dark:border-emerald-300/15 dark:bg-emerald-400/10">
-            <h3 class="font-bold text-emerald-950 dark:text-emerald-50">Pros</h3>
+          <div class="rounded-2xl border border-stone-300/80 bg-stone-100/80 p-4 dark:border-amber-300/15 dark:bg-stone-800/70">
+            <h3 class="font-bold text-stone-900 dark:text-stone-100">Pros</h3>
             <ul class="pros-list mt-3 space-y-2"></ul>
             <form class="add-item-form mt-3 flex flex-col gap-2 sm:flex-row" data-type="pros">
               <input
                 type="text"
                 placeholder="Add a positive point"
-                class="min-w-0 flex-1 rounded-xl border border-emerald-100 bg-white px-3 py-2.5 text-sm text-slate-950 outline-none transition placeholder:text-slate-500 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/15 dark:border-emerald-400/20 dark:bg-slate-950 dark:text-white dark:placeholder:text-slate-400"
+                class="min-w-0 flex-1 rounded-xl border border-stone-300 bg-ivory px-3 py-2.5 text-sm text-stone-950 outline-none transition placeholder:text-stone-500 focus:border-stone-500 focus:ring-4 focus:ring-stone-500/15 dark:border-stone-600 dark:bg-espresso dark:text-white dark:placeholder:text-stone-400"
               />
-              <button type="submit" class="inline-flex items-center justify-center rounded-xl bg-emerald-700 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-emerald-800 focus:outline-none focus:ring-4 focus:ring-emerald-500/20 dark:bg-emerald-400 dark:text-slate-950 dark:hover:bg-emerald-300">Add</button>
+              <button type="submit" class="inline-flex items-center justify-center rounded-xl bg-stone-700 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-stone-800 focus:outline-none focus:ring-4 focus:ring-stone-500/20 dark:bg-stone-300 dark:text-stone-950 dark:hover:bg-stone-200">Add</button>
             </form>
           </div>
-          <div class="rounded-2xl border border-amber-100 bg-amber-50/90 p-4 dark:border-amber-300/15 dark:bg-amber-400/10">
-            <h3 class="font-bold text-amber-950 dark:text-amber-50">Cons</h3>
+          <div class="rounded-2xl border border-orange-100 bg-orange-50/70 p-4 dark:border-orange-300/15 dark:bg-orange-400/10">
+            <h3 class="font-bold text-orange-950 dark:text-orange-50">Cons</h3>
             <ul class="cons-list mt-3 space-y-2"></ul>
             <form class="add-item-form mt-3 flex flex-col gap-2 sm:flex-row" data-type="cons">
               <input
                 type="text"
                 placeholder="Add a concern"
-                class="min-w-0 flex-1 rounded-xl border border-amber-100 bg-white px-3 py-2.5 text-sm text-slate-950 outline-none transition placeholder:text-slate-500 focus:border-amber-500 focus:ring-4 focus:ring-amber-500/15 dark:border-amber-400/20 dark:bg-slate-950 dark:text-white dark:placeholder:text-slate-400"
+                class="min-w-0 flex-1 rounded-xl border border-amber-100 bg-ivory px-3 py-2.5 text-sm text-stone-950 outline-none transition placeholder:text-stone-500 focus:border-orange-600 focus:ring-4 focus:ring-orange-700/15 dark:border-orange-400/20 dark:bg-espresso dark:text-white dark:placeholder:text-stone-400"
               />
-              <button type="submit" class="inline-flex items-center justify-center rounded-xl bg-amber-700 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-amber-800 focus:outline-none focus:ring-4 focus:ring-amber-500/20 dark:bg-amber-300 dark:text-slate-950 dark:hover:bg-amber-200">Add</button>
+              <button type="submit" class="inline-flex items-center justify-center rounded-xl bg-orange-800 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-orange-900 focus:outline-none focus:ring-4 focus:ring-orange-700/20 dark:bg-amber-300 dark:text-stone-950 dark:hover:bg-amber-200">Add</button>
             </form>
           </div>
         </div>
 
-        <details class="option-evidence-details mt-5 rounded-2xl border border-slate-200 bg-slate-50/90 p-4 dark:border-slate-700 dark:bg-slate-950/80">
-          <summary class="cursor-pointer select-none text-sm font-bold text-slate-800 transition hover:text-teal-700 dark:text-slate-100 dark:hover:text-teal-200">
+        <details class="option-evidence-details mt-5 rounded-2xl border border-stone-200 bg-stone-50/90 p-4 dark:border-stone-700 dark:bg-espresso/80">
+          <summary class="cursor-pointer select-none text-sm font-bold text-stone-800 transition hover:text-orange-800 dark:text-stone-100 dark:hover:text-amber-200">
             Evidence / notes for this option
           </summary>
           <label class="mt-4 block">
-            <span class="mb-2 block text-sm font-semibold text-slate-700 dark:text-slate-200">
+            <span class="mb-2 block text-sm font-semibold text-stone-700 dark:text-stone-200">
               Links, notes, or supporting material
             </span>
             <textarea
-              class="option-evidence min-h-28 w-full resize-y rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-950 outline-none transition placeholder:text-slate-500 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/15 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:placeholder:text-slate-400"
+              class="option-evidence min-h-28 w-full resize-y rounded-2xl border border-stone-200 bg-ivory px-4 py-3 text-sm text-stone-950 outline-none transition placeholder:text-stone-500 focus:border-orange-700 focus:ring-4 focus:ring-orange-700/15 dark:border-stone-700 dark:bg-espresso dark:text-white dark:placeholder:text-stone-400"
               placeholder="Paste links, research notes, quotes, reminders, or source material for this option..."
             ></textarea>
           </label>
@@ -789,13 +833,13 @@
         MUNGER_TENDENCIES.forEach((tendency) => {
           const label = document.createElement("label");
           label.className =
-            "flex cursor-pointer items-start gap-3 rounded-xl border border-transparent px-2 py-3 transition hover:border-slate-200 hover:bg-white dark:hover:border-slate-700 dark:hover:bg-slate-900";
+            "flex cursor-pointer items-start gap-3 rounded-xl border border-transparent px-2 py-3 transition hover:border-stone-200 hover:bg-ivory dark:hover:border-stone-700 dark:hover:bg-stone-900";
 
           const checkbox = document.createElement("input");
           checkbox.type = "checkbox";
           checkbox.checked = Boolean(state.mungerTendencies[tendency]);
           checkbox.className =
-            "mt-1 h-5 w-5 shrink-0 rounded border-slate-300 text-teal-700 focus:ring-teal-500/30 dark:border-slate-600 dark:bg-slate-950";
+            "mt-1 h-5 w-5 shrink-0 rounded border-stone-300 text-orange-800 focus:ring-orange-700/25 dark:border-stone-600 dark:bg-espresso";
           checkbox.ariaLabel = tendency;
           checkbox.addEventListener("change", () => {
             state.mungerTendencies[tendency] = checkbox.checked;
@@ -804,7 +848,7 @@
           });
 
           const text = document.createElement("span");
-          text.className = "text-sm font-medium leading-6 text-slate-800 dark:text-slate-100";
+          text.className = "text-sm font-medium leading-6 text-stone-800 dark:text-stone-100";
           text.textContent = tendency;
 
           label.append(checkbox, text);
@@ -842,27 +886,27 @@
         state.factors.forEach((factor, index) => {
           const row = document.createElement("div");
           row.className =
-            "grid gap-3 rounded-2xl border border-slate-200 bg-white p-3 shadow-sm dark:border-slate-700 dark:bg-slate-950 md:grid-cols-[minmax(0,1fr)_auto] md:items-center";
+            "grid gap-3 rounded-2xl border border-stone-200 bg-ivory p-3 shadow-sm dark:border-stone-700 dark:bg-espresso md:grid-cols-[minmax(0,1fr)_auto] md:items-center";
 
           const input = document.createElement("input");
           input.type = "text";
           input.value = factor.name;
           input.className =
-            "w-full min-w-0 rounded-xl bg-transparent px-2 text-sm font-semibold text-slate-900 outline-none focus:bg-slate-50 focus:ring-4 focus:ring-teal-500/10 dark:text-slate-50 dark:focus:bg-slate-900 md:col-span-2";
+            "w-full min-w-0 rounded-xl bg-transparent px-2 text-sm font-semibold text-stone-900 outline-none focus:bg-stone-50 focus:ring-4 focus:ring-orange-700/10 dark:text-stone-50 dark:focus:bg-cocoa md:col-span-2";
           input.ariaLabel = `Factor ${index + 1}`;
           input.addEventListener("change", () => renameFactor(index, input.value.trim()));
 
           const weightWrapper = document.createElement("label");
-          weightWrapper.className = "block rounded-xl bg-slate-50 px-3 py-2 dark:bg-slate-900";
+          weightWrapper.className = "block rounded-xl bg-stone-50 px-3 py-2 dark:bg-stone-900";
 
           const weightHeader = document.createElement("span");
-          weightHeader.className = "mb-1 flex items-center justify-between gap-3 text-xs font-bold text-slate-600 dark:text-slate-300";
+          weightHeader.className = "mb-1 flex items-center justify-between gap-3 text-xs font-bold text-stone-600 dark:text-stone-300";
 
           const weightLabel = document.createElement("span");
           weightLabel.textContent = "Importance";
 
           const weightValue = document.createElement("span");
-          weightValue.className = "rounded-full bg-white px-2 py-0.5 text-teal-700 dark:bg-slate-800 dark:text-teal-200";
+          weightValue.className = "rounded-full bg-ivory px-2 py-0.5 text-orange-800 dark:bg-stone-800 dark:text-amber-200";
           weightValue.textContent = factor.weight;
 
           const weightRange = document.createElement("input");
@@ -887,7 +931,7 @@
           button.type = "button";
           button.textContent = "Remove";
           button.className =
-            "inline-flex w-full items-center justify-center rounded-full px-3 py-2 text-xs font-bold text-slate-600 transition hover:bg-slate-100 hover:text-rose-700 focus:outline-none focus:ring-4 focus:ring-rose-500/15 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-rose-200 md:w-auto";
+            "inline-flex w-full items-center justify-center rounded-full px-3 py-2 text-xs font-bold text-stone-600 transition hover:bg-stone-100 hover:text-rose-700 focus:outline-none focus:ring-4 focus:ring-rose-500/15 dark:text-stone-300 dark:hover:bg-stone-800 dark:hover:text-rose-200 md:w-auto";
           button.addEventListener("click", () => removeFactor(index));
           button.disabled = state.factors.length === 1;
           if (button.disabled) {
@@ -927,7 +971,7 @@
         if (!state.options.length) {
           const emptyState = document.createElement("div");
           emptyState.className =
-            "reveal rounded-[1.75rem] border border-dashed border-slate-300 bg-white/80 p-8 text-center font-medium text-slate-700 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-300";
+            "reveal rounded-[1.75rem] border border-dashed border-stone-300 bg-ivory/80 p-8 text-center font-medium text-stone-700 dark:border-stone-700 dark:bg-stone-900/70 dark:text-stone-300";
           emptyState.textContent = "Add an option to start comparing your choices.";
           elements.optionsList.append(emptyState);
           return;
@@ -988,7 +1032,7 @@
 
         if (!items.length) {
           const empty = document.createElement("li");
-          empty.className = "text-sm font-medium text-slate-600 dark:text-slate-300";
+          empty.className = "text-sm font-medium text-stone-600 dark:text-stone-300";
           empty.textContent = type === "pros" ? "No pros yet." : "No cons yet.";
           list.append(empty);
           return;
@@ -997,7 +1041,7 @@
         items.forEach((item, index) => {
           const row = document.createElement("li");
           row.className =
-            "rounded-xl bg-white/90 px-3 py-2.5 text-sm font-medium text-slate-800 shadow-sm dark:bg-slate-950/80 dark:text-slate-100";
+            "rounded-xl bg-ivory/90 px-3 py-2.5 text-sm font-medium text-stone-800 shadow-sm dark:bg-espresso/80 dark:text-stone-100";
 
           const itemHeader = document.createElement("div");
           itemHeader.className = "flex items-start justify-between gap-3";
@@ -1008,7 +1052,7 @@
           text.placeholder = type === "pros" ? "Edit this pro" : "Edit this con";
           text.ariaLabel = `Edit ${type === "pros" ? "pro" : "con"}: ${item.text}`;
           text.className =
-            "min-h-8 min-w-0 flex-1 rounded-lg bg-transparent px-2 py-1 text-sm font-medium text-slate-800 outline-none transition placeholder:text-slate-400 focus:bg-white focus:ring-4 focus:ring-teal-500/10 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:bg-slate-900";
+            "min-h-8 min-w-0 flex-1 rounded-lg bg-transparent px-2 py-1 text-sm font-medium text-stone-800 outline-none transition placeholder:text-stone-400 focus:bg-ivory focus:ring-4 focus:ring-orange-700/10 dark:text-stone-100 dark:placeholder:text-stone-500 dark:focus:bg-cocoa";
           text.addEventListener("input", () => {
             option[type][index].text = text.value;
             button.ariaLabel = `Remove ${text.value || type.slice(0, -1)}`;
@@ -1030,7 +1074,7 @@
           button.type = "button";
           button.textContent = "×";
           button.ariaLabel = `Remove ${item.text}`;
-          button.className = "grid min-h-8 min-w-8 place-items-center rounded-full text-lg font-bold leading-none text-slate-500 transition hover:bg-rose-50 hover:text-rose-700 focus:outline-none focus:ring-4 focus:ring-rose-500/15 dark:text-slate-300 dark:hover:bg-rose-400/10 dark:hover:text-rose-200";
+          button.className = "grid min-h-8 min-w-8 place-items-center rounded-full text-lg font-bold leading-none text-stone-500 transition hover:bg-rose-50 hover:text-rose-700 focus:outline-none focus:ring-4 focus:ring-rose-500/15 dark:text-stone-300 dark:hover:bg-rose-400/10 dark:hover:text-rose-200";
           button.addEventListener("click", () => {
             option[type].splice(index, 1);
             persistAndRender();
@@ -1038,11 +1082,11 @@
 
           const evidenceDetails = document.createElement("details");
           evidenceDetails.className =
-            "mt-2 rounded-xl border border-slate-200 bg-slate-50/90 px-3 py-2 dark:border-slate-700 dark:bg-slate-900";
+            "mt-2 rounded-xl border border-stone-200 bg-stone-50/90 px-3 py-2 dark:border-stone-700 dark:bg-stone-900";
 
           const summary = document.createElement("summary");
           summary.className =
-            "cursor-pointer select-none text-xs font-bold text-slate-600 transition hover:text-teal-700 dark:text-slate-300 dark:hover:text-teal-200";
+            "cursor-pointer select-none text-xs font-bold text-stone-600 transition hover:text-orange-800 dark:text-stone-300 dark:hover:text-amber-200";
           summary.textContent = "Evidence / notes";
 
           const evidence = document.createElement("textarea");
@@ -1051,7 +1095,7 @@
           evidence.placeholder = "Add links, notes, source details, or supporting material...";
           evidence.ariaLabel = `Evidence or notes for ${item.text || type.slice(0, -1)}`;
           evidence.className =
-            "mt-3 w-full resize-y rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-950 outline-none transition placeholder:text-slate-500 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/15 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:placeholder:text-slate-400";
+            "mt-3 w-full resize-y rounded-xl border border-stone-200 bg-ivory px-3 py-2 text-sm text-stone-950 outline-none transition placeholder:text-stone-500 focus:border-orange-700 focus:ring-4 focus:ring-orange-700/15 dark:border-stone-700 dark:bg-espresso dark:text-white dark:placeholder:text-stone-400";
           evidence.addEventListener("input", () => {
             option[type][index].evidence = evidence.value;
             persistCurrentState();
@@ -1073,17 +1117,17 @@
 
           const wrapper = document.createElement("label");
           wrapper.className =
-            "block rounded-2xl border border-slate-200 bg-slate-50/90 p-4 shadow-sm transition hover:border-teal-200 dark:border-slate-700 dark:bg-slate-950/80 dark:hover:border-teal-300/30";
+            "block rounded-2xl border border-stone-200 bg-stone-50/90 p-4 shadow-sm transition hover:border-orange-200 dark:border-stone-700 dark:bg-espresso/80 dark:hover:border-orange-300/25";
 
           const header = document.createElement("span");
           header.className = "mb-3 flex items-center justify-between gap-4";
 
           const name = document.createElement("span");
-          name.className = "font-semibold text-slate-800 dark:text-slate-100";
+          name.className = "font-semibold text-stone-800 dark:text-stone-100";
           name.textContent = factor.name;
 
           const value = document.createElement("span");
-          value.className = "rounded-full bg-white px-3 py-1 text-sm font-bold text-teal-700 dark:bg-slate-800 dark:text-teal-200";
+          value.className = "rounded-full bg-ivory px-3 py-1 text-sm font-bold text-orange-800 dark:bg-stone-800 dark:text-amber-200";
           value.textContent = `${score} × ${factor.weight}`;
 
           const range = document.createElement("input");
@@ -1121,17 +1165,17 @@
         const winner = rankedOptions[0];
         const card = document.createElement("div");
         card.className =
-          "reveal rounded-3xl bg-gradient-to-br from-teal-700 to-cyan-700 p-5 text-white shadow-lg shadow-teal-700/20 dark:from-teal-500 dark:to-cyan-500 dark:text-slate-950";
+          "recommendation-card reveal rounded-3xl p-5 text-orange-50";
         card.innerHTML = `
-          <p class="text-sm font-semibold uppercase tracking-[0.24em] text-teal-50 dark:text-teal-950">Best recommendation</p>
-          <h3 class="mt-3 text-3xl font-extrabold">${escapeHtml(winner.option.name || "Untitled option")}</h3>
-          <p class="mt-3 text-teal-50 dark:text-slate-900">
+          <p class="text-sm font-semibold uppercase tracking-[0.24em] text-orange-100/90">Best recommendation</p>
+          <h3 class="mt-3 font-serif text-3xl font-semibold">${escapeHtml(winner.option.name || "Untitled option")}</h3>
+          <p class="mt-3 text-orange-50">
             Weighted score: <strong>${winner.score.normalized.toFixed(1)} / 10</strong>
           </p>
-          <p class="mt-1 text-sm font-semibold text-teal-50 dark:text-slate-900">
+          <p class="mt-1 text-sm font-semibold text-orange-50">
             ${winner.score.weightedTotal.toFixed(0)} of ${winner.score.maxTotal.toFixed(0)} weighted points
           </p>
-          <p class="mt-4 text-sm leading-6 text-teal-50 dark:text-slate-900">
+          <p class="mt-4 text-sm leading-6 text-orange-50/95">
             This option has the highest weighted total after multiplying each factor score by its importance.
           </p>
         `;
@@ -1142,16 +1186,16 @@
           const item = document.createElement("li");
           item.className =
             index === 0
-              ? "flex items-center justify-between gap-3 rounded-2xl border border-teal-200 bg-teal-50 px-4 py-3 text-sm shadow-sm dark:border-teal-300/30 dark:bg-teal-400/10"
-              : "flex items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm shadow-sm dark:border-slate-700 dark:bg-slate-950/80";
+              ? "flex items-center justify-between gap-3 rounded-2xl border border-orange-200 bg-orange-50 px-4 py-3 text-sm shadow-sm dark:border-orange-300/25 dark:bg-orange-400/10"
+              : "flex items-center justify-between gap-3 rounded-2xl border border-stone-200 bg-stone-50 px-4 py-3 text-sm shadow-sm dark:border-stone-700 dark:bg-espresso/80";
           item.innerHTML = `
-            <span class="font-semibold text-slate-800 dark:text-slate-100">
+            <span class="font-semibold text-stone-800 dark:text-stone-100">
               ${index + 1}. ${escapeHtml(option.name || "Untitled option")}
-              ${index === 0 ? '<span class="ml-2 rounded-full bg-teal-700 px-2 py-0.5 text-xs text-white dark:bg-teal-300 dark:text-slate-950">Best</span>' : ""}
+              ${index === 0 ? '<span class="ml-2 rounded-full bg-orange-800 px-2 py-0.5 text-xs text-white dark:bg-amber-300 dark:text-stone-950">Best</span>' : ""}
             </span>
-            <span class="text-right font-bold text-teal-700 dark:text-teal-200">
+            <span class="text-right font-bold text-orange-800 dark:text-amber-200">
               ${score.normalized.toFixed(1)} / 10
-              <span class="block text-xs text-slate-600 dark:text-slate-300">${score.weightedTotal.toFixed(0)} pts</span>
+              <span class="block text-xs text-stone-600 dark:text-stone-300">${score.weightedTotal.toFixed(0)} pts</span>
             </span>
           `;
           list.append(item);
@@ -1171,12 +1215,12 @@
         savedDecisions.forEach((decision, index) => {
           const row = document.createElement("div");
           row.className =
-            "reveal rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:border-teal-200 dark:border-slate-700 dark:bg-slate-950 dark:hover:border-teal-300/30";
+            "reveal rounded-2xl border border-stone-200 bg-ivory p-4 shadow-sm transition hover:border-orange-200 dark:border-stone-700 dark:bg-espresso dark:hover:border-orange-300/25";
 
           const savedDate = decision.savedAt ? new Date(decision.savedAt).toLocaleString() : "Saved decision";
           row.innerHTML = `
-            <p class="font-bold text-slate-950 dark:text-white">${escapeHtml(decision.title || "Untitled decision")}</p>
-            <p class="mt-1 text-xs font-medium text-slate-600 dark:text-slate-300">${escapeHtml(savedDate)}</p>
+            <p class="font-bold text-stone-950 dark:text-white">${escapeHtml(decision.title || "Untitled decision")}</p>
+            <p class="mt-1 text-xs font-medium text-stone-600 dark:text-stone-300">${escapeHtml(savedDate)}</p>
           `;
 
           const actions = document.createElement("div");
@@ -1186,7 +1230,7 @@
           loadButton.type = "button";
           loadButton.textContent = "Load";
           loadButton.className =
-            "inline-flex flex-1 items-center justify-center rounded-full bg-teal-50 px-3 py-2.5 text-xs font-bold text-teal-900 transition hover:bg-teal-100 focus:outline-none focus:ring-4 focus:ring-teal-500/15 dark:bg-teal-400/10 dark:text-teal-50 dark:hover:bg-teal-400/20";
+            "inline-flex flex-1 items-center justify-center rounded-full bg-orange-50 px-3 py-2.5 text-xs font-bold text-orange-950 transition hover:bg-orange-100 focus:outline-none focus:ring-4 focus:ring-orange-700/15 dark:bg-orange-400/10 dark:text-orange-50 dark:hover:bg-orange-400/20";
           loadButton.addEventListener("click", () => {
             state = normalizeState(decision);
             persistAndRender("Saved decision loaded");
@@ -1196,7 +1240,7 @@
           deleteButton.type = "button";
           deleteButton.textContent = "Delete";
           deleteButton.className =
-            "inline-flex flex-1 items-center justify-center rounded-full px-3 py-2.5 text-xs font-bold text-slate-600 transition hover:bg-rose-50 hover:text-rose-700 focus:outline-none focus:ring-4 focus:ring-rose-500/15 dark:text-slate-300 dark:hover:bg-rose-400/10 dark:hover:text-rose-200";
+            "inline-flex flex-1 items-center justify-center rounded-full px-3 py-2.5 text-xs font-bold text-stone-600 transition hover:bg-rose-50 hover:text-rose-700 focus:outline-none focus:ring-4 focus:ring-rose-500/15 dark:text-stone-300 dark:hover:bg-rose-400/10 dark:hover:text-rose-200";
           deleteButton.addEventListener("click", () => {
             savedDecisions.splice(index, 1);
             localStorage.setItem(SAVED_KEY, JSON.stringify(savedDecisions));
@@ -1212,7 +1256,7 @@
       function createMessageCard(message) {
         const card = document.createElement("p");
         card.className =
-          "rounded-2xl border border-dashed border-slate-300 bg-slate-50/90 p-4 text-sm font-medium text-slate-700 dark:border-slate-700 dark:bg-slate-950/70 dark:text-slate-300";
+          "rounded-2xl border border-dashed border-stone-300 bg-stone-50/90 p-4 text-sm font-medium text-stone-700 dark:border-stone-700 dark:bg-espresso/70 dark:text-stone-300";
         card.textContent = message;
         return card;
       }
@@ -1260,7 +1304,7 @@
         const baseClass =
           "rounded-2xl border px-4 py-3 text-sm font-bold transition-colors";
         const emptyClass =
-          `${baseClass} border-slate-200 bg-white text-slate-700 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-300`;
+          `${baseClass} border-stone-200 bg-ivory text-stone-700 dark:border-stone-700 dark:bg-espresso dark:text-stone-300`;
 
         if (!deadline) {
           return {

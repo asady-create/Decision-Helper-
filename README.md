@@ -1,6 +1,6 @@
 # Decision Helper
 
-A clean, modern single-page web app for comparing decision options with pros, cons, emotional context, and weighted 1-10 factor scoring.
+A warm, reflective single-page decision journal for comparing options with pros, cons, emotional context, and weighted 1-10 factor scoring.
 
 ## Features
 

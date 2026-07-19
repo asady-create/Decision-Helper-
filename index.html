@@ -293,6 +293,37 @@
                 ></div>
               </div>
 
+              <div class="warm-inset mt-5 space-y-5 rounded-2xl p-4">
+                <div>
+                  <label for="decisionPrinciple" class="mb-1 block text-sm font-semibold text-stone-200">
+                    What principle are you relying on?
+                  </label>
+                  <p class="mb-2 text-sm text-stone-400">
+                    Name the rule, value, or standard guiding this choice.
+                  </p>
+                  <textarea
+                    id="decisionPrinciple"
+                    rows="3"
+                    placeholder="e.g. Choose the option that protects long-term optionality"
+                    class="w-full resize-y rounded-2xl border border-amber-200/15 bg-[#1a130f] px-4 py-3.5 text-base text-stone-100 outline-none transition placeholder:text-stone-400 focus:border-orange-700 focus:ring-4 focus:ring-orange-700/15"
+                  ></textarea>
+                </div>
+                <div>
+                  <label for="desiredOutcome" class="mb-1 block text-sm font-semibold text-stone-200">
+                    What outcome do you want to achieve?
+                  </label>
+                  <p class="mb-2 text-sm text-stone-400">
+                    Describe the result you most want this decision to produce.
+                  </p>
+                  <textarea
+                    id="desiredOutcome"
+                    rows="3"
+                    placeholder="e.g. Feel clear, prepared, and able to commit without lingering regret"
+                    class="w-full resize-y rounded-2xl border border-amber-200/15 bg-[#1a130f] px-4 py-3.5 text-base text-stone-100 outline-none transition placeholder:text-stone-400 focus:border-orange-700 focus:ring-4 focus:ring-orange-700/15"
+                  ></textarea>
+                </div>
+              </div>
+
               <div class="mt-6 rounded-2xl border border-orange-400/20 bg-orange-950/40 p-4 text-sm text-orange-100 text-orange-50">
                 <h3 class="font-bold">How to use it</h3>
                 <ol class="mt-2 list-decimal space-y-1 pl-5">
@@ -543,6 +574,8 @@
       const defaultState = {
         question: "",
         deadline: "",
+        principle: "",
+        desiredOutcome: "",
         mood: {
           stress: 5,
           emotions: "",
@@ -581,6 +614,8 @@
         question: document.querySelector("#decisionQuestion"),
         deadline: document.querySelector("#decisionDeadline"),
         deadlineCountdown: document.querySelector("#deadlineCountdown"),
+        principle: document.querySelector("#decisionPrinciple"),
+        desiredOutcome: document.querySelector("#desiredOutcome"),
         addOptionForm: document.querySelector("#addOptionForm"),
         optionName: document.querySelector("#optionName"),
         stressLevel: document.querySelector("#stressLevel"),
@@ -612,6 +647,16 @@
         state.deadline = event.target.value;
         persistCurrentState();
         renderDeadlineCountdown();
+      });
+
+      elements.principle.addEventListener("input", (event) => {
+        state.principle = event.target.value;
+        persistCurrentState();
+      });
+
+      elements.desiredOutcome.addEventListener("input", (event) => {
+        state.desiredOutcome = event.target.value;
+        persistCurrentState();
       });
 
       elements.stressLevel.addEventListener("input", (event) => {
@@ -732,6 +777,8 @@
         return {
           question: rawState.question || "",
           deadline: normalizeDeadline(rawState.deadline),
+          principle: rawState.principle || "",
+          desiredOutcome: rawState.desiredOutcome || "",
           mood: normalizeMood(rawState.mood),
           mungerTendencies: normalizeMungerTendencies(rawState.mungerTendencies),
           factors,
@@ -807,6 +854,8 @@
 
       function render() {
         elements.question.value = state.question;
+        elements.principle.value = state.principle;
+        elements.desiredOutcome.value = state.desiredOutcome;
         renderDeadlineCountdown();
         renderMoodCheckIn();
         renderMungerChecklist();

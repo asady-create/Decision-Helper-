@@ -1,0 +1,47 @@
+---
+description: How to reuse the VibeTrack design-system Cursor rules in other projects
+alwaysApply: false
+---
+
+# Reusing VibeTrack Design Rules in Later Projects
+
+## In this repo
+Rules live at:
+- `.cursor/rules/vibetrack-design-system.mdc` (always on)
+- `.cursor/rules/vibetrack-ui-patterns.mdc` (when UI files are in context)
+
+In Cursor chat, you can also `@`-mention a rule by name if needed.
+
+## Option A — Copy into a new project (simplest)
+1. Create the new project folder and open it in Cursor.
+2. Copy this folder into the new project root:
+   - from: `Decision-Helper-/.cursor/rules/`
+   - to: `YourNewProject/.cursor/rules/`
+3. Commit `.cursor/rules/` so teammates get the same guidance.
+4. Tell the agent: "Follow the VibeTrack design system rules."
+
+## Option B — User Rules (all your personal projects)
+1. Open Cursor → **Customize → Rules** (or Cursor Settings → Rules).
+2. Add a User Rule and paste the contents of `vibetrack-design-system.mdc` (body only is fine).
+3. Those preferences then apply across projects on this machine.
+
+## Option C — Remote / shared rules
+1. Keep this repo (or a dedicated rules repo) on GitHub.
+2. In Cursor: **Customize → Rules → Add Rule → Remote Rule (GitHub)**.
+3. Point it at the repo that contains `.cursor/rules/*.mdc`.
+4. Cursor syncs imported rules for reuse.
+
+## Prompt recipe for a new UI
+Use a prompt like:
+
+> Build a light minimalist page using the VibeTrack design system rules.
+> Reuse Fraunces + Outfit, sage paper tokens, soft atmosphere gradients,
+> centered 42rem column, no cards, quiet motion.
+
+## Verify the agent is following the system
+Checklist:
+- Brand is large display type
+- Background has soft sage atmosphere, not flat white
+- Accent is sage green `#3f6f5a` (or token-based)
+- No purple / dark-neon / terracotta defaults
+- Sections are sparse and single-purpose

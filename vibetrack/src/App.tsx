@@ -24,15 +24,9 @@ function App() {
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editText, setEditText] = useState('')
   const [editAuthor, setEditAuthor] = useState('')
-  const [ready, setReady] = useState(false)
 
   const todaysQuote = quoteOfTheDay(quotes, dateKey)
   const completedCount = HABITS.filter((habit) => habits[habit.id]).length
-
-  useEffect(() => {
-    const frame = requestAnimationFrame(() => setReady(true))
-    return () => cancelAnimationFrame(frame)
-  }, [])
 
   useEffect(() => {
     saveQuotes(quotes)
@@ -102,7 +96,7 @@ function App() {
   }
 
   return (
-    <div className={`app ${ready ? 'is-ready' : ''}`}>
+    <div className="app">
       <div className="atmosphere" aria-hidden="true" />
 
       <header className="top">

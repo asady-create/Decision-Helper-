@@ -44,16 +44,7 @@ textarea {
   position: relative;
   min-height: 100svh;
   padding: 2rem 1.25rem 3.5rem;
-  opacity: 0;
-  transform: translateY(10px);
-  transition:
-    opacity 0.55s ease,
-    transform 0.55s ease;
-}
-
-.app.is-ready {
-  opacity: 1;
-  transform: translateY(0);
+  animation: rise 0.55s ease both;
 }
 
 .atmosphere {

@@ -20,7 +20,11 @@ export function loadQuotes(): Quote[] {
 }
 
 export function saveQuotes(quotes: Quote[]): void {
-  localStorage.setItem(QUOTES_KEY, JSON.stringify(quotes))
+  try {
+    localStorage.setItem(QUOTES_KEY, JSON.stringify(quotes))
+  } catch {
+    // Ignore storage quota / private-mode write failures.
+  }
 }
 
 export function loadHabitsForDay(dateKey: string): DayHabits {
@@ -29,7 +33,11 @@ export function loadHabitsForDay(dateKey: string): DayHabits {
 }
 
 export function saveHabitsForDay(dateKey: string, habits: DayHabits): void {
-  const all = readJson<Record<string, DayHabits>>(HABITS_KEY, {})
-  all[dateKey] = habits
-  localStorage.setItem(HABITS_KEY, JSON.stringify(all))
+  try {
+    const all = readJson<Record<string, DayHabits>>(HABITS_KEY, {})
+    all[dateKey] = habits
+    localStorage.setItem(HABITS_KEY, JSON.stringify(all))
+  } catch {
+    // Ignore storage quota / private-mode write failures.
+  }
 }

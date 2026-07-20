@@ -1,6 +1,6 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { format } from 'date-fns'
-import { Check, ChevronDown, ChevronUp, Plus } from 'lucide-react'
+import { Check, ChevronDown, ChevronUp, Pencil, Plus, Trash2 } from 'lucide-react'
 import { HABITS, type HabitId } from './lib/habits'
 import { quoteOfTheDay, type Quote } from './lib/quotes'
 import {
@@ -21,6 +21,9 @@ function App() {
   const [text, setText] = useState('')
   const [author, setAuthor] = useState('')
   const [libraryOpen, setLibraryOpen] = useState(false)
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const [editText, setEditText] = useState('')
+  const [editAuthor, setEditAuthor] = useState('')
   const [ready, setReady] = useState(false)
 
   const todaysQuote = quoteOfTheDay(quotes, dateKey)
@@ -58,6 +61,44 @@ function App() {
     setQuotes((current) => [next, ...current])
     setText('')
     setAuthor('')
+  }
+
+  function startEdit(quote: Quote) {
+    setEditingId(quote.id)
+    setEditText(quote.text)
+    setEditAuthor(quote.author)
+  }
+
+  function cancelEdit() {
+    setEditingId(null)
+    setEditText('')
+    setEditAuthor('')
+  }
+
+  function saveEdit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    if (!editingId) return
+
+    const trimmed = editText.trim()
+    if (!trimmed) return
+
+    setQuotes((current) =>
+      current.map((quote) =>
+        quote.id === editingId
+          ? {
+              ...quote,
+              text: trimmed,
+              author: editAuthor.trim() || 'Anonymous',
+            }
+          : quote,
+      ),
+    )
+    cancelEdit()
+  }
+
+  function deleteQuote(id: string) {
+    setQuotes((current) => current.filter((quote) => quote.id !== id))
+    if (editingId === id) cancelEdit()
   }
 
   return (
@@ -169,12 +210,77 @@ function App() {
 
           {libraryOpen && (
             <ul id="quote-library" className="library-list">
-              {quotes.map((quote) => (
-                <li key={quote.id} className="library-item">
-                  <p className="library-quote">“{quote.text}”</p>
-                  <p className="library-author">— {quote.author}</p>
-                </li>
-              ))}
+              {quotes.length === 0 ? (
+                <li className="library-empty">No quotes in your library yet.</li>
+              ) : (
+                quotes.map((quote) => {
+                  const isEditing = editingId === quote.id
+
+                  return (
+                    <li key={quote.id} className="library-item">
+                      {isEditing ? (
+                        <form className="library-edit" onSubmit={saveEdit}>
+                          <label className="field">
+                            <span>Quote</span>
+                            <textarea
+                              value={editText}
+                              onChange={(event) => setEditText(event.target.value)}
+                              rows={3}
+                              required
+                            />
+                          </label>
+                          <label className="field">
+                            <span>Author</span>
+                            <input
+                              type="text"
+                              value={editAuthor}
+                              onChange={(event) =>
+                                setEditAuthor(event.target.value)
+                              }
+                              placeholder="Optional"
+                            />
+                          </label>
+                          <div className="library-actions">
+                            <button type="submit" className="text-action primary">
+                              Save
+                            </button>
+                            <button
+                              type="button"
+                              className="text-action"
+                              onClick={cancelEdit}
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        </form>
+                      ) : (
+                        <>
+                          <p className="library-quote">“{quote.text}”</p>
+                          <p className="library-author">— {quote.author}</p>
+                          <div className="library-actions">
+                            <button
+                              type="button"
+                              className="text-action"
+                              onClick={() => startEdit(quote)}
+                            >
+                              <Pencil size={14} strokeWidth={2.25} />
+                              Edit
+                            </button>
+                            <button
+                              type="button"
+                              className="text-action danger"
+                              onClick={() => deleteQuote(quote.id)}
+                            >
+                              <Trash2 size={14} strokeWidth={2.25} />
+                              Delete
+                            </button>
+                          </div>
+                        </>
+                      )}
+                    </li>
+                  )
+                })
+              )}
             </ul>
           )}
         </section>

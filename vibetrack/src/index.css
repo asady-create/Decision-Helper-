@@ -376,6 +376,54 @@ main {
   font-size: 0.95rem;
 }
 
+.library-empty {
+  padding: 1rem 0.1rem;
+  border-top: 1px solid var(--line);
+  color: var(--ink-soft);
+}
+
+.library-edit {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.library-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.85rem;
+  margin-top: 0.75rem;
+}
+
+.text-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  border: none;
+  background: transparent;
+  color: var(--ink-soft);
+  padding: 0;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.text-action:hover {
+  color: var(--ink);
+}
+
+.text-action.primary {
+  color: var(--accent);
+}
+
+.text-action.primary:hover {
+  color: #355d4b;
+}
+
+.text-action.danger:hover {
+  color: #8a3d3d;
+}
+
 @keyframes rise {
   from {
     opacity: 0;

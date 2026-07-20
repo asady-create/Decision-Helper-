@@ -1,6 +1,6 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { format } from 'date-fns'
-import { Check, Plus } from 'lucide-react'
+import { Check, ChevronDown, ChevronUp, Plus } from 'lucide-react'
 import { HABITS, type HabitId } from './lib/habits'
 import { quoteOfTheDay, type Quote } from './lib/quotes'
 import {
@@ -20,6 +20,7 @@ function App() {
   const [habits, setHabits] = useState(() => loadHabitsForDay(dateKey))
   const [text, setText] = useState('')
   const [author, setAuthor] = useState('')
+  const [libraryOpen, setLibraryOpen] = useState(false)
   const [ready, setReady] = useState(false)
 
   const todaysQuote = quoteOfTheDay(quotes, dateKey)
@@ -145,9 +146,37 @@ function App() {
             </button>
           </form>
 
-          <p className="library-count">
-            {quotes.length} quote{quotes.length === 1 ? '' : 's'} in your library
-          </p>
+          <div className="library-bar">
+            <p className="library-count">
+              {quotes.length} quote{quotes.length === 1 ? '' : 's'} in your
+              library
+            </p>
+            <button
+              type="button"
+              className="library-toggle"
+              aria-expanded={libraryOpen}
+              aria-controls="quote-library"
+              onClick={() => setLibraryOpen((open) => !open)}
+            >
+              {libraryOpen ? 'Hide library' : 'Browse library'}
+              {libraryOpen ? (
+                <ChevronUp size={16} strokeWidth={2.25} />
+              ) : (
+                <ChevronDown size={16} strokeWidth={2.25} />
+              )}
+            </button>
+          </div>
+
+          {libraryOpen && (
+            <ul id="quote-library" className="library-list">
+              {quotes.map((quote) => (
+                <li key={quote.id} className="library-item">
+                  <p className="library-quote">“{quote.text}”</p>
+                  <p className="library-author">— {quote.author}</p>
+                </li>
+              ))}
+            </ul>
+          )}
         </section>
       </main>
     </div>

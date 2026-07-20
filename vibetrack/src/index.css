@@ -317,8 +317,63 @@ main {
   transform: translateY(0);
 }
 
-.library-count {
+.library-bar {
   margin-top: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.library-count {
+  margin: 0;
+}
+
+.library-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  border: none;
+  background: transparent;
+  color: var(--accent);
+  padding: 0.25rem 0;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.library-toggle:hover {
+  color: #355d4b;
+}
+
+.library-list {
+  list-style: none;
+  margin: 1rem 0 0;
+  padding: 0;
+  display: grid;
+  animation: rise 0.35s ease both;
+}
+
+.library-item {
+  padding: 1rem 0.1rem;
+  border-top: 1px solid var(--line);
+}
+
+.library-quote {
+  margin: 0;
+  font-family: var(--display);
+  font-size: 1.15rem;
+  font-weight: 500;
+  line-height: 1.35;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+
+.library-author {
+  margin: 0.45rem 0 0;
+  color: var(--ink-soft);
+  font-size: 0.95rem;
 }
 
 @keyframes rise {
@@ -352,5 +407,11 @@ main {
     flex-direction: column;
     align-items: flex-start;
     gap: 0.25rem;
+  }
+
+  .library-bar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.4rem;
   }
 }

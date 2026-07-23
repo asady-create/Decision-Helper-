@@ -1,4 +1,4 @@
-import { emptyHabits, type DayHabits } from './habits'
+import { emptyHabits, normalizeDayHabits, type DayHabits } from './habits'
 import { SEED_QUOTES, type Quote } from './quotes'
 
 const QUOTES_KEY = 'vibetrack:quotes'
@@ -28,13 +28,13 @@ export function saveQuotes(quotes: Quote[]): void {
 }
 
 export function loadHabitsForDay(dateKey: string): DayHabits {
-  const all = readJson<Record<string, DayHabits>>(HABITS_KEY, {})
-  return { ...emptyHabits(), ...(all[dateKey] ?? {}) }
+  const all = readJson<Record<string, unknown>>(HABITS_KEY, {})
+  return normalizeDayHabits(all[dateKey] ?? emptyHabits())
 }
 
 export function saveHabitsForDay(dateKey: string, habits: DayHabits): void {
   try {
-    const all = readJson<Record<string, DayHabits>>(HABITS_KEY, {})
+    const all = readJson<Record<string, unknown>>(HABITS_KEY, {})
     all[dateKey] = habits
     localStorage.setItem(HABITS_KEY, JSON.stringify(all))
   } catch {

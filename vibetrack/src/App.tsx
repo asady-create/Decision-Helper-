@@ -26,7 +26,7 @@ function App() {
   const [editAuthor, setEditAuthor] = useState('')
 
   const todaysQuote = quoteOfTheDay(quotes, dateKey)
-  const completedCount = HABITS.filter((habit) => habits[habit.id]).length
+  const completedCount = HABITS.filter((habit) => habits.checks[habit.id]).length
 
   useEffect(() => {
     saveQuotes(quotes)
@@ -37,7 +37,21 @@ function App() {
   }, [dateKey, habits])
 
   function toggleHabit(id: HabitId) {
-    setHabits((current) => ({ ...current, [id]: !current[id] }))
+    setHabits((current) => ({
+      ...current,
+      checks: { ...current.checks, [id]: !current.checks[id] },
+    }))
+  }
+
+  function updateReadingBooks(value: string) {
+    setHabits((current) => ({
+      ...current,
+      readingBooks: value,
+      checks: {
+        ...current.checks,
+        reading: value.trim().length > 0 ? true : current.checks.reading,
+      },
+    }))
   }
 
   function handleAddQuote(event: FormEvent<HTMLFormElement>) {
@@ -129,9 +143,9 @@ function App() {
 
           <ul className="habit-list">
             {HABITS.map((habit) => {
-              const checked = habits[habit.id]
+              const checked = habits.checks[habit.id]
               return (
-                <li key={habit.id}>
+                <li key={habit.id} className="habit-row">
                   <label className={`habit ${checked ? 'is-checked' : ''}`}>
                     <input
                       type="checkbox"
@@ -143,6 +157,20 @@ function App() {
                     </span>
                     <span className="label">{habit.label}</span>
                   </label>
+
+                  {habit.id === 'reading' && checked && (
+                    <label className="reading-note">
+                      <span>Books read today</span>
+                      <input
+                        type="text"
+                        value={habits.readingBooks}
+                        onChange={(event) =>
+                          updateReadingBooks(event.target.value)
+                        }
+                        placeholder="e.g. Atomic Habits, Meditations"
+                      />
+                    </label>
+                  )}
                 </li>
               )
             })}

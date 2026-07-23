@@ -1,8 +1,21 @@
-import { useEffect, useState, type FormEvent } from 'react'
+import { useDeferredValue, useEffect, useState, type FormEvent } from 'react'
 import { format } from 'date-fns'
-import { Check, ChevronDown, ChevronUp, Pencil, Plus, Trash2 } from 'lucide-react'
+import {
+  Check,
+  ChevronDown,
+  ChevronUp,
+  Pencil,
+  Plus,
+  Search,
+  Trash2,
+} from 'lucide-react'
 import { HABITS, type HabitId } from './lib/habits'
-import { quoteOfTheDay, type Quote } from './lib/quotes'
+import {
+  filterQuotes,
+  groupQuotesByAuthor,
+  quoteOfTheDay,
+  type Quote,
+} from './lib/quotes'
 import {
   loadHabitsForDay,
   loadQuotes,
@@ -21,12 +34,17 @@ function App() {
   const [text, setText] = useState('')
   const [author, setAuthor] = useState('')
   const [libraryOpen, setLibraryOpen] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [expandedId, setExpandedId] = useState<string | null>(null)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editText, setEditText] = useState('')
   const [editAuthor, setEditAuthor] = useState('')
+  const deferredSearch = useDeferredValue(searchQuery)
 
   const todaysQuote = quoteOfTheDay(quotes, dateKey)
   const completedCount = HABITS.filter((habit) => habits.checks[habit.id]).length
+  const filteredQuotes = filterQuotes(quotes, deferredSearch)
+  const quoteGroups = groupQuotesByAuthor(filteredQuotes)
 
   useEffect(() => {
     saveQuotes(quotes)
@@ -72,6 +90,7 @@ function App() {
   }
 
   function startEdit(quote: Quote) {
+    setExpandedId(quote.id)
     setEditingId(quote.id)
     setEditText(quote.text)
     setEditAuthor(quote.author)
@@ -81,6 +100,11 @@ function App() {
     setEditingId(null)
     setEditText('')
     setEditAuthor('')
+  }
+
+  function toggleExpanded(id: string) {
+    setExpandedId((current) => (current === id ? null : id))
+    if (editingId === id) cancelEdit()
   }
 
   function saveEdit(event: FormEvent<HTMLFormElement>) {
@@ -231,79 +255,145 @@ function App() {
           </div>
 
           {libraryOpen && (
-            <ul id="quote-library" className="library-list">
-              {quotes.length === 0 ? (
-                <li className="library-empty">No quotes in your library yet.</li>
-              ) : (
-                quotes.map((quote) => {
-                  const isEditing = editingId === quote.id
+            <div id="quote-library" className="library-panel">
+              <label className="library-search">
+                <Search size={16} strokeWidth={2.25} aria-hidden="true" />
+                <input
+                  type="search"
+                  value={searchQuery}
+                  onChange={(event) => setSearchQuery(event.target.value)}
+                  placeholder="Search quotes or authors…"
+                />
+              </label>
 
-                  return (
-                    <li key={quote.id} className="library-item">
-                      {isEditing ? (
-                        <form className="library-edit" onSubmit={saveEdit}>
-                          <label className="field">
-                            <span>Quote</span>
-                            <textarea
-                              value={editText}
-                              onChange={(event) => setEditText(event.target.value)}
-                              rows={3}
-                              required
-                            />
-                          </label>
-                          <label className="field">
-                            <span>Author</span>
-                            <input
-                              type="text"
-                              value={editAuthor}
-                              onChange={(event) =>
-                                setEditAuthor(event.target.value)
-                              }
-                              placeholder="Optional"
-                            />
-                          </label>
-                          <div className="library-actions">
-                            <button type="submit" className="text-action primary">
-                              Save
-                            </button>
-                            <button
-                              type="button"
-                              className="text-action"
-                              onClick={cancelEdit}
+              <p className="library-meta">
+                {quotes.length === 0
+                  ? 'No quotes in your library yet.'
+                  : deferredSearch.trim()
+                    ? `${filteredQuotes.length} of ${quotes.length} match`
+                    : `Grouped by author · ${quotes.length} total`}
+              </p>
+
+              {quotes.length === 0 ? null : filteredQuotes.length === 0 ? (
+                <p className="library-empty">No quotes match that search.</p>
+              ) : (
+                <div className="library-scroll">
+                  {quoteGroups.map((group) => (
+                    <section key={group.author} className="library-group">
+                      <div className="library-group-head">
+                        <h3>{group.author}</h3>
+                        <span>
+                          {group.quotes.length} quote
+                          {group.quotes.length === 1 ? '' : 's'}
+                        </span>
+                      </div>
+
+                      <ul className="library-list">
+                        {group.quotes.map((quote) => {
+                          const isEditing = editingId === quote.id
+                          const isExpanded = expandedId === quote.id || isEditing
+
+                          return (
+                            <li
+                              key={quote.id}
+                              className={`library-item ${isExpanded ? 'is-expanded' : ''}`}
                             >
-                              Cancel
-                            </button>
-                          </div>
-                        </form>
-                      ) : (
-                        <>
-                          <p className="library-quote">“{quote.text}”</p>
-                          <p className="library-author">— {quote.author}</p>
-                          <div className="library-actions">
-                            <button
-                              type="button"
-                              className="text-action"
-                              onClick={() => startEdit(quote)}
-                            >
-                              <Pencil size={14} strokeWidth={2.25} />
-                              Edit
-                            </button>
-                            <button
-                              type="button"
-                              className="text-action danger"
-                              onClick={() => deleteQuote(quote.id)}
-                            >
-                              <Trash2 size={14} strokeWidth={2.25} />
-                              Delete
-                            </button>
-                          </div>
-                        </>
-                      )}
-                    </li>
-                  )
-                })
+                              {isEditing ? (
+                                <form className="library-edit" onSubmit={saveEdit}>
+                                  <label className="field">
+                                    <span>Quote</span>
+                                    <textarea
+                                      value={editText}
+                                      onChange={(event) =>
+                                        setEditText(event.target.value)
+                                      }
+                                      rows={3}
+                                      required
+                                    />
+                                  </label>
+                                  <label className="field">
+                                    <span>Author</span>
+                                    <input
+                                      type="text"
+                                      value={editAuthor}
+                                      onChange={(event) =>
+                                        setEditAuthor(event.target.value)
+                                      }
+                                      placeholder="Optional"
+                                    />
+                                  </label>
+                                  <div className="library-actions">
+                                    <button
+                                      type="submit"
+                                      className="text-action primary"
+                                    >
+                                      Save
+                                    </button>
+                                    <button
+                                      type="button"
+                                      className="text-action"
+                                      onClick={cancelEdit}
+                                    >
+                                      Cancel
+                                    </button>
+                                  </div>
+                                </form>
+                              ) : (
+                                <>
+                                  <button
+                                    type="button"
+                                    className="library-summary"
+                                    onClick={() => toggleExpanded(quote.id)}
+                                    aria-expanded={isExpanded}
+                                  >
+                                    <p className="library-quote">
+                                      “{quote.text}”
+                                    </p>
+                                    <span className="library-chevron" aria-hidden="true">
+                                      {isExpanded ? (
+                                        <ChevronUp size={16} strokeWidth={2.25} />
+                                      ) : (
+                                        <ChevronDown size={16} strokeWidth={2.25} />
+                                      )}
+                                    </span>
+                                  </button>
+
+                                  {isExpanded && (
+                                    <div className="library-details">
+                                      <p className="library-author">
+                                        — {quote.author}
+                                      </p>
+                                      <div className="library-actions">
+                                        <button
+                                          type="button"
+                                          className="text-action"
+                                          onClick={() => startEdit(quote)}
+                                        >
+                                          <Pencil size={14} strokeWidth={2.25} />
+                                          Edit
+                                        </button>
+                                        <button
+                                          type="button"
+                                          className="text-action danger"
+                                          onClick={() => deleteQuote(quote.id)}
+                                        >
+                                          <Trash2 size={14} strokeWidth={2.25} />
+                                          Delete
+                                        </button>
+                                      </div>
+                                    </div>
+                                  )}
+                                </>
+                              )}
+                            </li>
+                          )
+                        })}
+                      </ul>
+                    </section>
+                  ))}
+                </div>
               )}
-            </ul>
+            </div>
           )}
         </section>
       </main>

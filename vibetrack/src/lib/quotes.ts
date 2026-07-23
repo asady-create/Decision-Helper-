@@ -37,3 +37,34 @@ export function quoteOfTheDay(quotes: Quote[], dateKey: string): Quote | null {
 
   return quotes[hash % quotes.length] ?? null
 }
+
+export function filterQuotes(quotes: Quote[], query: string): Quote[] {
+  const needle = query.trim().toLowerCase()
+  if (!needle) return quotes
+
+  return quotes.filter((quote) => {
+    const haystack = `${quote.text} ${quote.author}`.toLowerCase()
+    return haystack.includes(needle)
+  })
+}
+
+export type QuoteGroup = {
+  author: string
+  quotes: Quote[]
+}
+
+/** Group quotes by author and sort authors alphabetically. */
+export function groupQuotesByAuthor(quotes: Quote[]): QuoteGroup[] {
+  const groups = new Map<string, Quote[]>()
+
+  for (const quote of quotes) {
+    const key = quote.author.trim() || 'Anonymous'
+    const bucket = groups.get(key)
+    if (bucket) bucket.push(quote)
+    else groups.set(key, [quote])
+  }
+
+  return [...groups.entries()]
+    .sort(([a], [b]) => a.localeCompare(b, undefined, { sensitivity: 'base' }))
+    .map(([author, grouped]) => ({ author, quotes: grouped }))
+}

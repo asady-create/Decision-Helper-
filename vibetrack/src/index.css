@@ -376,39 +376,146 @@ main {
   color: #355d4b;
 }
 
-.library-list {
-  list-style: none;
-  margin: 1rem 0 0;
-  padding: 0;
+.library-panel {
+  margin-top: 1rem;
   display: grid;
+  gap: 0.85rem;
   animation: rise 0.35s ease both;
 }
 
+.library-search {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  border: 1px solid var(--line);
+  border-radius: 0.65rem;
+  background: color-mix(in srgb, var(--white) 82%, transparent);
+  padding: 0.7rem 0.85rem;
+  color: var(--ink-soft);
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    background 0.2s ease;
+}
+
+.library-search:focus-within {
+  border-color: #8faf9a;
+  background: var(--white);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+  color: var(--ink);
+}
+
+.library-search input {
+  width: 100%;
+  border: none;
+  background: transparent;
+  color: var(--ink);
+  outline: none;
+  padding: 0;
+}
+
+.library-meta,
+.library-empty {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 0.92rem;
+}
+
+.library-scroll {
+  max-height: min(28rem, 55svh);
+  overflow: auto;
+  padding-right: 0.2rem;
+  display: grid;
+  gap: 1.25rem;
+  scrollbar-width: thin;
+  scrollbar-color: #b7c7bb transparent;
+}
+
+.library-group-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.35rem;
+  padding: 0 0.1rem;
+}
+
+.library-group-head h3 {
+  margin: 0;
+  font-family: var(--display);
+  font-size: 1.05rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.library-group-head span {
+  color: var(--ink-soft);
+  font-size: 0.85rem;
+}
+
+.library-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+}
+
 .library-item {
-  padding: 1rem 0.1rem;
+  padding: 0.55rem 0.1rem;
   border-top: 1px solid var(--line);
+}
+
+.library-group .library-item:first-child {
+  border-top: none;
+}
+
+.library-summary {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.75rem;
+  align-items: start;
+  border: none;
+  background: transparent;
+  padding: 0;
+  text-align: left;
+  cursor: pointer;
+  color: inherit;
 }
 
 .library-quote {
   margin: 0;
   font-family: var(--display);
-  font-size: 1.15rem;
+  font-size: 1.02rem;
   font-weight: 500;
   line-height: 1.35;
   letter-spacing: -0.01em;
   color: var(--ink);
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+
+.library-item.is-expanded .library-quote {
+  -webkit-line-clamp: unset;
+  overflow: visible;
+  font-size: 1.12rem;
+}
+
+.library-chevron {
+  color: var(--ink-soft);
+  margin-top: 0.15rem;
+}
+
+.library-details {
+  animation: rise 0.25s ease both;
 }
 
 .library-author {
   margin: 0.45rem 0 0;
   color: var(--ink-soft);
   font-size: 0.95rem;
-}
-
-.library-empty {
-  padding: 1rem 0.1rem;
-  border-top: 1px solid var(--line);
-  color: var(--ink-soft);
 }
 
 .library-edit {

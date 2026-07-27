@@ -4,10 +4,12 @@ import {
   Check,
   ChevronDown,
   ChevronUp,
+  Download,
   Pencil,
   Plus,
   Search,
   Trash2,
+  Upload,
 } from 'lucide-react'
 import { HABITS, type HabitId } from './lib/habits'
 import {
@@ -17,8 +19,11 @@ import {
   type Quote,
 } from './lib/quotes'
 import {
+  createQuoteBackup,
   loadHabitsForDay,
   loadQuotes,
+  mergeQuotes,
+  parseQuoteBackup,
   saveHabitsForDay,
   saveQuotes,
 } from './lib/storage'
@@ -39,6 +44,7 @@ function App() {
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editText, setEditText] = useState('')
   const [editAuthor, setEditAuthor] = useState('')
+  const [backupMessage, setBackupMessage] = useState<string | null>(null)
   const deferredSearch = useDeferredValue(searchQuery)
 
   const todaysQuote = quoteOfTheDay(quotes, dateKey)
@@ -131,6 +137,38 @@ function App() {
   function deleteQuote(id: string) {
     setQuotes((current) => current.filter((quote) => quote.id !== id))
     if (editingId === id) cancelEdit()
+  }
+
+  function exportQuotes() {
+    const backup = createQuoteBackup(quotes)
+    const blob = new Blob([JSON.stringify(backup, null, 2)], {
+      type: 'application/json',
+    })
+    const url = URL.createObjectURL(blob)
+    const anchor = document.createElement('a')
+    anchor.href = url
+    anchor.download = `vibetrack-quotes-${format(new Date(), 'yyyy-MM-dd')}.json`
+    anchor.click()
+    URL.revokeObjectURL(url)
+    setBackupMessage('Quotes exported. Keep this file to restore later.')
+  }
+
+  async function importQuotes(file: File | null) {
+    if (!file) return
+
+    try {
+      const raw = await file.text()
+      const incoming = parseQuoteBackup(raw)
+      setQuotes((current) => mergeQuotes(current, incoming))
+      setLibraryOpen(true)
+      setBackupMessage(
+        `Imported ${incoming.length} quote${incoming.length === 1 ? '' : 's'}.`,
+      )
+    } catch (error) {
+      setBackupMessage(
+        error instanceof Error ? error.message : 'Could not import that file.',
+      )
+    }
   }
 
   return (
@@ -254,17 +292,51 @@ function App() {
             </button>
           </div>
 
+          <p className="storage-note">
+            Quotes are saved in this browser for this exact site address. Switching
+            between localhost ports or preview links starts a fresh library —
+            use Export / Import to keep them.
+          </p>
+
+          {backupMessage && <p className="backup-message">{backupMessage}</p>}
+
           {libraryOpen && (
             <div id="quote-library" className="library-panel">
-              <label className="library-search">
-                <Search size={16} strokeWidth={2.25} aria-hidden="true" />
-                <input
-                  type="search"
-                  value={searchQuery}
-                  onChange={(event) => setSearchQuery(event.target.value)}
-                  placeholder="Search quotes or authors…"
-                />
-              </label>
+              <div className="library-tools">
+                <label className="library-search">
+                  <Search size={16} strokeWidth={2.25} aria-hidden="true" />
+                  <input
+                    type="search"
+                    value={searchQuery}
+                    onChange={(event) => setSearchQuery(event.target.value)}
+                    placeholder="Search quotes or authors…"
+                  />
+                </label>
+
+                <div className="backup-actions">
+                  <button
+                    type="button"
+                    className="text-action"
+                    onClick={exportQuotes}
+                  >
+                    <Download size={14} strokeWidth={2.25} />
+                    Export
+                  </button>
+                  <label className="text-action import-action">
+                    <Upload size={14} strokeWidth={2.25} />
+                    Import
+                    <input
+                      type="file"
+                      accept="application/json,.json"
+                      hidden
+                      onChange={(event) => {
+                        void importQuotes(event.target.files?.[0] ?? null)
+                        event.target.value = ''
+                      }}
+                    />
+                  </label>
+                </div>
+              </div>
 
               <p className="library-meta">
                 {quotes.length === 0

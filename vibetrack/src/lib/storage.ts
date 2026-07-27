@@ -4,6 +4,12 @@ import { SEED_QUOTES, type Quote } from './quotes'
 const QUOTES_KEY = 'vibetrack:quotes'
 const HABITS_KEY = 'vibetrack:habits'
 
+export type QuoteBackup = {
+  version: 1
+  exportedAt: string
+  quotes: Quote[]
+}
+
 function readJson<T>(key: string, fallback: T): T {
   try {
     const raw = localStorage.getItem(key)
@@ -12,6 +18,17 @@ function readJson<T>(key: string, fallback: T): T {
   } catch {
     return fallback
   }
+}
+
+function isQuote(value: unknown): value is Quote {
+  if (!value || typeof value !== 'object') return false
+  const quote = value as Record<string, unknown>
+  return (
+    typeof quote.id === 'string' &&
+    typeof quote.text === 'string' &&
+    typeof quote.author === 'string' &&
+    typeof quote.createdAt === 'string'
+  )
 }
 
 export function loadQuotes(): Quote[] {
@@ -25,6 +42,45 @@ export function saveQuotes(quotes: Quote[]): void {
   } catch {
     // Ignore storage quota / private-mode write failures.
   }
+}
+
+export function createQuoteBackup(quotes: Quote[]): QuoteBackup {
+  return {
+    version: 1,
+    exportedAt: new Date().toISOString(),
+    quotes,
+  }
+}
+
+export function parseQuoteBackup(raw: string): Quote[] {
+  const parsed = JSON.parse(raw) as unknown
+
+  if (Array.isArray(parsed)) {
+    const quotes = parsed.filter(isQuote)
+    if (quotes.length === 0) throw new Error('No valid quotes found in file.')
+    return quotes
+  }
+
+  if (parsed && typeof parsed === 'object') {
+    const backup = parsed as Partial<QuoteBackup>
+    if (Array.isArray(backup.quotes)) {
+      const quotes = backup.quotes.filter(isQuote)
+      if (quotes.length === 0) throw new Error('No valid quotes found in file.')
+      return quotes
+    }
+  }
+
+  throw new Error('Unrecognized backup format.')
+}
+
+export function mergeQuotes(current: Quote[], incoming: Quote[]): Quote[] {
+  const byId = new Map<string, Quote>()
+  for (const quote of [...incoming, ...current]) {
+    byId.set(quote.id, quote)
+  }
+  return [...byId.values()].sort((a, b) =>
+    b.createdAt.localeCompare(a.createdAt),
+  )
 }
 
 export function loadHabitsForDay(dateKey: string): DayHabits {

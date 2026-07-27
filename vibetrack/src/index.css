@@ -383,6 +383,33 @@ main {
   animation: rise 0.35s ease both;
 }
 
+.storage-note,
+.backup-message {
+  margin: 0.65rem 0 0;
+  color: var(--ink-soft);
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+.backup-message {
+  color: var(--accent);
+}
+
+.library-tools {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.backup-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.import-action {
+  cursor: pointer;
+}
+
 .library-search {
   display: flex;
   align-items: center;

@@ -36,16 +36,36 @@
       .boot p {
         margin: 0;
         color: #5d6b64;
+        line-height: 1.45;
+      }
+      .boot code {
+        font-family: ui-monospace, monospace;
+        font-size: 0.92em;
       }
     </style>
   </head>
   <body>
     <div id="root">
-      <div class="boot">
+      <div class="boot" id="boot">
         <h1>VibeTrack</h1>
-        <p>Loading your daily tracker…</p>
+        <p id="boot-message">Starting…</p>
       </div>
     </div>
+    <script>
+      // If React never mounts, the boot screen used to look like an infinite loader.
+      window.setTimeout(function () {
+        var root = document.getElementById('root')
+        var message = document.getElementById('boot-message')
+        if (!root || !message) return
+        if (root.querySelector('.app')) return
+        message.innerHTML =
+          'The app did not start in this browser tab.<br><br>' +
+          'This usually means the page HTML loaded, but the JavaScript could not reach the Cloud Agent.<br><br>' +
+          'Fix: on your computer run<br>' +
+          '<code>cd vibetrack && npm install && npm run build && npm run preview</code><br>' +
+          'then open <code>http://localhost:4173</code>'
+      }, 3500)
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

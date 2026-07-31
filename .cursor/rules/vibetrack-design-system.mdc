@@ -1,0 +1,76 @@
+---
+description: VibeTrack light minimalist design system — tokens, typography, atmosphere, and brand hierarchy
+alwaysApply: true
+---
+
+# VibeTrack Design System
+
+Use this design language for VibeTrack and any project that adopts these rules.
+
+## Visual direction
+- Light, calm, minimalist. Soft sage / mist greens on pale paper.
+- Not dark mode. Not purple gradients. Not cream+terracotta. Not broadsheet/newspaper.
+- One clear visual idea per screen. Reduce clutter. Prefer whitespace over cards.
+- Brand name is a hero-level signal (large display type), not a tiny nav label.
+
+## CSS tokens (required starting point)
+
+```css
+:root {
+  --ink: #24312b;
+  --ink-soft: #5d6b64;
+  --paper: #f3f6f2;
+  --paper-2: #e8eee8;
+  --line: #d5ddd6;
+  --accent: #3f6f5a;
+  --accent-soft: #d9ebe1;
+  --white: #fbfcf9;
+  --shadow: 0 18px 40px rgba(36, 49, 43, 0.06);
+
+  --display: 'Fraunces', Georgia, serif;
+  --sans: 'Outfit', sans-serif;
+}
+```
+
+Load fonts from Google Fonts: **Fraunces** (display) + **Outfit** (UI).
+
+## Atmosphere
+- Do not use a flat single-color page background.
+- Use a soft paper base plus subtle radial green washes, e.g.:
+
+```css
+background:
+  radial-gradient(ellipse 70% 45% at 12% -10%, #dce8df 0%, transparent 55%),
+  radial-gradient(ellipse 55% 40% at 100% 0%, #e7efe8 0%, transparent 50%),
+  linear-gradient(180deg, #f7faf6 0%, #eef3ee 48%, #e8efe9 100%);
+```
+
+## Typography
+- Brand / page titles / quotes: `--display` (Fraunces), slightly tight letter-spacing.
+- Body / labels / meta: `--sans` (Outfit).
+- Section labels: small uppercase, letter-spacing ~0.08em, color `--ink-soft`.
+- Primary quote text: large clamp sizing, calm line-height (~1.25).
+
+## Layout
+- Centered content column, max-width ~42rem.
+- Generous vertical rhythm between sections (~2.25–2.75rem).
+- First viewport composition: brand + date + primary focal content (e.g. quote of the day).
+- One job per section: one headline, one short supporting line, then the interaction.
+
+## Interaction chrome
+- Default: no cards. Prefer hairline dividers and open lists.
+- Primary button: filled `--accent`, soft pill radius, short hover lift.
+- Inputs: light translucent white, soft green focus ring using `--accent-soft`.
+- Checkboxes: custom square boxes; checked state fills `--accent`.
+
+## Motion (ship 2–3 intentional motions)
+- Page enter: fade + slight rise.
+- Content enter: `rise` keyframe (opacity + translateY).
+- Checkbox / button: short transform or color transitions (~0.2s).
+- Avoid noisy parallax, glow, or constant looping animation.
+
+## Do / Don't
+- Do reuse tokens; avoid new one-off hex colors unless extending the palette intentionally.
+- Do keep copy short and quiet.
+- Don't introduce purple, neon, heavy shadows, emoji decoration, or dense dashboard chrome.
+- Don't put stats strips, promo chips, or floating badges over the hero content.

@@ -6,7 +6,12 @@
 import { promises as fs } from "fs";
 import path from "path";
 import type { AppData } from "./types";
-import { normalizeAppData } from "./storage";
+import { DEFAULT_TIMELINE_AREAS } from "./timeline";
+import {
+  normalizeHabitsLog,
+  normalizeQuotes,
+  SEED_QUOTES,
+} from "./daily";
 
 export const DISK_FILENAME = "ikigai-store.json";
 
@@ -18,11 +23,27 @@ export function getStorePath(): string {
   return path.join(getDataDir(), DISK_FILENAME);
 }
 
+function normalizeDiskData(parsed: Partial<AppData>): AppData {
+  return {
+    map: parsed.map ?? null,
+    notes: parsed.notes ?? [],
+    insights: parsed.insights ?? [],
+    timeline: parsed.timeline ?? [],
+    timelineAreas:
+      parsed.timelineAreas ?? DEFAULT_TIMELINE_AREAS.map((a) => ({ ...a })),
+    quotes:
+      Array.isArray(parsed.quotes) && parsed.quotes.length > 0
+        ? normalizeQuotes(parsed.quotes)
+        : SEED_QUOTES.map((q) => ({ ...q })),
+    habits: normalizeHabitsLog(parsed.habits),
+  };
+}
+
 export async function readDiskStore(): Promise<AppData | null> {
   try {
     const raw = await fs.readFile(getStorePath(), "utf8");
     const parsed = JSON.parse(raw) as Partial<AppData>;
-    return normalizeAppData(parsed);
+    return normalizeDiskData(parsed);
   } catch (err) {
     const code = (err as NodeJS.ErrnoException).code;
     if (code === "ENOENT") return null;

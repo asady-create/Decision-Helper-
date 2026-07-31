@@ -84,18 +84,26 @@ export function IkigaiProvider({ children }: { children: ReactNode }) {
     let cancelled = false;
     (async () => {
       try {
-        const meta = await fetch("/api/data", { cache: "no-store" })
+        const meta = await fetch("/api/data", {
+          cache: "no-store",
+          signal: AbortSignal.timeout(4000),
+        })
           .then((r) => r.json())
           .catch(() => null);
         if (!cancelled && meta?.path) setDiskPath(meta.path as string);
-      } catch {
-        /* ignore */
+
+        const loaded = await hydrateAppData();
+        if (cancelled) return;
+        setData(loaded);
+      } catch (err) {
+        console.warn("[ikigai] hydrate failed; showing local cache", err);
+        // Keep EMPTY / last state — do not block the UI forever.
+      } finally {
+        if (!cancelled) {
+          readyRef.current = true;
+          setReady(true);
+        }
       }
-      const loaded = await hydrateAppData();
-      if (cancelled) return;
-      setData(loaded);
-      readyRef.current = true;
-      setReady(true);
     })();
     return () => {
       cancelled = true;

@@ -352,7 +352,10 @@ export function syncToDisk(data: AppData, immediate = false): void {
 export async function fetchDiskData(): Promise<AppData | null> {
   if (!isBrowser()) return null;
   try {
-    const res = await fetch("/api/data", { cache: "no-store" });
+    const res = await fetch("/api/data", {
+      cache: "no-store",
+      signal: AbortSignal.timeout(4000),
+    });
     if (!res.ok) return null;
     const json = (await res.json()) as { data?: Partial<AppData> };
     if (!json.data) return null;

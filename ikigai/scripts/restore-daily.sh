@@ -3,8 +3,8 @@ set -euo pipefail
 
 # Run from your Ikigai project root in Git Bash:
 #   bash scripts/restore-daily.sh
-# Or download and run:
-#   curl -fsSL https://raw.githubusercontent.com/asady-create/Decision-Helper-/main/ikigai/scripts/restore-daily.sh | bash
+# Or:
+#   curl -fsSL https://raw.githubusercontent.com/asady-create/Decision-Helper-/cursor/fix-ikigai-daily-940e/ikigai/scripts/restore-daily.sh | bash
 
 ROOT="$(pwd)"
 if [[ ! -f "$ROOT/package.json" ]] || ! grep -q '"name": "ikigai"' "$ROOT/package.json" 2>/dev/null; then
@@ -29,11 +29,10 @@ fi
 
 TMP="$(mktemp -d)"
 trap 'rm -rf "$TMP"' EXIT
-echo "→ Downloading Daily merge from Decision-Helper…"
-git clone --depth 1 --branch main https://github.com/asady-create/Decision-Helper-.git "$TMP/dh"
+echo "→ Downloading Daily merge + loading fix from Decision-Helper…"
+git clone --depth 1 --branch cursor/fix-ikigai-daily-940e https://github.com/asady-create/Decision-Helper-.git "$TMP/dh"
 
 echo "→ Installing Daily code (keeping your data file)…"
-# Copy code/config, but never wipe data/
 cp -R "$TMP/dh/ikigai/src" "$ROOT/"
 cp -f "$TMP/dh/ikigai/package.json" "$ROOT/package.json"
 cp -f "$TMP/dh/ikigai/package-lock.json" "$ROOT/package-lock.json"
@@ -44,7 +43,6 @@ cp -f "$TMP/dh/ikigai/eslint.config.mjs" "$ROOT/eslint.config.mjs" 2>/dev/null |
 mkdir -p "$ROOT/scripts"
 cp -f "$TMP/dh/ikigai/scripts/restore-daily.sh" "$ROOT/scripts/restore-daily.sh" 2>/dev/null || true
 
-# Restore personal data if we backed it up
 mkdir -p "$ROOT/data"
 if [[ -f "$BACKUP_DIR/ikigai-store.json" ]]; then
   cp -f "$BACKUP_DIR/ikigai-store.json" "$ROOT/data/ikigai-store.json"
@@ -54,6 +52,9 @@ fi
 echo "→ npm install…"
 npm install
 
+echo "→ Clearing broken Next.js cache…"
+rm -rf "$ROOT/.next"
+
 echo ""
 echo "Done. Start the app with:"
 echo "  npm run dev"
@@ -61,5 +62,11 @@ echo "Then open:"
 echo "  http://localhost:3000        (old map/notes)"
 echo "  http://localhost:3000/daily  (VibeTrack Daily)"
 echo ""
-echo "If Daily opens but map looks empty, run in Chrome console on localhost:3000:"
+echo "If it still spins forever:"
+echo "  1) Ctrl+C to stop"
+echo "  2) rm -rf .next"
+echo "  3) npm run dev"
+echo "  4) Hard refresh Chrome (Ctrl+Shift+R)"
+echo ""
+echo "If map looks empty after load, Chrome console on localhost:3000:"
 echo "  localStorage.removeItem('ikigai:v2'); localStorage.removeItem('ikigai:v2:snapshot'); location.reload()"

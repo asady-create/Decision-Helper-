@@ -413,7 +413,8 @@
               >
                 Show tendency checklist
               </summary>
-              <div id="mungerChecklist" class="mt-5 space-y-5"></div>
+              <p class="mt-3 text-xs text-stone-500">Tap any tendency that may be shaping this decision. Hover for the full name.</p>
+              <div id="mungerChecklist" class="mt-3 flex flex-wrap gap-2"></div>
             </details>
 
             <div class="mt-5 border-t border-[#e8dfd4] pt-5">
@@ -1064,25 +1065,28 @@
 
         MUNGER_TENDENCIES.forEach((tendency) => {
           const entry = state.mungerTendencies[tendency.id];
+          const checked = Boolean(entry.checked);
           const label = document.createElement("label");
-          label.className =
-            "flex cursor-pointer items-start gap-3 rounded-xl border border-transparent px-2 py-3 transition hover:border-[#e0d5c8] hover:bg-[#fffaf5]";
+          label.title = tendency.name;
+          label.className = checked
+            ? "inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-[#c4a27a] bg-[#fff1e4] px-2.5 py-1.5 text-xs font-medium text-[#8b5a2b] transition hover:border-[#b07a45]"
+            : "inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-[#e5dbd0] bg-[#fffdf9] px-2.5 py-1.5 text-xs font-medium text-stone-600 transition hover:border-[#d8ccbe] hover:bg-[#fffaf5]";
 
           const checkbox = document.createElement("input");
           checkbox.type = "checkbox";
-          checkbox.checked = Boolean(entry.checked);
+          checkbox.checked = checked;
           checkbox.className =
-            "mt-1 h-5 w-5 shrink-0 rounded border-[#d8ccbe] bg-[#fffaf5] text-[#9a6432] focus:ring-[#c48a4a]/20";
+            "h-3.5 w-3.5 shrink-0 rounded border-[#d8ccbe] bg-white text-[#9a6432] focus:ring-2 focus:ring-[#c48a4a]/25";
           checkbox.ariaLabel = tendency.name;
           checkbox.addEventListener("change", () => {
             state.mungerTendencies[tendency.id].checked = checkbox.checked;
             persistCurrentState();
-            updateMungerChecklistSummary();
+            renderMungerChecklist();
           });
 
           const text = document.createElement("span");
-          text.className = "text-sm font-medium leading-6 text-stone-800";
-          text.textContent = tendency.name;
+          text.className = "leading-none";
+          text.textContent = tendency.shortLabel;
 
           label.append(checkbox, text);
           elements.mungerChecklist.append(label);

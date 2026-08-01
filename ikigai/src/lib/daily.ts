@@ -1,17 +1,33 @@
 import type { DayHabits, HabitId, Quote } from "./types";
 
+export type HabitCategory = "body" | "mind" | "soul";
+
+export const HABIT_CATEGORIES = [
+  { id: "body", label: "Body" },
+  { id: "mind", label: "Mind" },
+  { id: "soul", label: "Soul" },
+] as const satisfies ReadonlyArray<{ id: HabitCategory; label: string }>;
+
 export const HABITS = [
-  { id: "gym", label: "Gym" },
-  { id: "running", label: "Running" },
-  { id: "cycling", label: "Cycling" },
-  { id: "swimming", label: "Swimming" },
-  { id: "squash", label: "Squash" },
-  { id: "meditation", label: "Meditation" },
-  { id: "reading", label: "Reading" },
-  { id: "learning", label: "Learning" },
-  { id: "investing", label: "Investing" },
-  { id: "praying", label: "Praying" },
-] as const satisfies ReadonlyArray<{ id: HabitId; label: string }>;
+  { id: "gym", label: "Gym", category: "body" },
+  { id: "running", label: "Running", category: "body" },
+  { id: "cycling", label: "Cycling", category: "body" },
+  { id: "swimming", label: "Swimming", category: "body" },
+  { id: "squash", label: "Squash", category: "body" },
+  { id: "reading", label: "Reading", category: "mind" },
+  { id: "learning", label: "Learning", category: "mind" },
+  { id: "investing", label: "Investing", category: "mind" },
+  { id: "meditation", label: "Meditation", category: "soul" },
+  { id: "praying", label: "Praying", category: "soul" },
+] as const satisfies ReadonlyArray<{
+  id: HabitId;
+  label: string;
+  category: HabitCategory;
+}>;
+
+export function habitsInCategory(category: HabitCategory) {
+  return HABITS.filter((habit) => habit.category === category);
+}
 
 export const SEED_QUOTES: Quote[] = [
   {

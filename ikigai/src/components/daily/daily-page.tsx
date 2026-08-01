@@ -22,7 +22,9 @@ import {
   emptyDayHabits,
   filterQuotes,
   groupQuotesByAuthor,
+  HABIT_CATEGORIES,
   HABITS,
+  habitsInCategory,
   isQuote,
   mergeQuotes,
   quoteOfTheDay,
@@ -239,57 +241,80 @@ export function DailyPage() {
           </span>
         </div>
 
-        <ul className="divide-y divide-[var(--border)] border-y border-[var(--border)]">
-          {HABITS.map((habit) => {
-            const checked = day.checks[habit.id];
+        <div className="space-y-6">
+          {HABIT_CATEGORIES.map((category) => {
+            const habits = habitsInCategory(category.id);
+            const done = habits.filter((h) => day.checks[h.id]).length;
             return (
-              <li key={habit.id} className="py-2">
-                <label
-                  className={cn(
-                    "flex cursor-pointer items-center gap-3 py-2 transition",
-                    checked && "text-[var(--muted)]"
-                  )}
-                >
-                  <input
-                    type="checkbox"
-                    className="peer sr-only"
-                    checked={checked}
-                    onChange={() => toggleHabit(habit.id)}
-                  />
-                  <span
-                    className={cn(
-                      "flex size-5 shrink-0 items-center justify-center rounded border transition",
-                      checked
-                        ? "border-[var(--accent)] bg-[var(--accent)] text-white"
-                        : "border-[var(--border)] bg-[var(--surface)]"
-                    )}
-                  >
-                    {checked && <Check className="size-3.5" strokeWidth={2.5} />}
+              <section key={category.id} className="space-y-2">
+                <div className="flex items-baseline justify-between gap-3">
+                  <h3 className="font-display text-base font-semibold tracking-tight text-[var(--foreground)]">
+                    {category.label}
+                  </h3>
+                  <span className="text-xs tabular-nums text-[var(--muted)]">
+                    {done}/{habits.length}
                   </span>
-                  <span className="text-sm font-medium text-[var(--foreground)]">
-                    {habit.label}
-                  </span>
-                </label>
+                </div>
+                <ul className="divide-y divide-[var(--border)] border-y border-[var(--border)]">
+                  {habits.map((habit) => {
+                    const checked = day.checks[habit.id];
+                    return (
+                      <li key={habit.id} className="py-2">
+                        <label
+                          className={cn(
+                            "flex cursor-pointer items-center gap-3 py-2 transition",
+                            checked && "text-[var(--muted)]"
+                          )}
+                        >
+                          <input
+                            type="checkbox"
+                            className="peer sr-only"
+                            checked={checked}
+                            onChange={() => toggleHabit(habit.id)}
+                          />
+                          <span
+                            className={cn(
+                              "flex size-5 shrink-0 items-center justify-center rounded border transition",
+                              checked
+                                ? "border-[var(--accent)] bg-[var(--accent)] text-white"
+                                : "border-[var(--border)] bg-[var(--surface)]"
+                            )}
+                          >
+                            {checked && (
+                              <Check className="size-3.5" strokeWidth={2.5} />
+                            )}
+                          </span>
+                          <span className="text-sm font-medium text-[var(--foreground)]">
+                            {habit.label}
+                          </span>
+                        </label>
 
-                {habit.id === "reading" && checked && (
-                  <div className="mb-2 ml-8 space-y-1.5">
-                    <Label htmlFor="books-read" className="text-xs text-[var(--muted)]">
-                      Books read today
-                    </Label>
-                    <Input
-                      id="books-read"
-                      value={day.readingBooks}
-                      onChange={(event) =>
-                        updateReadingBooks(event.target.value)
-                      }
-                      placeholder="e.g. Atomic Habits, Meditations"
-                    />
-                  </div>
-                )}
-              </li>
+                        {habit.id === "reading" && checked && (
+                          <div className="mb-2 ml-8 space-y-1.5">
+                            <Label
+                              htmlFor="books-read"
+                              className="text-xs text-[var(--muted)]"
+                            >
+                              Books read today
+                            </Label>
+                            <Input
+                              id="books-read"
+                              value={day.readingBooks}
+                              onChange={(event) =>
+                                updateReadingBooks(event.target.value)
+                              }
+                              placeholder="e.g. Atomic Habits, Meditations"
+                            />
+                          </div>
+                        )}
+                      </li>
+                    );
+                  })}
+                </ul>
+              </section>
             );
           })}
-        </ul>
+        </div>
       </motion.section>
 
       <motion.section

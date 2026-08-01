@@ -105,6 +105,7 @@ export type HabitId =
   | "running"
   | "cycling"
   | "swimming"
+  | "squash"
   | "meditation"
   | "reading"
   | "learning"

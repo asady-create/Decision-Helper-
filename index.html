@@ -11,7 +11,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Source+Sans+3:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap"
       rel="stylesheet"
     />
     <script>
@@ -20,8 +20,8 @@
           theme: {
             extend: {
               fontFamily: {
-                sans: ["Figtree", "ui-sans-serif", "sans-serif"],
-                serif: ["Instrument Serif", "Georgia", "serif"],
+                sans: ["Source Sans 3", "ui-sans-serif", "sans-serif"],
+                serif: ["Cormorant Garamond", "Georgia", "serif"],
               },
               boxShadow: {
                 soft: "0 10px 30px -22px rgba(92, 62, 40, 0.22)",
@@ -55,12 +55,23 @@
 
       body {
         min-height: 100vh;
-        font-family: Figtree, ui-sans-serif, sans-serif;
+        font-family: "Source Sans 3", ui-sans-serif, sans-serif;
+        font-weight: 400;
+        letter-spacing: 0.01em;
         color: var(--ink);
         background:
           radial-gradient(circle at 12% 0%, rgba(232, 180, 130, 0.28), transparent 32rem),
           radial-gradient(circle at 88% 8%, rgba(214, 164, 120, 0.18), transparent 28rem),
           linear-gradient(165deg, #faf4ec 0%, #f3ebe1 52%, #efe6da 100%);
+      }
+
+      .font-serif,
+      h1,
+      h2,
+      h3 {
+        font-family: "Cormorant Garamond", Georgia, serif;
+        font-weight: 500;
+        letter-spacing: 0.015em;
       }
 
       .glass-panel {
@@ -152,10 +163,10 @@
       <header class="reveal mb-8">
         <a href="#" class="inline-flex items-center gap-3" aria-label="Decision Helper home">
           <span
-            class="brand-mark grid h-11 w-11 shrink-0 place-items-center rounded-xl text-lg font-bold text-white"
+            class="brand-mark grid h-11 w-11 shrink-0 place-items-center rounded-xl font-serif text-xl font-medium text-white"
             >D</span
           >
-          <span class="font-serif text-2xl tracking-tight text-stone-800 sm:text-3xl">Decision Helper</span>
+          <span class="font-serif text-3xl font-medium text-stone-800 sm:text-4xl">Decision Helper</span>
         </a>
       </header>
 
@@ -163,7 +174,7 @@
         <section class="space-y-6">
           <div class="reveal max-w-2xl pb-1">
             <h1 class="sr-only">Decision Helper</h1>
-            <p class="text-lg leading-7 text-stone-600 sm:text-xl">
+            <p class="text-lg font-light leading-8 text-stone-600 sm:text-xl">
               Compare options with a calmer framework. Capture pros, cons, and scores — saved locally in this browser.
             </p>
           </div>
@@ -173,7 +184,7 @@
             aria-labelledby="feelingsTitle"
           >
             <div class="mb-5">
-              <h2 id="feelingsTitle" class="font-serif text-xl font-semibold text-stone-800">
+              <h2 id="feelingsTitle" class="font-serif text-xl font-medium text-stone-800">
                 How do you feel right now?
               </h2>
               <p class="mt-1 text-sm text-stone-500">
@@ -225,7 +236,7 @@
             >
               <div class="mb-5 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div>
-                  <h2 id="decisionFormTitle" class="font-serif text-xl font-semibold text-stone-800">
+                  <h2 id="decisionFormTitle" class="font-serif text-xl font-medium text-stone-800">
                     1. Frame the decision
                   </h2>
                   <p class="mt-1 text-sm text-stone-500">
@@ -301,7 +312,7 @@
               </div>
 
               <div class="mt-6 rounded-2xl border border-[#ead7c4] bg-[#fff1e4] p-4 text-sm text-stone-700">
-                <h3 class="font-bold">How to use it</h3>
+                <h3 class="font-medium">How to use it</h3>
                 <ol class="mt-2 list-decimal space-y-1 pl-5">
                   <li>Write one clear decision question.</li>
                   <li>Add two or more realistic options.</li>
@@ -323,7 +334,7 @@
                   />
                   <button
                     type="submit"
-                    class="inline-flex w-full items-center justify-center rounded-2xl bg-[#9a6432] px-5 py-3.5 font-bold text-white shadow-sm transition hover:bg-[#7a4e25] focus:outline-none focus:ring-4 focus:ring-[#c48a4a]/20 sm:w-auto "
+                    class="inline-flex w-full items-center justify-center rounded-2xl bg-[#9a6432] px-5 py-3.5 font-semibold text-white shadow-sm transition hover:bg-[#7a4e25] focus:outline-none focus:ring-4 focus:ring-[#c48a4a]/20 sm:w-auto "
                   >
                     Add option
                   </button>
@@ -336,7 +347,7 @@
               aria-labelledby="factorsTitle"
             >
               <div class="mb-5">
-                <h2 id="factorsTitle" class="font-serif text-xl font-semibold text-stone-800">
+                <h2 id="factorsTitle" class="font-serif text-xl font-medium text-stone-800">
                   2. Score key factors
                 </h2>
                 <p class="mt-1 text-sm text-stone-500">
@@ -353,7 +364,7 @@
                 />
                 <button
                   type="submit"
-                  class="inline-flex w-full items-center justify-center rounded-2xl border border-[#e4cfb8] bg-[#fff1e4] px-5 py-3.5 font-bold text-stone-700 transition hover:bg-[#fff1e4] focus:outline-none focus:ring-4 focus:ring-[#c48a4a]/15 sm:w-auto text-stone-800"
+                  class="inline-flex w-full items-center justify-center rounded-2xl border border-[#e4cfb8] bg-[#fff1e4] px-5 py-3.5 font-semibold text-stone-700 transition hover:bg-[#fff1e4] focus:outline-none focus:ring-4 focus:ring-[#c48a4a]/15 sm:w-auto text-stone-800"
                 >
                   Add factor
                 </button>
@@ -364,7 +375,7 @@
           <section class="reveal space-y-4" aria-labelledby="optionsTitle">
             <div class="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
               <div>
-                <h2 id="optionsTitle" class="font-serif text-2xl font-semibold tracking-tight text-stone-800">
+                <h2 id="optionsTitle" class="font-serif text-2xl font-medium text-stone-800">
                   3. Compare options
                 </h2>
                 <p class="text-sm text-stone-500">
@@ -382,7 +393,7 @@
           >
             <div class="mb-4">
               <p class="mb-1 text-sm font-medium text-[#8b5a2b]">Bias awareness check</p>
-              <h2 id="mungerTitle" class="font-serif text-xl font-semibold text-stone-800">
+              <h2 id="mungerTitle" class="font-serif text-xl font-medium text-stone-800">
                 Charlie Munger's the Psychology of Human Misjudgment
               </h2>
               <p class="mt-3 text-base italic leading-7 text-stone-700">
@@ -407,7 +418,7 @@
 
             <div class="mt-5 border-t border-[#e8dfd4] pt-5">
               <div class="mb-3 flex flex-wrap items-center justify-between gap-3">
-                <h3 class="font-serif text-base font-semibold text-stone-800">Counterarguments</h3>
+                <h3 class="font-serif text-base font-medium text-stone-800">Counterarguments</h3>
                 <button
                   id="addCounterargument"
                   type="button"
@@ -429,7 +440,7 @@
             class="glass-panel interactive-surface reveal rounded-2xl border border-[#e8dfd4] bg-white/90 p-5 shadow-soft bg-white/90 sm:p-6"
             aria-labelledby="recommendationTitle"
           >
-            <h2 id="recommendationTitle" class="font-serif text-xl font-semibold text-stone-800">
+            <h2 id="recommendationTitle" class="font-serif text-xl font-medium text-stone-800">
               Recommendation
             </h2>
             <div id="recommendation" class="mt-5"></div>
@@ -441,13 +452,13 @@
           >
             <div class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <h2 id="savedTitle" class="font-serif text-lg font-semibold text-stone-800">Saved decisions</h2>
+                <h2 id="savedTitle" class="font-serif text-lg font-medium text-stone-800">Saved decisions</h2>
                 <p class="text-sm text-stone-500">Stored locally on this device.</p>
               </div>
               <button
                 id="saveSnapshot"
                 type="button"
-                class="inline-flex w-full items-center justify-center rounded-xl bg-[#9a6432] px-5 py-3 text-sm font-bold text-white transition hover:bg-[#7a4e25] focus:outline-none focus:ring-4 focus:ring-[#c48a4a]/15 sm:w-auto text-white"
+                class="inline-flex w-full items-center justify-center rounded-xl bg-[#9a6432] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#7a4e25] focus:outline-none focus:ring-4 focus:ring-[#c48a4a]/15 sm:w-auto text-white"
               >
                 Save
               </button>
@@ -466,7 +477,7 @@
           <div class="min-w-0">
             <input
               type="text"
-              class="option-title w-full rounded-xl border border-transparent bg-transparent px-0 py-1 font-serif text-2xl font-semibold tracking-tight text-stone-800 outline-none transition focus:border-[#c48a4a] focus:bg-[#fffaf5] focus:px-3 focus:ring-4 focus:ring-[#c48a4a]/15 text-stone-800"
+              class="option-title w-full rounded-xl border border-transparent bg-transparent px-0 py-1 font-serif text-2xl font-medium text-stone-800 outline-none transition focus:border-[#c48a4a] focus:bg-[#fffaf5] focus:px-3 focus:ring-4 focus:ring-[#c48a4a]/15 text-stone-800"
             />
             <p class="score-summary mt-1 text-sm font-semibold text-stone-500"></p>
           </div>
@@ -480,7 +491,7 @@
 
         <div class="mt-5 grid gap-4 md:grid-cols-2">
           <div class="warm-inset rounded-2xl p-4">
-            <h3 class="font-bold text-stone-800">Pros</h3>
+            <h3 class="font-medium text-stone-800">Pros</h3>
             <ul class="pros-list mt-3 space-y-2"></ul>
             <form class="add-item-form mt-3 flex flex-col gap-2 sm:flex-row" data-type="pros">
               <input
@@ -488,11 +499,11 @@
                 placeholder="Add a positive point"
                 class="min-w-0 flex-1 rounded-xl border border-[#e0d5c8] bg-[#fffaf5] px-3 py-2.5 text-sm font-medium text-stone-800 outline-none transition placeholder:text-stone-500 focus:border-[#c48a4a] focus:ring-4 focus:ring-[#c48a4a]/15 bg-[#fffaf5] text-stone-800"
               />
-              <button type="submit" class="inline-flex items-center justify-center rounded-xl bg-[#9a6432] px-4 py-2.5 text-sm font-bold text-white transition hover:bg-[#8b5a2b] focus:outline-none focus:ring-4 focus:ring-[#c48a4a]/15">Add</button>
+              <button type="submit" class="inline-flex items-center justify-center rounded-xl bg-[#9a6432] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#8b5a2b] focus:outline-none focus:ring-4 focus:ring-[#c48a4a]/15">Add</button>
             </form>
           </div>
           <div class="rounded-2xl border border-[#ead7c4] bg-[#fffaf5] p-4">
-            <h3 class="font-bold text-stone-700">Cons</h3>
+            <h3 class="font-medium text-stone-700">Cons</h3>
             <ul class="cons-list mt-3 space-y-2"></ul>
             <form class="add-item-form mt-3 flex flex-col gap-2 sm:flex-row" data-type="cons">
               <input
@@ -500,7 +511,7 @@
                 placeholder="Add a concern"
                 class="min-w-0 flex-1 rounded-xl border border-[#dfc7ad] bg-[#fffaf5] px-3 py-2.5 text-sm font-medium text-stone-800 outline-none transition placeholder:text-stone-500 focus:border-[#c48a4a] focus:ring-4 focus:ring-[#c48a4a]/15 bg-[#fffaf5] text-stone-800"
               />
-              <button type="submit" class="inline-flex items-center justify-center rounded-xl bg-[#9a6432] px-4 py-2.5 text-sm font-bold text-white transition hover:bg-[#8b5a2b] focus:outline-none focus:ring-4 focus:ring-[#c48a4a]/15">Add</button>
+              <button type="submit" class="inline-flex items-center justify-center rounded-xl bg-[#9a6432] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#8b5a2b] focus:outline-none focus:ring-4 focus:ring-[#c48a4a]/15">Add</button>
             </form>
           </div>
         </div>
@@ -922,7 +933,7 @@
           header.className = "flex items-center justify-between gap-3";
 
           const title = document.createElement("p");
-          title.className = "text-xs font-bold uppercase tracking-wide text-stone-500";
+          title.className = "text-xs font-medium uppercase tracking-[0.14em] text-stone-500";
           title.textContent = `Counterargument ${index + 1}`;
 
           const removeButton = document.createElement("button");
@@ -1390,8 +1401,8 @@
         const card = document.createElement("div");
         card.className = "recommendation-card reveal rounded-2xl p-5 text-stone-800";
         card.innerHTML = `
-          <p class="text-sm font-semibold uppercase tracking-[0.18em] text-[#8b5a2b]">Best recommendation</p>
-          <h3 class="mt-3 font-serif text-3xl font-semibold">${escapeHtml(winner.option.name || "Untitled option")}</h3>
+          <p class="text-sm font-semibold uppercase tracking-[0.16em] font-medium text-[#8b5a2b]">Best recommendation</p>
+          <h3 class="mt-3 font-serif text-3xl font-medium">${escapeHtml(winner.option.name || "Untitled option")}</h3>
           <p class="mt-3 text-stone-700">
             Weighted score: <strong>${winner.score.normalized.toFixed(1)} / 10</strong>
           </p>
@@ -1442,7 +1453,7 @@
 
           const savedDate = decision.savedAt ? new Date(decision.savedAt).toLocaleString() : "Saved decision";
           row.innerHTML = `
-            <p class="font-bold text-stone-800">${escapeHtml(decision.title || "Untitled decision")}</p>
+            <p class="font-medium text-stone-800">${escapeHtml(decision.title || "Untitled decision")}</p>
             <p class="mt-1 text-xs font-medium text-stone-500">${escapeHtml(savedDate)}</p>
           `;
 

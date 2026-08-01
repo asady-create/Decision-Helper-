@@ -1,0 +1,50 @@
+---
+description: VibeTrack UI implementation patterns for React/CSS screens using the design system
+globs: **/*.{tsx,ts,css,html}
+alwaysApply: false
+---
+
+# VibeTrack UI Patterns
+
+Apply when editing UI files. Canonical reference: `vibetrack/src/index.css` and `vibetrack/src/App.tsx`.
+
+## Page shell
+- Root wrapper class (e.g. `.app`) with page padding and enter transition.
+- Fixed `.atmosphere` layer behind content for gradients.
+- Header with large `.brand` + quiet date/meta on the same baseline row.
+- `main` as a single-column grid of sections.
+
+## Section structure
+```tsx
+<section aria-labelledby="section-id">
+  <h2 id="section-id">Title</h2>
+  <p className="hint">One short supporting sentence.</p>
+  {/* interaction */}
+</section>
+```
+
+## Forms
+- Label above control; uppercase micro-label in `--ink-soft`.
+- Textarea/input share the same border, radius (~0.65rem), and focus treatment.
+- Submit is an inline-flex pill with optional lucide icon (`Plus`, etc.).
+
+## Habit / checklist rows
+- Open list, not cards.
+- Each row: custom checkbox + label, separated by `--line` borders.
+- Hide native checkbox visually; keep it accessible; style a `.box` sibling.
+- Checked: accent fill + softer label color.
+
+## Quote block
+- Display type for the quote body.
+- Author as muted footer (`— Name`).
+- Empty state: one quiet sentence prompting action.
+
+## Responsive
+- Below ~640px: stack header, reduce padding, stack section heads.
+- Keep tap targets comfortable; preserve the same light palette.
+
+## When extending
+1. Start from CSS variables in the design-system rule.
+2. Prefer new utility classes that reuse tokens over inline styles.
+3. Match existing motion timing and quiet density.
+4. If a border/shadow/radius can be removed without hurting understanding, remove it.

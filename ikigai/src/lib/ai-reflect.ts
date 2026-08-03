@@ -34,16 +34,20 @@ export function buildReflectionContext(data: AppData): string {
     );
     lines.push(
       `- Skills I have: ${
-        map.skillsHave
-          .map((s) => (s.note ? `${s.name} (${s.note})` : s.name))
+        (map.skillsHave ?? [])
+          .map((s) =>
+            s?.note ? `${clean(s.name)} (${clean(s.note)})` : clean(s?.name)
+          )
           .filter((s) => s.trim())
           .join("; ") || "(empty)"
       }`
     );
     lines.push(
       `- Skills I lack: ${
-        map.skillsLack
-          .map((s) => (s.note ? `${s.name} (${s.note})` : s.name))
+        (map.skillsLack ?? [])
+          .map((s) =>
+            s?.note ? `${clean(s.name)} (${clean(s.note)})` : clean(s?.name)
+          )
           .filter((s) => s.trim())
           .join("; ") || "(empty)"
       }`
@@ -52,20 +56,24 @@ export function buildReflectionContext(data: AppData): string {
   }
 
   const notes = (data.notes ?? [])
-    .filter((n) => n.content.trim())
+    .filter((n) => n && clean(n.content))
     .slice(0, 8)
-    .map((n) => `- ${clip(n.content, 180)}${n.tags.length ? ` [${n.tags.join(", ")}]` : ""}`);
+    .map((n) => {
+      const tags = Array.isArray(n.tags) ? n.tags.filter(Boolean) : [];
+      return `- ${clip(n.content, 180)}${tags.length ? ` [${tags.join(", ")}]` : ""}`;
+    });
   lines.push("Recent notes:");
   lines.push(...(notes.length ? notes : ["- (none)"]));
 
   const insights = (data.insights ?? [])
+    .filter((i) => i && clean(i.text))
     .slice(0, 6)
-    .map((i) => `- [${i.connectionId}] ${clip(i.text, 140)}`);
+    .map((i) => `- [${i.connectionId || "insight"}] ${clip(i.text, 140)}`);
   lines.push("Saved insights:");
   lines.push(...(insights.length ? insights : ["- (none)"]));
 
   const quotes = (data.quotes ?? [])
-    .filter((q) => clean(q.text))
+    .filter((q) => q && clean(q.text))
     .slice(0, 5)
     .map(
       (q) =>
@@ -287,6 +295,47 @@ export function buildLocalReflection(data: AppData): AiReflection {
     });
   }
 
+  if (goodAt && need && !want) {
+    pursuits.push({
+      id: nanoid(10),
+      title: `Skill offered into a real need`,
+      summary: `Even before love/want is fully named, “${clip(goodAt, 50)}” meeting “${clip(need, 50)}” is already a serious contemplative path — vocation often appears here first.`,
+      why: [
+        `You said you’re good at: ${clip(goodAt)}.`,
+        `You sense the world needs: ${clip(need)}.`,
+        ...(have[0] ? [`A concrete skill you hold: “${have[0]}”.`] : []),
+        ...(values[0] ? [`Value under it: “${values[0]}”.`] : []),
+      ],
+      intersections: ["vocation", "mission"],
+      questions: [
+        `When you use “${clip(goodAt, 40)}” for “${clip(need, 40)}”, what feels like duty and what feels like belonging?`,
+        `Whose specific face comes to mind when you read that need?`,
+        `What would you refuse to commercialize even if this path grew?`,
+      ],
+    });
+  }
+
+  if (have.length >= 2 && need) {
+    pursuits.push({
+      id: nanoid(10),
+      title: `Weave the skills you already name`,
+      summary: `Your skill list (${have.slice(0, 3).map((h) => `“${h}”`).join(", ")}${have.length > 3 ? "…" : ""}) already sketches a unique offer into “${clip(need, 50)}”. Contemplation: which combination is irreducibly yours?`,
+      why: [
+        `Skills you wrote: ${have.slice(0, 4).join("; ")}.`,
+        `Need you wrote: ${clip(need)}.`,
+        ...(values.length
+          ? [`Values that may select among them: ${values.slice(0, 3).join(", ")}.`]
+          : []),
+      ],
+      intersections: ["profession", "ikigai"],
+      questions: [
+        `If you could keep only two skills in service of that need, which two feel honest?`,
+        `Where have strangers already benefited from this combination without a title?`,
+        `What skill gap (${lack[0] ? `“${lack[0]}”` : "still unnamed"}) is actually optional vs essential?`,
+      ],
+    });
+  }
+
   if (pursuits.length === 0) {
     pursuits.push({
       id: nanoid(10),
@@ -351,7 +400,9 @@ export function buildLocalReflection(data: AppData): AiReflection {
           .filter(Boolean)
           .slice(0, 3)
           .join(", ")}. These pursuits are invitations to contemplate — not conclusions.`
-      : `Your Ikigai picture is still emerging. Use the reflections below as mirrors, not verdicts. Fill more of the map when something feels true, then return here.`;
+      : goodAt && need
+        ? `Even with some fields still quiet, your map already points toward skill meeting need — “${clip(goodAt, 40)}” and “${clip(need, 40)}”. Sit with the pursuits below before forcing a complete picture.`
+        : `Your Ikigai picture is still emerging. Use the reflections below as mirrors, not verdicts. Fill more of the map when something feels true, then return here.`;
 
   return {
     id: nanoid(10),

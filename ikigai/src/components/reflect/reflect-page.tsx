@@ -6,7 +6,10 @@ import { format } from "date-fns";
 import { motion } from "framer-motion";
 import { ArrowRight, Compass, LoaderCircle, Sparkles } from "lucide-react";
 import { useIkigai } from "@/components/providers/ikigai-provider";
-import { mapReadyForReflection } from "@/lib/ai-reflect";
+import {
+  buildLocalReflection,
+  mapReadyForReflection,
+} from "@/lib/ai-reflect";
 import type { AiReflection } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -39,18 +42,40 @@ export function ReflectPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ data }),
       });
-      const json = (await res.json()) as {
+
+      let json: {
         reflection?: AiReflection;
         note?: string;
         error?: string;
-      };
-      if (!res.ok || !json.reflection) {
-        throw new Error(json.error || "Reflection failed");
+      } = {};
+      try {
+        json = (await res.json()) as typeof json;
+      } catch {
+        json = {};
       }
-      setAiReflection(json.reflection);
-      if (json.note) setModeNote(json.note);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Reflection failed");
+
+      if (res.ok && json.reflection) {
+        setAiReflection(json.reflection);
+        if (json.note) setModeNote(json.note);
+        return;
+      }
+
+      // Client-side fallback — works offline and in any region (HK included).
+      const local = buildLocalReflection(data);
+      setAiReflection(local);
+      setModeNote(
+        "Server reflection unavailable, so the built-in contemplative engine ran in your browser instead. This does not depend on OpenAI or your region."
+      );
+    } catch {
+      try {
+        const local = buildLocalReflection(data);
+        setAiReflection(local);
+        setModeNote(
+          "Used the built-in contemplative engine in your browser. No API or region dependency."
+        );
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Reflection failed");
+      }
     } finally {
       setLoading(false);
     }
@@ -93,7 +118,8 @@ export function ReflectPage() {
             </h2>
             <p className="text-sm text-[var(--muted)]">{readiness.hint}</p>
             <p className="text-xs text-[var(--muted)]">
-              Map fields filled: {readiness.filled}/5 core areas
+              Map fields filled: {readiness.filled}/5 core areas. Works with the
+              built-in guide offline — no OpenAI or region dependency required.
             </p>
           </div>
           <Button

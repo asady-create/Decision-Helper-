@@ -69,6 +69,7 @@ export function emptyDayHabits(): DayHabits {
   return {
     checks: emptyChecks(),
     readingBooks: "",
+    featuredQuoteId: null,
   };
 }
 
@@ -106,6 +107,9 @@ export function normalizeDayHabits(raw: unknown): DayHabits {
   if (!raw || typeof raw !== "object") return base;
   const value = raw as Record<string, unknown>;
 
+  const featuredQuoteId =
+    typeof value.featuredQuoteId === "string" ? value.featuredQuoteId : null;
+
   if ("checks" in value && value.checks && typeof value.checks === "object") {
     return {
       checks: {
@@ -114,6 +118,7 @@ export function normalizeDayHabits(raw: unknown): DayHabits {
       },
       readingBooks:
         typeof value.readingBooks === "string" ? value.readingBooks : "",
+      featuredQuoteId,
     };
   }
 
@@ -127,6 +132,7 @@ export function normalizeDayHabits(raw: unknown): DayHabits {
     checks,
     readingBooks:
       typeof value.readingBooks === "string" ? value.readingBooks : "",
+    featuredQuoteId,
   };
 }
 
@@ -148,6 +154,32 @@ export function quoteOfTheDay(quotes: Quote[], dateKey: string): Quote | null {
     hash = (hash * 31 + dateKey.charCodeAt(i)) >>> 0;
   }
   return quotes[hash % quotes.length] ?? null;
+}
+
+/** Resolve today's featured quote, falling back to the auto daily pick. */
+export function resolveFeaturedQuote(
+  quotes: Quote[],
+  dateKey: string,
+  featuredQuoteId: string | null
+): Quote | null {
+  if (featuredQuoteId) {
+    const selected = quotes.find((quote) => quote.id === featuredQuoteId);
+    if (selected) return selected;
+  }
+  return quoteOfTheDay(quotes, dateKey);
+}
+
+/** Pick another quote from the library (not the current one when possible). */
+export function nextLibraryQuote(
+  quotes: Quote[],
+  currentId: string | null
+): Quote | null {
+  if (quotes.length === 0) return null;
+  if (quotes.length === 1) return quotes[0] ?? null;
+
+  const currentIndex = quotes.findIndex((quote) => quote.id === currentId);
+  if (currentIndex === -1) return quotes[0] ?? null;
+  return quotes[(currentIndex + 1) % quotes.length] ?? null;
 }
 
 export function filterQuotes(quotes: Quote[], query: string): Quote[] {

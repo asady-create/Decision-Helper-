@@ -11,6 +11,7 @@ import {
   Download,
   Pencil,
   Plus,
+  RefreshCw,
   Search,
   Trash2,
   Upload,
@@ -27,7 +28,8 @@ import {
   habitsInCategory,
   isQuote,
   mergeQuotes,
-  quoteOfTheDay,
+  nextLibraryQuote,
+  resolveFeaturedQuote,
   todayKey,
 } from "@/lib/daily";
 import type { HabitId, Quote } from "@/lib/types";
@@ -49,7 +51,11 @@ export function DailyPage() {
   const [editAuthor, setEditAuthor] = useState("");
   const [backupMessage, setBackupMessage] = useState<string | null>(null);
 
-  const todaysQuote = quoteOfTheDay(quotes, dateKey);
+  const featuredQuote = resolveFeaturedQuote(
+    quotes,
+    dateKey,
+    day.featuredQuoteId
+  );
   const completedCount = HABITS.filter((h) => day.checks[h.id]).length;
   const filteredQuotes = useMemo(
     () => filterQuotes(quotes, deferredSearch),
@@ -78,11 +84,22 @@ export function DailyPage() {
 
   function updateReadingBooks(value: string) {
     setDayHabits(dateKey, {
+      ...day,
       checks: {
         ...day.checks,
         reading: value.trim().length > 0 ? true : day.checks.reading,
       },
       readingBooks: value,
+    });
+  }
+
+  function refreshFeaturedQuote() {
+    if (quotes.length === 0) return;
+    const next = nextLibraryQuote(quotes, featuredQuote?.id ?? null);
+    if (!next) return;
+    setDayHabits(dateKey, {
+      ...day,
+      featuredQuoteId: next.id,
     });
   }
 
@@ -207,21 +224,39 @@ export function DailyPage() {
         transition={{ delay: 0.05 }}
         className="space-y-3"
       >
-        <h2 className="font-display text-sm font-semibold tracking-[0.14em] text-[var(--muted)] uppercase">
-          Quote of the day
-        </h2>
-        {todaysQuote ? (
+        <div className="flex items-center justify-between gap-3">
+          <h2 className="font-display text-sm font-semibold tracking-[0.14em] text-[var(--muted)] uppercase">
+            Quote of the day
+          </h2>
+          <Button
+            type="button"
+            variant="secondary"
+            size="sm"
+            onClick={refreshFeaturedQuote}
+            disabled={quotes.length < 2}
+            aria-label="Show another quote from your library"
+          >
+            <RefreshCw />
+            Refresh
+          </Button>
+        </div>
+        {featuredQuote ? (
           <blockquote className="border-l-2 border-[var(--accent)] pl-5 sm:pl-6">
             <p className="font-display text-xl leading-snug font-semibold tracking-tight text-[var(--foreground)] sm:text-2xl">
-              “{todaysQuote.text}”
+              “{featuredQuote.text}”
             </p>
             <footer className="mt-3 text-sm text-[var(--muted)]">
-              — {todaysQuote.author}
+              — {featuredQuote.author}
             </footer>
           </blockquote>
         ) : (
           <p className="text-sm text-[var(--muted)]">
             Add a quote below to begin your collection.
+          </p>
+        )}
+        {quotes.length >= 2 && (
+          <p className="text-xs text-[var(--muted)]">
+            Refresh cycles through another quote from your library.
           </p>
         )}
       </motion.section>

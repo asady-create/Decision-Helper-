@@ -115,6 +115,8 @@ export type HabitId =
 export interface DayHabits {
   checks: Record<HabitId, boolean>;
   readingBooks: string;
+  /** Optional override of the auto quote-of-the-day for this date. */
+  featuredQuoteId: string | null;
 }
 
 export interface AppData {

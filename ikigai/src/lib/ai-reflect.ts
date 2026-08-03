@@ -112,6 +112,47 @@ Rules:
 - tensions: 2-4 honest unresolved edges to sit with.
 - No markdown. No weekly plan.`;
 
+/**
+ * Full copy-paste prompt for the user to run in ChatGPT / Claude / Gemini / etc.
+ * Keeps Ikigai private to their chosen AI — no API key needed in this app.
+ */
+export function buildOutsourcedReflectPrompt(data: AppData): string {
+  const context = buildReflectionContext(data);
+  return `${REFLECT_SYSTEM_PROMPT}
+
+---
+
+Here are my Ikigai inputs. Reflect on them and return ONLY the JSON object described above:
+
+${context}`;
+}
+
+/** Pull a JSON object out of raw model text (plain or fenced). */
+export function extractJsonObject(raw: string): unknown {
+  const text = (raw ?? "").trim();
+  if (!text) throw new Error("Paste is empty");
+
+  const fence = text.match(/```(?:json)?\s*([\s\S]*?)```/i);
+  const candidate = (fence?.[1] ?? text).trim();
+
+  try {
+    return JSON.parse(candidate);
+  } catch {
+    const start = candidate.indexOf("{");
+    const end = candidate.lastIndexOf("}");
+    if (start >= 0 && end > start) {
+      return JSON.parse(candidate.slice(start, end + 1));
+    }
+    throw new Error(
+      "Could not find JSON in the paste. Ask your AI to reply with only the JSON object."
+    );
+  }
+}
+
+export function parseOutsourcedAiReply(raw: string): AiReflection {
+  return parseAiReflection(extractJsonObject(raw), "outsourced");
+}
+
 type RawPursuit = {
   title?: string;
   summary?: string;

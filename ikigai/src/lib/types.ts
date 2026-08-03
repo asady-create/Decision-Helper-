@@ -133,7 +133,7 @@ export interface AppData {
   aiReflection: AiReflection | null;
 }
 
-export type AiReflectionSource = "local" | "openai";
+export type AiReflectionSource = "local" | "openai" | "outsourced";
 
 export interface IkigaiPursuit {
   id: string;

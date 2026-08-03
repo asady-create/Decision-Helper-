@@ -1,27 +1,39 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import { format } from "date-fns";
 import { motion } from "framer-motion";
-import { ArrowRight, Compass, LoaderCircle, Sparkles } from "lucide-react";
+import {
+  ArrowRight,
+  Check,
+  ClipboardCopy,
+  Compass,
+  Sparkles,
+} from "lucide-react";
 import { useIkigai } from "@/components/providers/ikigai-provider";
 import {
   buildLocalReflection,
+  buildOutsourcedReflectPrompt,
   mapReadyForReflection,
+  parseOutsourcedAiReply,
 } from "@/lib/ai-reflect";
-import type { AiReflection } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 export function ReflectPage() {
   const { ready, data, aiReflection, setAiReflection } = useIkigai();
-  const [loading, setLoading] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const [paste, setPaste] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [modeNote, setModeNote] = useState<string | null>(null);
 
   const readiness = mapReadyForReflection(data);
   const reflection = aiReflection;
+  const prompt = useMemo(
+    () => (ready ? buildOutsourcedReflectPrompt(data) : ""),
+    [ready, data]
+  );
 
   if (!ready) {
     return (
@@ -32,54 +44,51 @@ export function ReflectPage() {
     );
   }
 
-  async function runReflection() {
-    setLoading(true);
+  async function copyPrompt() {
+    setError(null);
+    try {
+      await navigator.clipboard.writeText(prompt);
+      setCopied(true);
+      setModeNote(
+        "Prompt copied. Paste it into ChatGPT, Claude, Gemini, or any model you trust — then bring the reply back here."
+      );
+      window.setTimeout(() => setCopied(false), 2000);
+    } catch {
+      setError("Could not copy automatically — select the prompt and copy it manually.");
+    }
+  }
+
+  function importReply() {
     setError(null);
     setModeNote(null);
     try {
-      const res = await fetch("/api/reflect", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ data }),
-      });
-
-      let json: {
-        reflection?: AiReflection;
-        note?: string;
-        error?: string;
-      } = {};
-      try {
-        json = (await res.json()) as typeof json;
-      } catch {
-        json = {};
-      }
-
-      if (res.ok && json.reflection) {
-        setAiReflection(json.reflection);
-        if (json.note) setModeNote(json.note);
-        return;
-      }
-
-      // Client-side fallback — works offline and in any region (HK included).
-      const local = buildLocalReflection(data);
-      setAiReflection(local);
+      const parsed = parseOutsourcedAiReply(paste);
+      setAiReflection(parsed);
       setModeNote(
-        "Server reflection unavailable, so the built-in contemplative engine ran in your browser instead. This does not depend on OpenAI or your region."
+        "Imported from your outsourced AI reply. Sit with it — revise your map if something feels true or false."
       );
-    } catch {
-      try {
-        const local = buildLocalReflection(data);
-        setAiReflection(local);
-        setModeNote(
-          "Used the built-in contemplative engine in your browser. No API or region dependency."
-        );
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Reflection failed");
-      }
-    } finally {
-      setLoading(false);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not parse the reply");
     }
   }
+
+  function runLocalGuide() {
+    setError(null);
+    const local = buildLocalReflection(data);
+    setAiReflection(local);
+    setModeNote(
+      "Quick local guide (template-based). For richer AI language, copy the prompt into your own model."
+    );
+  }
+
+  const sourceLabel =
+    reflection?.source === "outsourced"
+      ? "Your AI (pasted)"
+      : reflection?.source === "openai"
+        ? "OpenAI (app key)"
+        : reflection
+          ? "Built-in guide"
+          : null;
 
   return (
     <div className="space-y-12">
@@ -99,39 +108,26 @@ export function ReflectPage() {
           Contemplate your direction
         </motion.h1>
         <p className="mt-3 max-w-2xl text-sm leading-relaxed text-[var(--muted)]">
-          Assistance for contemplation — not a plan, not a verdict. It reads
-          your map, notes, and insights, then names possible Ikigai pursuits to
-          sit with, grounded in your own words and questions meant for quiet
-          attention.
+          We build a prompt from your map, notes, and insights. You run it in
+          whatever AI you prefer — then paste the reply back to sit with possible
+          pursuits. No API key, no region lock.
         </p>
       </section>
 
       <motion.section
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
-        className="space-y-4 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5 sm:p-6"
+        className="space-y-5 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5 sm:p-6"
       >
-        <div className="flex flex-wrap items-start justify-between gap-4">
-          <div className="max-w-xl space-y-2">
-            <h2 className="font-display text-lg font-semibold tracking-tight">
-              Begin a reflection
-            </h2>
-            <p className="text-sm text-[var(--muted)]">{readiness.hint}</p>
-            <p className="text-xs text-[var(--muted)]">
-              Map fields filled: {readiness.filled}/5 core areas. Works with the
-              built-in guide offline — no OpenAI or region dependency required.
-            </p>
-          </div>
-          <Button
-            type="button"
-            variant="accent"
-            size="lg"
-            onClick={() => void runReflection()}
-            disabled={loading || !readiness.ready}
-          >
-            {loading ? <LoaderCircle className="animate-spin" /> : <Sparkles />}
-            {reflection ? "Reflect again" : "Contemplate my Ikigai"}
-          </Button>
+        <div className="space-y-2">
+          <h2 className="font-display text-lg font-semibold tracking-tight">
+            1 · Copy your reflection prompt
+          </h2>
+          <p className="text-sm text-[var(--muted)]">{readiness.hint}</p>
+          <p className="text-xs text-[var(--muted)]">
+            Map fields filled: {readiness.filled}/5 · Works with ChatGPT, Claude,
+            Gemini, DeepSeek, or any chat model you can access from Hong Kong.
+          </p>
         </div>
 
         {!readiness.ready && (
@@ -148,9 +144,76 @@ export function ReflectPage() {
           </div>
         )}
 
+        {readiness.ready && (
+          <>
+            <textarea
+              readOnly
+              value={prompt}
+              rows={12}
+              className="w-full resize-y rounded-xl border border-[var(--border)] bg-[var(--background)] px-3 py-3 font-mono text-xs leading-relaxed text-[var(--foreground)]"
+              aria-label="Ikigai reflection prompt to copy"
+            />
+            <div className="flex flex-wrap gap-2">
+              <Button
+                type="button"
+                variant="accent"
+                size="lg"
+                onClick={() => void copyPrompt()}
+              >
+                {copied ? <Check /> : <ClipboardCopy />}
+                {copied ? "Copied" : "Copy prompt"}
+              </Button>
+              <Button
+                type="button"
+                variant="secondary"
+                size="lg"
+                onClick={runLocalGuide}
+              >
+                <Sparkles />
+                Quick local guide
+              </Button>
+            </div>
+          </>
+        )}
+
         {error && <p className="text-sm text-red-700">{error}</p>}
         {modeNote && <p className="text-xs text-[var(--muted)]">{modeNote}</p>}
       </motion.section>
+
+      {readiness.ready && (
+        <motion.section
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="space-y-4 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5 sm:p-6"
+        >
+          <div className="space-y-2">
+            <h2 className="font-display text-lg font-semibold tracking-tight">
+              2 · Paste the AI reply
+            </h2>
+            <p className="text-sm text-[var(--muted)]">
+              Ask the model for JSON only (the prompt already says so). Paste the
+              whole reply below — fenced code blocks are fine.
+            </p>
+          </div>
+          <textarea
+            value={paste}
+            onChange={(e) => setPaste(e.target.value)}
+            rows={8}
+            placeholder='Paste JSON here, e.g. { "mirror": "...", "pursuits": [...], "tensions": [...] }'
+            className="w-full resize-y rounded-xl border border-[var(--border)] bg-[var(--background)] px-3 py-3 font-mono text-xs leading-relaxed text-[var(--foreground)] placeholder:text-[var(--muted)]"
+            aria-label="Paste AI reflection JSON"
+          />
+          <Button
+            type="button"
+            variant="accent"
+            size="lg"
+            onClick={importReply}
+            disabled={!paste.trim()}
+          >
+            Import reflection
+          </Button>
+        </motion.section>
+      )}
 
       {reflection && (
         <>
@@ -165,8 +228,7 @@ export function ReflectPage() {
               </h2>
               <span className="text-xs text-[var(--muted)]">
                 {format(new Date(reflection.createdAt), "MMM d, yyyy · HH:mm")}
-                {" · "}
-                {reflection.source === "openai" ? "AI model" : "Built-in guide"}
+                {sourceLabel ? ` · ${sourceLabel}` : ""}
               </span>
             </div>
             <blockquote className="border-l-2 border-[var(--accent)] pl-5 sm:pl-6">
@@ -299,9 +361,9 @@ export function ReflectPage() {
         <div className="flex items-start gap-3 rounded-xl border border-dashed border-[var(--border)] px-4 py-5 text-sm text-[var(--muted)]">
           <Compass className="mt-0.5 size-4 shrink-0" />
           <p>
-            When you reflect, you’ll see a mirror of your inputs, a few possible
-            Ikigai directions, and questions meant for contemplation — not a
-            weekly plan.
+            Copy the prompt → run it in your AI → paste the JSON reply. You’ll
+            get a mirror, possible Ikigai directions, and questions for
+            contemplation — not a weekly plan.
           </p>
         </div>
       )}

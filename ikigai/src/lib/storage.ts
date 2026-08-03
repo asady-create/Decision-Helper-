@@ -135,7 +135,10 @@ function normalizeAiReflection(raw: unknown): AiReflection | null {
     tensions: Array.isArray(value.tensions)
       ? value.tensions.filter((t): t is string => typeof t === "string")
       : [],
-    source: value.source === "openai" ? "openai" : "local",
+    source:
+      value.source === "openai" || value.source === "outsourced"
+        ? value.source
+        : "local",
   };
 }
 

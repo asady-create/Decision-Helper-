@@ -7,6 +7,7 @@
  */
 
 import type {
+  AiReflection,
   AppData,
   DayHabits,
   InsightIdea,
@@ -50,6 +51,7 @@ const DEFAULT_DATA: AppData = {
   timelineAreas: DEFAULT_TIMELINE_AREAS.map((a) => ({ ...a })),
   quotes: SEED_QUOTES.map((q) => ({ ...q })),
   habits: {},
+  aiReflection: null,
 };
 
 function isBrowser() {
@@ -90,6 +92,50 @@ export function normalizeAppData(raw: Partial<AppData> | null): AppData {
     ),
     quotes: normalizeQuotes(raw.quotes),
     habits: normalizeHabitsLog(raw.habits),
+    aiReflection: normalizeAiReflection(raw.aiReflection),
+  };
+}
+
+function normalizeAiReflection(raw: unknown): AiReflection | null {
+  if (!raw || typeof raw !== "object") return null;
+  const value = raw as Partial<AiReflection>;
+  if (typeof value.id !== "string" || typeof value.createdAt !== "string") {
+    return null;
+  }
+  if (typeof value.mirror !== "string" || !Array.isArray(value.pursuits)) {
+    return null;
+  }
+  const pursuits = value.pursuits
+    .filter((p): p is NonNullable<typeof p> => Boolean(p && typeof p === "object"))
+    .map((p) => {
+      const item = p as Partial<AiReflection["pursuits"][number]>;
+      return {
+        id: typeof item.id === "string" ? item.id : `pursuit-${Math.random().toString(36).slice(2, 8)}`,
+        title: typeof item.title === "string" ? item.title : "Untitled direction",
+        summary: typeof item.summary === "string" ? item.summary : "",
+        why: Array.isArray(item.why)
+          ? item.why.filter((x): x is string => typeof x === "string")
+          : [],
+        intersections: Array.isArray(item.intersections)
+          ? item.intersections.filter(
+              (x): x is AiReflection["pursuits"][number]["intersections"][number] =>
+                typeof x === "string"
+            )
+          : [],
+        questions: Array.isArray(item.questions)
+          ? item.questions.filter((x): x is string => typeof x === "string")
+          : [],
+      };
+    });
+  return {
+    id: value.id,
+    createdAt: value.createdAt,
+    mirror: value.mirror,
+    pursuits,
+    tensions: Array.isArray(value.tensions)
+      ? value.tensions.filter((t): t is string => typeof t === "string")
+      : [],
+    source: value.source === "openai" ? "openai" : "local",
   };
 }
 
@@ -134,6 +180,10 @@ export function contentScore(data: AppData): number {
     if (q.text?.trim()) score += Math.min(q.text.trim().length, 120) + 5;
   }
   score += Object.keys(data.habits ?? {}).length * 8;
+  if (data.aiReflection?.mirror?.trim()) {
+    score += Math.min(data.aiReflection.mirror.trim().length, 160) + 20;
+    score += (data.aiReflection.pursuits?.length ?? 0) * 12;
+  }
   return score;
 }
 
@@ -206,6 +256,7 @@ function migrateLegacy(): AppData | null {
       timelineAreas: DEFAULT_TIMELINE_AREAS.map((a) => ({ ...a })),
       quotes: SEED_QUOTES.map((q) => ({ ...q })),
       habits: {},
+      aiReflection: null,
     };
     saveAppDataLocal(data, { force: true });
     window.localStorage.removeItem(LEGACY_KEY);
@@ -536,6 +587,13 @@ export function saveDayHabits(dateKey: string, day: DayHabits): AppData {
     ...normalizeHabitsLog(data.habits),
     [dateKey]: normalizeDayHabits(day),
   };
+  saveAppData(data);
+  return data;
+}
+
+export function saveAiReflection(reflection: AiReflection | null): AppData {
+  const data = loadAppDataLocal();
+  data.aiReflection = reflection;
   saveAppData(data);
   return data;
 }

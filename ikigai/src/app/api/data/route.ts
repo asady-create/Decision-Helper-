@@ -28,6 +28,8 @@ function isEmpty(data: AppData): boolean {
     return false;
   if ((data.quotes?.length ?? 0) > 0 || Object.keys(data.habits ?? {}).length)
     return false;
+  if (data.aiReflection?.mirror?.trim() || data.aiReflection?.pursuits?.length)
+    return false;
   return true;
 }
 
@@ -42,6 +44,7 @@ export async function GET() {
       timelineAreas: [],
       quotes: [],
       habits: {},
+      aiReflection: null,
     },
     path: getStorePath(),
     exists: data !== null,
@@ -64,6 +67,7 @@ async function save(req: Request) {
     timelineAreas: body.timelineAreas ?? [],
     quotes: body.quotes ?? [],
     habits: body.habits ?? {},
+    aiReflection: body.aiReflection ?? null,
   };
 
   // Never let an empty payload wipe a rich disk file

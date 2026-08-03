@@ -13,6 +13,7 @@ import {
   Menu,
   X,
   SunMedium,
+  Sparkles,
 } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
@@ -25,6 +26,7 @@ const NAV = [
   { href: "/map", label: "Map", icon: Map },
   { href: "/skills", label: "Skills", icon: Wrench },
   { href: "/insights", label: "Insights", icon: GitMerge },
+  { href: "/reflect", label: "Reflect", icon: Sparkles },
   { href: "/timeline", label: "Timeline", icon: History },
   { href: "/notes", label: "Notes", icon: NotebookPen },
 ];

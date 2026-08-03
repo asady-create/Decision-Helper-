@@ -42,6 +42,7 @@ cp -f "$TMP/dh/ikigai/postcss.config.mjs" "$ROOT/postcss.config.mjs" 2>/dev/null
 cp -f "$TMP/dh/ikigai/eslint.config.mjs" "$ROOT/eslint.config.mjs" 2>/dev/null || true
 mkdir -p "$ROOT/scripts"
 cp -f "$TMP/dh/ikigai/scripts/restore-daily.sh" "$ROOT/scripts/restore-daily.sh" 2>/dev/null || true
+cp -f "$TMP/dh/ikigai/.env.example" "$ROOT/.env.example" 2>/dev/null || true
 
 mkdir -p "$ROOT/data"
 if [[ -f "$BACKUP_DIR/ikigai-store.json" ]]; then
@@ -59,8 +60,11 @@ echo ""
 echo "Done. Start the app with:"
 echo "  npm run dev"
 echo "Then open:"
-echo "  http://localhost:3000        (old map/notes)"
-echo "  http://localhost:3000/daily  (VibeTrack Daily)"
+echo "  http://localhost:3000         (map / notes)"
+echo "  http://localhost:3000/daily   (Daily habits + quotes)"
+echo "  http://localhost:3000/reflect (Ikigai contemplation)"
+echo ""
+echo "Optional LLM reflections: copy .env.example → .env.local and set OPENAI_API_KEY"
 echo ""
 echo "If it still spins forever:"
 echo "  1) Ctrl+C to stop"

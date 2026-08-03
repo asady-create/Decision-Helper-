@@ -36,6 +36,7 @@ function normalizeDiskData(parsed: Partial<AppData>): AppData {
         ? normalizeQuotes(parsed.quotes)
         : SEED_QUOTES.map((q) => ({ ...q })),
     habits: normalizeHabitsLog(parsed.habits),
+    aiReflection: parsed.aiReflection ?? null,
   };
 }
 

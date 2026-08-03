@@ -129,4 +129,30 @@ export interface AppData {
   quotes: Quote[];
   /** Habit checks keyed by YYYY-MM-DD. */
   habits: Record<string, DayHabits>;
+  /** Latest AI / reflective Ikigai contemplation. */
+  aiReflection: AiReflection | null;
+}
+
+export type AiReflectionSource = "local" | "openai";
+
+export interface IkigaiPursuit {
+  id: string;
+  title: string;
+  summary: string;
+  /** Reasons grounded in the user’s own words. */
+  why: string[];
+  intersections: InsightConnectionId[];
+  /** Questions for contemplation, not tasks. */
+  questions: string[];
+}
+
+export interface AiReflection {
+  id: string;
+  createdAt: string;
+  /** A calm mirror of what their inputs suggest. */
+  mirror: string;
+  pursuits: IkigaiPursuit[];
+  /** Honest tensions / unanswered edges to sit with. */
+  tensions: string[];
+  source: AiReflectionSource;
 }

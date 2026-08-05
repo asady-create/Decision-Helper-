@@ -16,6 +16,7 @@ export const HABITS = [
   { id: "squash", label: "Squash", category: "body" },
   { id: "reading", label: "Reading", category: "mind" },
   { id: "learning", label: "Learning", category: "mind" },
+  { id: "building", label: "Building", category: "mind" },
   { id: "investing", label: "Investing", category: "mind" },
   { id: "meditation", label: "Meditation", category: "soul" },
   { id: "praying", label: "Praying", category: "soul" },

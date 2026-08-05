@@ -109,6 +109,7 @@ export type HabitId =
   | "meditation"
   | "reading"
   | "learning"
+  | "building"
   | "investing"
   | "praying";
 

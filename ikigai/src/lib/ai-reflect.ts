@@ -87,10 +87,18 @@ export function buildReflectionContext(data: AppData): string {
   return lines.join("\n");
 }
 
-export const REFLECT_SYSTEM_PROMPT = `You are a calm Ikigai reflection guide.
-Help the user contemplate possible life directions from their own words.
-Do NOT give weekly experiments, task lists, hustle advice, or productivity coaching.
-Speak as contemplative assistance: mirror, name possible pursuits, explain why using their inputs, and ask reflective questions.
+export const REFLECT_SYSTEM_PROMPT = `You are a calm, practical Ikigai reflection guide.
+Help the user see realistic life directions from their own words.
+Be accurate, realistic, inspiring, and helpful — never theatrical or absurd.
+
+Tone and content rules:
+- Do NOT invent grandiose, mystical, or preposterous titles (no “cosmic weaver”, “soul architect”, “destiny alchemist”, or similar).
+- Titles must sound like real directions a thoughtful adult could pursue in the next 1–5 years (roles, crafts, services, practices).
+- Prefer plain language: teaching, coaching, writing, building, caring, advising, designing, researching, etc., grounded in what they wrote.
+- Summaries should be concrete and hopeful, not hype or hustle.
+- Do NOT give weekly experiments, task lists, or productivity coaching.
+- Do NOT invent skills, needs, or careers they did not imply.
+
 Return ONLY valid JSON matching this schema:
 {
   "mirror": string,
@@ -106,10 +114,11 @@ Return ONLY valid JSON matching this schema:
   "tensions": string[]
 }
 Rules:
-- 3 to 5 pursuits maximum.
-- Each why item must clearly reference something they wrote.
-- Each pursuit needs 2-3 contemplation questions.
-- tensions: 2-4 honest unresolved edges to sit with.
+- 3 to 4 pursuits maximum.
+- Each title: short, realistic, specific (about 3–8 words).
+- Each why item must clearly reference something they wrote (quote or paraphrase tightly).
+- Each pursuit has EXACTLY ONE contemplation question — open, practical, and useful.
+- tensions: 1 to 2 items only. Each tension is one short, precise sentence (no poetry).
 - No markdown. No weekly plan.`;
 
 /**
@@ -181,7 +190,7 @@ export function parseAiReflection(
 ): AiReflection {
   const data = (raw ?? {}) as RawReflection;
   const pursuits: IkigaiPursuit[] = (data.pursuits ?? [])
-    .slice(0, 5)
+    .slice(0, 4)
     .map((p) => ({
       id: nanoid(10),
       title: clean(p.title) || "Untitled direction",
@@ -191,7 +200,8 @@ export function parseAiReflection(
         .map((x) => x as InsightConnectionId)
         .filter((x) => VALID_INTERSECTIONS.has(x))
         .slice(0, 3),
-      questions: (p.questions ?? []).map(clean).filter(Boolean).slice(0, 3),
+      // Exactly one contemplation question per pursuit.
+      questions: (p.questions ?? []).map(clean).filter(Boolean).slice(0, 1),
     }))
     .filter((p) => p.title && p.summary);
 
@@ -202,7 +212,7 @@ export function parseAiReflection(
       clean(data.mirror) ||
       "Your map is still forming. Sit with what is already true before forcing a destination.",
     pursuits,
-    tensions: (data.tensions ?? []).map(clean).filter(Boolean).slice(0, 4),
+    tensions: (data.tensions ?? []).map(clean).filter(Boolean).slice(0, 2),
     source,
   };
 }
@@ -242,18 +252,16 @@ export function buildLocalReflection(data: AppData): AiReflection {
   if (want && goodAt) {
     pursuits.push({
       id: nanoid(10),
-      title: `Craft at the edge of love and skill`,
-      summary: `A path where “${clip(want, 60)}” is expressed through “${clip(goodAt, 60)}” — not as a job title first, but as a way of being useful that feels alive.`,
+      title: `Use your strengths for what you care about`,
+      summary: `A realistic path: apply “${clip(goodAt, 50)}” toward “${clip(want, 50)}” in small, repeatable ways — teaching, making, advising, or building — before inventing a grand role.`,
       why: [
         `You named love/want as: ${clip(want)}.`,
         `You named what you’re good at as: ${clip(goodAt)}.`,
-        ...(have[0] ? [`You already carry the skill “${have[0]}”.`] : []),
+        ...(have[0] ? [`You already list the skill “${have[0]}”.`] : []),
       ],
       intersections: ["passion", "ikigai"],
       questions: [
-        `When you imagine bringing “${clip(goodAt, 40)}” to “${clip(want, 40)}”, what feels nourishing rather than performative?`,
-        `Where have you already done a small version of this without calling it your purpose?`,
-        `What would you protect about this direction even if nobody paid you yet?`,
+        `Where could you use “${clip(goodAt, 40)}” for “${clip(want, 40)}” in a real setting this year?`,
       ],
     });
   }
@@ -261,18 +269,16 @@ export function buildLocalReflection(data: AppData): AiReflection {
   if (want && need) {
     pursuits.push({
       id: nanoid(10),
-      title: `Service shaped by what you love`,
-      summary: `A mission-shaped direction: letting “${clip(want, 50)}” meet “${clip(need, 50)}”, so purpose is relational — something offered into a real need.`,
+      title: `Help a real group with what you love`,
+      summary: `Connect “${clip(want, 45)}” to “${clip(need, 45)}” for a specific group of people — one clear problem, not the whole world.`,
       why: [
         `You wrote that you love/want: ${clip(want)}.`,
         `You sense the world needs: ${clip(need)}.`,
-        ...(values[0] ? [`Your value “${values[0]}” may be the compass between them.`] : []),
+        ...(values[0] ? [`Your value “${values[0]}” can keep this honest.`] : []),
       ],
       intersections: ["mission", "ikigai"],
       questions: [
-        `Whose specific life gets quieter or freer if your love meets that need?`,
-        `What part of “${clip(need, 40)}” touches you personally, not just intellectually?`,
-        `If you could only help one narrow corner of that need, which corner feels honest?`,
+        `Who is the first real person or group you would help if “${clip(need, 40)}” were your focus?`,
       ],
     });
   }
@@ -280,8 +286,8 @@ export function buildLocalReflection(data: AppData): AiReflection {
   if (goodAt && reward) {
     pursuits.push({
       id: nanoid(10),
-      title: `Sustainable craft exchange`,
-      summary: `A profession-shaped path where “${clip(goodAt, 50)}” can be received as “${clip(reward, 50)}” — worth contemplating how livelihood can support, not devour, meaning.`,
+      title: `Earn from a skill you already have`,
+      summary: `A practical livelihood angle: turn “${clip(goodAt, 50)}” into something people can pay for via “${clip(reward, 50)}”, without pretending it must be your whole identity.`,
       why: [
         `You said you’re good at: ${clip(goodAt)}.`,
         `You can imagine being rewarded by: ${clip(reward)}.`,
@@ -289,9 +295,7 @@ export function buildLocalReflection(data: AppData): AiReflection {
       ],
       intersections: ["profession"],
       questions: [
-        `What form of “${clip(reward, 40)}” would still let you respect your energy?`,
-        `Where does skill become commodity, and where does it stay gift?`,
-        `What standard of enoughness would keep this path from becoming only income?`,
+        `What is the simplest paid form of “${clip(goodAt, 40)}” someone would hire you for?`,
       ],
     });
   }
@@ -299,20 +303,18 @@ export function buildLocalReflection(data: AppData): AiReflection {
   if (need && reward) {
     pursuits.push({
       id: nanoid(10),
-      title: `Vocation at the need–reward crossing`,
-      summary: `A vocation-shaped contemplation: serving “${clip(need, 50)}” in a way that can also be sustained through “${clip(reward, 50)}”.`,
+      title: `Serve a need in a sustainable way`,
+      summary: `Help with “${clip(need, 50)}” in a form that can also support you through “${clip(reward, 50)}” — useful work that can last.`,
       why: [
         `World need: ${clip(need)}.`,
         `Possible reward: ${clip(reward)}.`,
         ...(lack[0]
-          ? [`You named a growth edge — “${lack[0]}” — which often sits on this path.`]
+          ? [`You named a growth edge — “${lack[0]}” — that may matter here.`]
           : []),
       ],
       intersections: ["vocation"],
       questions: [
-        `What would “serving and sustaining” look like without burning out the servant?`,
-        `Which part of the need are you uniquely positioned to witness?`,
-        `What must remain non-negotiable if this becomes livelihood?`,
+        `What part of “${clip(need, 40)}” could you serve without burning out?`,
       ],
     });
   }
@@ -320,8 +322,8 @@ export function buildLocalReflection(data: AppData): AiReflection {
   if (offer) {
     pursuits.push({
       id: nanoid(10),
-      title: `Deepen what you already say you deliver`,
-      summary: `Your center statement — “${clip(offer, 80)}” — may already be pointing at Ikigai. Contemplation here means refining the offer until it feels inevitable.`,
+      title: `Clarify what you already offer`,
+      summary: `You already wrote an offer — “${clip(offer, 80)}”. Make that sentence clearer and more specific for real people.`,
       why: [
         `You wrote your deliverable/offer as: ${clip(offer)}.`,
         ...(want ? [`It sits near love/want: ${clip(want)}.`] : []),
@@ -329,9 +331,7 @@ export function buildLocalReflection(data: AppData): AiReflection {
       ],
       intersections: ["ikigai"],
       questions: [
-        `If this offer were a sentence you could stand behind for a decade, what would you change?`,
-        `Who is the first real person this offer is for?`,
-        `What disappears from your life if you stop delivering this?`,
+        `Who is the first real person this offer is for, in one sentence?`,
       ],
     });
   }
@@ -339,8 +339,8 @@ export function buildLocalReflection(data: AppData): AiReflection {
   if (goodAt && need && !want) {
     pursuits.push({
       id: nanoid(10),
-      title: `Skill offered into a real need`,
-      summary: `Even before love/want is fully named, “${clip(goodAt, 50)}” meeting “${clip(need, 50)}” is already a serious contemplative path — vocation often appears here first.`,
+      title: `Apply your skill where it’s needed`,
+      summary: `A grounded next step: use “${clip(goodAt, 50)}” for “${clip(need, 50)}” — coaching, support, teaching, or practical help — even while love/want is still forming.`,
       why: [
         `You said you’re good at: ${clip(goodAt)}.`,
         `You sense the world needs: ${clip(need)}.`,
@@ -349,9 +349,7 @@ export function buildLocalReflection(data: AppData): AiReflection {
       ],
       intersections: ["vocation", "mission"],
       questions: [
-        `When you use “${clip(goodAt, 40)}” for “${clip(need, 40)}”, what feels like duty and what feels like belonging?`,
-        `Whose specific face comes to mind when you read that need?`,
-        `What would you refuse to commercialize even if this path grew?`,
+        `In what concrete role or setting could “${clip(goodAt, 40)}” help with “${clip(need, 40)}”?`,
       ],
     });
   }
@@ -359,20 +357,21 @@ export function buildLocalReflection(data: AppData): AiReflection {
   if (have.length >= 2 && need) {
     pursuits.push({
       id: nanoid(10),
-      title: `Weave the skills you already name`,
-      summary: `Your skill list (${have.slice(0, 3).map((h) => `“${h}”`).join(", ")}${have.length > 3 ? "…" : ""}) already sketches a unique offer into “${clip(need, 50)}”. Contemplation: which combination is irreducibly yours?`,
+      title: `Combine two skills you already have`,
+      summary: `Your skills (${have
+        .slice(0, 3)
+        .map((h) => `“${h}”`)
+        .join(", ")}${have.length > 3 ? "…" : ""}) can support “${clip(need, 50)}” if you pick a focused combo instead of trying to use everything.`,
       why: [
         `Skills you wrote: ${have.slice(0, 4).join("; ")}.`,
         `Need you wrote: ${clip(need)}.`,
         ...(values.length
-          ? [`Values that may select among them: ${values.slice(0, 3).join(", ")}.`]
+          ? [`Values that may guide the choice: ${values.slice(0, 3).join(", ")}.`]
           : []),
       ],
       intersections: ["profession", "ikigai"],
       questions: [
-        `If you could keep only two skills in service of that need, which two feel honest?`,
-        `Where have strangers already benefited from this combination without a title?`,
-        `What skill gap (${lack[0] ? `“${lack[0]}”` : "still unnamed"}) is actually optional vs essential?`,
+        `Which two of your skills would you combine first to help with “${clip(need, 40)}”?`,
       ],
     });
   }
@@ -380,20 +379,18 @@ export function buildLocalReflection(data: AppData): AiReflection {
   if (pursuits.length === 0) {
     pursuits.push({
       id: nanoid(10),
-      title: `Begin with honest noticing`,
+      title: `Fill in the map a bit more`,
       summary:
-        "Your map still has empty rooms. Before choosing a pursuit, contemplate which quadrant feels warmest when you sit with it — love, skill, need, or reward.",
+        "Your map still has empty fields. Add honest answers for love, skill, need, or reward before locking a direction.",
       why: [
-        "Several core map fields are still empty, so any strong claim about your Ikigai would be guesswork.",
+        "Several core map fields are still empty, so strong claims about your Ikigai would be guesswork.",
         ...(noteBits[0]
           ? [`Your notes already hold a thread: ${clip(noteBits[0])}.`]
-          : ["Even a short note under Want or Need can open the first door."]),
+          : ["A short note under Want or Need is enough to start."]),
       ],
       intersections: ["ikigai"],
       questions: [
-        "Which empty field feels least scary to fill honestly today?",
-        "What have you repeatedly done for others without calling it purpose?",
-        "What do you defend when nobody is watching?",
+        "Which empty field can you fill honestly in one or two sentences today?",
       ],
     });
   }
@@ -401,56 +398,47 @@ export function buildLocalReflection(data: AppData): AiReflection {
   const tensions: string[] = [];
   if (want && reward && want !== reward) {
     tensions.push(
-      `Sit with the gap between what you love (“${clip(want, 50)}”) and how you imagine being rewarded (“${clip(reward, 50)}”).`
+      `Love (“${clip(want, 40)}”) and reward (“${clip(reward, 40)}”) are not the same yet.`
     );
   }
   if (have.length && lack.length) {
     tensions.push(
-      `You hold “${have[0]}” while still reaching for “${lack[0]}” — which edge is identity, and which is aspiration?`
+      `You have “${have[0]}”, but still want “${lack[0]}”.`
     );
   }
   if (need && !want) {
-    tensions.push(
-      "You can see a world need, but love/want is quieter. Contemplation: service without affection can become duty."
-    );
+    tensions.push("You see a need clearly, but love/want is still unclear.");
   }
   if (want && !need) {
-    tensions.push(
-      "Love is clear, but the world’s need is not yet named. Contemplation: who specifically benefits if your love matures?"
-    );
+    tensions.push("Love is clear, but who specifically needs it is not.");
   }
   if (tensions.length === 0) {
-    tensions.push(
-      "Notice where your answers sound impressive versus where they feel quietly true."
-    );
-    tensions.push(
-      "Ikigai is often found in what you already return to, not only in what you aspire to become."
-    );
+    tensions.push("Keep what feels quietly true; drop what only sounds impressive.");
   }
 
   const filled = [want, goodAt, need, reward, offer].filter(Boolean).length;
   const mirror =
     filled >= 3
-      ? `Across your map, a pattern is forming around ${[
-          want && "what you love",
+      ? `Your inputs point to a few realistic directions around ${[
+          want && "what you care about",
           goodAt && "what you can do",
-          need && "what others need",
-          reward && "how life might sustain you",
-          offer && "what you say you deliver",
+          need && "who needs help",
+          reward && "how you could sustain it",
+          offer && "what you already offer",
         ]
           .filter(Boolean)
           .slice(0, 3)
-          .join(", ")}. These pursuits are invitations to contemplate — not conclusions.`
+          .join(", ")}. Treat these as options to test gently — not final answers.`
       : goodAt && need
-        ? `Even with some fields still quiet, your map already points toward skill meeting need — “${clip(goodAt, 40)}” and “${clip(need, 40)}”. Sit with the pursuits below before forcing a complete picture.`
-        : `Your Ikigai picture is still emerging. Use the reflections below as mirrors, not verdicts. Fill more of the map when something feels true, then return here.`;
+        ? `Even with some fields empty, a practical thread is clear: your skill (“${clip(goodAt, 40)}”) and a real need (“${clip(need, 40)}”).`
+        : `Your Ikigai picture is still forming. Use the options below as mirrors, then add more honest detail to your map.`;
 
   return {
     id: nanoid(10),
     createdAt: new Date().toISOString(),
     mirror,
     pursuits: pursuits.slice(0, 4),
-    tensions: tensions.slice(0, 4),
+    tensions: tensions.slice(0, 2),
     source: "local",
   };
 }

@@ -61,6 +61,7 @@ export function emptyChecks(): Record<HabitId, boolean> {
     meditation: false,
     reading: false,
     learning: false,
+    building: false,
     investing: false,
     praying: false,
   };

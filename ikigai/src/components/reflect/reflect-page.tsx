@@ -108,9 +108,9 @@ export function ReflectPage() {
           Contemplate your direction
         </motion.h1>
         <p className="mt-3 max-w-2xl text-sm leading-relaxed text-[var(--muted)]">
-          We build a prompt from your map, notes, and insights. You run it in
-          whatever AI you prefer — then paste the reply back to sit with possible
-          pursuits. No API key, no region lock.
+          Copy a prompt built from your map into any AI you trust, then paste the
+          reply back. Aim for directions that are accurate, realistic, inspiring,
+          and helpful — one question per pursuit, short tensions only.
         </p>
       </section>
 
@@ -302,7 +302,7 @@ export function ReflectPage() {
                       {pursuit.questions.length > 0 && (
                         <div>
                           <p className="text-xs font-semibold tracking-[0.12em] text-[var(--muted)] uppercase">
-                            Sit with these
+                            Sit with this
                           </p>
                           <ul className="mt-2 space-y-2">
                             {pursuit.questions.map((question) => (
@@ -334,7 +334,7 @@ export function ReflectPage() {
               className="space-y-3"
             >
               <h2 className="font-display text-sm font-semibold tracking-[0.14em] text-[var(--muted)] uppercase">
-                Tensions worth keeping open
+                Tensions to keep in view
               </h2>
               <ul className="divide-y divide-[var(--border)] border-y border-[var(--border)]">
                 {reflection.tensions.map((tension) => (

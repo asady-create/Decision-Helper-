@@ -11,6 +11,7 @@ import {
   Download,
   Pencil,
   Plus,
+  RefreshCw,
   Search,
   Trash2,
   Upload,
@@ -22,10 +23,13 @@ import {
   emptyDayHabits,
   filterQuotes,
   groupQuotesByAuthor,
+  HABIT_CATEGORIES,
   HABITS,
+  habitsInCategory,
   isQuote,
   mergeQuotes,
-  quoteOfTheDay,
+  nextLibraryQuote,
+  resolveFeaturedQuote,
   todayKey,
 } from "@/lib/daily";
 import type { HabitId, Quote } from "@/lib/types";
@@ -47,7 +51,11 @@ export function DailyPage() {
   const [editAuthor, setEditAuthor] = useState("");
   const [backupMessage, setBackupMessage] = useState<string | null>(null);
 
-  const todaysQuote = quoteOfTheDay(quotes, dateKey);
+  const featuredQuote = resolveFeaturedQuote(
+    quotes,
+    dateKey,
+    day.featuredQuoteId
+  );
   const completedCount = HABITS.filter((h) => day.checks[h.id]).length;
   const filteredQuotes = useMemo(
     () => filterQuotes(quotes, deferredSearch),
@@ -76,11 +84,22 @@ export function DailyPage() {
 
   function updateReadingBooks(value: string) {
     setDayHabits(dateKey, {
+      ...day,
       checks: {
         ...day.checks,
         reading: value.trim().length > 0 ? true : day.checks.reading,
       },
       readingBooks: value,
+    });
+  }
+
+  function refreshFeaturedQuote() {
+    if (quotes.length === 0) return;
+    const next = nextLibraryQuote(quotes, featuredQuote?.id ?? null);
+    if (!next) return;
+    setDayHabits(dateKey, {
+      ...day,
+      featuredQuoteId: next.id,
     });
   }
 
@@ -205,21 +224,39 @@ export function DailyPage() {
         transition={{ delay: 0.05 }}
         className="space-y-3"
       >
-        <h2 className="font-display text-sm font-semibold tracking-[0.14em] text-[var(--muted)] uppercase">
-          Quote of the day
-        </h2>
-        {todaysQuote ? (
+        <div className="flex items-center justify-between gap-3">
+          <h2 className="font-display text-sm font-semibold tracking-[0.14em] text-[var(--muted)] uppercase">
+            Quote of the day
+          </h2>
+          <Button
+            type="button"
+            variant="secondary"
+            size="sm"
+            onClick={refreshFeaturedQuote}
+            disabled={quotes.length < 2}
+            aria-label="Show another quote from your library"
+          >
+            <RefreshCw />
+            Refresh
+          </Button>
+        </div>
+        {featuredQuote ? (
           <blockquote className="border-l-2 border-[var(--accent)] pl-5 sm:pl-6">
             <p className="font-display text-xl leading-snug font-semibold tracking-tight text-[var(--foreground)] sm:text-2xl">
-              “{todaysQuote.text}”
+              “{featuredQuote.text}”
             </p>
             <footer className="mt-3 text-sm text-[var(--muted)]">
-              — {todaysQuote.author}
+              — {featuredQuote.author}
             </footer>
           </blockquote>
         ) : (
           <p className="text-sm text-[var(--muted)]">
             Add a quote below to begin your collection.
+          </p>
+        )}
+        {quotes.length >= 2 && (
+          <p className="text-xs text-[var(--muted)]">
+            Refresh cycles through another quote from your library.
           </p>
         )}
       </motion.section>
@@ -239,57 +276,80 @@ export function DailyPage() {
           </span>
         </div>
 
-        <ul className="divide-y divide-[var(--border)] border-y border-[var(--border)]">
-          {HABITS.map((habit) => {
-            const checked = day.checks[habit.id];
+        <div className="space-y-6">
+          {HABIT_CATEGORIES.map((category) => {
+            const habits = habitsInCategory(category.id);
+            const done = habits.filter((h) => day.checks[h.id]).length;
             return (
-              <li key={habit.id} className="py-2">
-                <label
-                  className={cn(
-                    "flex cursor-pointer items-center gap-3 py-2 transition",
-                    checked && "text-[var(--muted)]"
-                  )}
-                >
-                  <input
-                    type="checkbox"
-                    className="peer sr-only"
-                    checked={checked}
-                    onChange={() => toggleHabit(habit.id)}
-                  />
-                  <span
-                    className={cn(
-                      "flex size-5 shrink-0 items-center justify-center rounded border transition",
-                      checked
-                        ? "border-[var(--accent)] bg-[var(--accent)] text-white"
-                        : "border-[var(--border)] bg-[var(--surface)]"
-                    )}
-                  >
-                    {checked && <Check className="size-3.5" strokeWidth={2.5} />}
+              <section key={category.id} className="space-y-2">
+                <div className="flex items-baseline justify-between gap-3">
+                  <h3 className="font-display text-base font-semibold tracking-tight text-[var(--foreground)]">
+                    {category.label}
+                  </h3>
+                  <span className="text-xs tabular-nums text-[var(--muted)]">
+                    {done}/{habits.length}
                   </span>
-                  <span className="text-sm font-medium text-[var(--foreground)]">
-                    {habit.label}
-                  </span>
-                </label>
+                </div>
+                <ul className="divide-y divide-[var(--border)] border-y border-[var(--border)]">
+                  {habits.map((habit) => {
+                    const checked = day.checks[habit.id];
+                    return (
+                      <li key={habit.id} className="py-2">
+                        <label
+                          className={cn(
+                            "flex cursor-pointer items-center gap-3 py-2 transition",
+                            checked && "text-[var(--muted)]"
+                          )}
+                        >
+                          <input
+                            type="checkbox"
+                            className="peer sr-only"
+                            checked={checked}
+                            onChange={() => toggleHabit(habit.id)}
+                          />
+                          <span
+                            className={cn(
+                              "flex size-5 shrink-0 items-center justify-center rounded border transition",
+                              checked
+                                ? "border-[var(--accent)] bg-[var(--accent)] text-white"
+                                : "border-[var(--border)] bg-[var(--surface)]"
+                            )}
+                          >
+                            {checked && (
+                              <Check className="size-3.5" strokeWidth={2.5} />
+                            )}
+                          </span>
+                          <span className="text-sm font-medium text-[var(--foreground)]">
+                            {habit.label}
+                          </span>
+                        </label>
 
-                {habit.id === "reading" && checked && (
-                  <div className="mb-2 ml-8 space-y-1.5">
-                    <Label htmlFor="books-read" className="text-xs text-[var(--muted)]">
-                      Books read today
-                    </Label>
-                    <Input
-                      id="books-read"
-                      value={day.readingBooks}
-                      onChange={(event) =>
-                        updateReadingBooks(event.target.value)
-                      }
-                      placeholder="e.g. Atomic Habits, Meditations"
-                    />
-                  </div>
-                )}
-              </li>
+                        {habit.id === "reading" && checked && (
+                          <div className="mb-2 ml-8 space-y-1.5">
+                            <Label
+                              htmlFor="books-read"
+                              className="text-xs text-[var(--muted)]"
+                            >
+                              Books read today
+                            </Label>
+                            <Input
+                              id="books-read"
+                              value={day.readingBooks}
+                              onChange={(event) =>
+                                updateReadingBooks(event.target.value)
+                              }
+                              placeholder="e.g. Atomic Habits, Meditations"
+                            />
+                          </div>
+                        )}
+                      </li>
+                    );
+                  })}
+                </ul>
+              </section>
             );
           })}
-        </ul>
+        </div>
       </motion.section>
 
       <motion.section

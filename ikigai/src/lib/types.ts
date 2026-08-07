@@ -105,15 +105,19 @@ export type HabitId =
   | "running"
   | "cycling"
   | "swimming"
+  | "squash"
   | "meditation"
   | "reading"
   | "learning"
+  | "building"
   | "investing"
   | "praying";
 
 export interface DayHabits {
   checks: Record<HabitId, boolean>;
   readingBooks: string;
+  /** Optional override of the auto quote-of-the-day for this date. */
+  featuredQuoteId: string | null;
 }
 
 export interface AppData {
@@ -126,4 +130,30 @@ export interface AppData {
   quotes: Quote[];
   /** Habit checks keyed by YYYY-MM-DD. */
   habits: Record<string, DayHabits>;
+  /** Latest AI / reflective Ikigai contemplation. */
+  aiReflection: AiReflection | null;
+}
+
+export type AiReflectionSource = "local" | "openai" | "outsourced";
+
+export interface IkigaiPursuit {
+  id: string;
+  title: string;
+  summary: string;
+  /** Reasons grounded in the user’s own words. */
+  why: string[];
+  intersections: InsightConnectionId[];
+  /** Questions for contemplation, not tasks. */
+  questions: string[];
+}
+
+export interface AiReflection {
+  id: string;
+  createdAt: string;
+  /** A calm mirror of what their inputs suggest. */
+  mirror: string;
+  pursuits: IkigaiPursuit[];
+  /** Honest tensions / unanswered edges to sit with. */
+  tensions: string[];
+  source: AiReflectionSource;
 }

@@ -10,6 +10,7 @@ import {
   type ReactNode,
 } from "react";
 import type {
+  AiReflection,
   AppData,
   DayHabits,
   InsightIdea,
@@ -23,6 +24,7 @@ import {
   deleteNote as storageDeleteNote,
   flushAppData,
   hydrateAppData,
+  saveAiReflection as storageSaveAiReflection,
   saveDayHabits as storageSaveDayHabits,
   saveInsights as storageSaveInsights,
   saveMap as storageSaveMap,
@@ -42,6 +44,7 @@ const EMPTY: AppData = {
   timelineAreas: DEFAULT_TIMELINE_AREAS.map((a) => ({ ...a })),
   quotes: SEED_QUOTES.map((q) => ({ ...q })),
   habits: {},
+  aiReflection: null,
 };
 
 interface IkigaiStore {
@@ -53,6 +56,7 @@ interface IkigaiStore {
   timelineAreas: TimelineAreaDef[];
   quotes: Quote[];
   habits: Record<string, DayHabits>;
+  aiReflection: AiReflection | null;
   diskPath: string | null;
   refresh: () => Promise<void>;
   upsertMap: (map: PurposeMap) => void;
@@ -63,6 +67,7 @@ interface IkigaiStore {
   setTimelineAreas: (areas: TimelineAreaDef[]) => void;
   setQuotes: (quotes: Quote[]) => void;
   setDayHabits: (dateKey: string, day: DayHabits) => void;
+  setAiReflection: (reflection: AiReflection | null) => void;
 }
 
 const IkigaiContext = createContext<IkigaiStore | null>(null);
@@ -84,18 +89,26 @@ export function IkigaiProvider({ children }: { children: ReactNode }) {
     let cancelled = false;
     (async () => {
       try {
-        const meta = await fetch("/api/data", { cache: "no-store" })
+        const meta = await fetch("/api/data", {
+          cache: "no-store",
+          signal: AbortSignal.timeout(4000),
+        })
           .then((r) => r.json())
           .catch(() => null);
         if (!cancelled && meta?.path) setDiskPath(meta.path as string);
-      } catch {
-        /* ignore */
+
+        const loaded = await hydrateAppData();
+        if (cancelled) return;
+        setData(loaded);
+      } catch (err) {
+        console.warn("[ikigai] hydrate failed; showing local cache", err);
+        // Keep EMPTY / last state — do not block the UI forever.
+      } finally {
+        if (!cancelled) {
+          readyRef.current = true;
+          setReady(true);
+        }
       }
-      const loaded = await hydrateAppData();
-      if (cancelled) return;
-      setData(loaded);
-      readyRef.current = true;
-      setReady(true);
     })();
     return () => {
       cancelled = true;
@@ -169,6 +182,12 @@ export function IkigaiProvider({ children }: { children: ReactNode }) {
     setData({ ...next });
   }, []);
 
+  const setAiReflection = useCallback((reflection: AiReflection | null) => {
+    if (!readyRef.current) return;
+    const next = storageSaveAiReflection(reflection);
+    setData({ ...next });
+  }, []);
+
   const notes = [...data.notes].sort(
     (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
   );
@@ -181,6 +200,7 @@ export function IkigaiProvider({ children }: { children: ReactNode }) {
   const timelineAreas = [...(data.timelineAreas ?? [])];
   const quotes = [...(data.quotes ?? [])];
   const habits = { ...(data.habits ?? {}) };
+  const aiReflection = data.aiReflection ?? null;
 
   return (
     <IkigaiContext.Provider
@@ -193,6 +213,7 @@ export function IkigaiProvider({ children }: { children: ReactNode }) {
         timelineAreas,
         quotes,
         habits,
+        aiReflection,
         diskPath,
         refresh,
         upsertMap,
@@ -203,6 +224,7 @@ export function IkigaiProvider({ children }: { children: ReactNode }) {
         setTimelineAreas,
         setQuotes,
         setDayHabits,
+        setAiReflection,
       }}
     >
       {children}

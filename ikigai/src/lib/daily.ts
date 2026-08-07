@@ -1,16 +1,34 @@
 import type { DayHabits, HabitId, Quote } from "./types";
 
+export type HabitCategory = "body" | "mind" | "soul";
+
+export const HABIT_CATEGORIES = [
+  { id: "body", label: "Body" },
+  { id: "mind", label: "Mind" },
+  { id: "soul", label: "Soul" },
+] as const satisfies ReadonlyArray<{ id: HabitCategory; label: string }>;
+
 export const HABITS = [
-  { id: "gym", label: "Gym" },
-  { id: "running", label: "Running" },
-  { id: "cycling", label: "Cycling" },
-  { id: "swimming", label: "Swimming" },
-  { id: "meditation", label: "Meditation" },
-  { id: "reading", label: "Reading" },
-  { id: "learning", label: "Learning" },
-  { id: "investing", label: "Investing" },
-  { id: "praying", label: "Praying" },
-] as const satisfies ReadonlyArray<{ id: HabitId; label: string }>;
+  { id: "gym", label: "Gym", category: "body" },
+  { id: "running", label: "Running", category: "body" },
+  { id: "cycling", label: "Cycling", category: "body" },
+  { id: "swimming", label: "Swimming", category: "body" },
+  { id: "squash", label: "Squash", category: "body" },
+  { id: "reading", label: "Reading", category: "mind" },
+  { id: "learning", label: "Learning", category: "mind" },
+  { id: "building", label: "Building", category: "mind" },
+  { id: "investing", label: "Investing", category: "mind" },
+  { id: "meditation", label: "Meditation", category: "soul" },
+  { id: "praying", label: "Praying", category: "soul" },
+] as const satisfies ReadonlyArray<{
+  id: HabitId;
+  label: string;
+  category: HabitCategory;
+}>;
+
+export function habitsInCategory(category: HabitCategory) {
+  return HABITS.filter((habit) => habit.category === category);
+}
 
 export const SEED_QUOTES: Quote[] = [
   {
@@ -39,9 +57,11 @@ export function emptyChecks(): Record<HabitId, boolean> {
     running: false,
     cycling: false,
     swimming: false,
+    squash: false,
     meditation: false,
     reading: false,
     learning: false,
+    building: false,
     investing: false,
     praying: false,
   };
@@ -51,6 +71,7 @@ export function emptyDayHabits(): DayHabits {
   return {
     checks: emptyChecks(),
     readingBooks: "",
+    featuredQuoteId: null,
   };
 }
 
@@ -88,6 +109,9 @@ export function normalizeDayHabits(raw: unknown): DayHabits {
   if (!raw || typeof raw !== "object") return base;
   const value = raw as Record<string, unknown>;
 
+  const featuredQuoteId =
+    typeof value.featuredQuoteId === "string" ? value.featuredQuoteId : null;
+
   if ("checks" in value && value.checks && typeof value.checks === "object") {
     return {
       checks: {
@@ -96,6 +120,7 @@ export function normalizeDayHabits(raw: unknown): DayHabits {
       },
       readingBooks:
         typeof value.readingBooks === "string" ? value.readingBooks : "",
+      featuredQuoteId,
     };
   }
 
@@ -109,6 +134,7 @@ export function normalizeDayHabits(raw: unknown): DayHabits {
     checks,
     readingBooks:
       typeof value.readingBooks === "string" ? value.readingBooks : "",
+    featuredQuoteId,
   };
 }
 
@@ -130,6 +156,32 @@ export function quoteOfTheDay(quotes: Quote[], dateKey: string): Quote | null {
     hash = (hash * 31 + dateKey.charCodeAt(i)) >>> 0;
   }
   return quotes[hash % quotes.length] ?? null;
+}
+
+/** Resolve today's featured quote, falling back to the auto daily pick. */
+export function resolveFeaturedQuote(
+  quotes: Quote[],
+  dateKey: string,
+  featuredQuoteId: string | null
+): Quote | null {
+  if (featuredQuoteId) {
+    const selected = quotes.find((quote) => quote.id === featuredQuoteId);
+    if (selected) return selected;
+  }
+  return quoteOfTheDay(quotes, dateKey);
+}
+
+/** Pick another quote from the library (not the current one when possible). */
+export function nextLibraryQuote(
+  quotes: Quote[],
+  currentId: string | null
+): Quote | null {
+  if (quotes.length === 0) return null;
+  if (quotes.length === 1) return quotes[0] ?? null;
+
+  const currentIndex = quotes.findIndex((quote) => quote.id === currentId);
+  if (currentIndex === -1) return quotes[0] ?? null;
+  return quotes[(currentIndex + 1) % quotes.length] ?? null;
 }
 
 export function filterQuotes(quotes: Quote[], query: string): Quote[] {

@@ -128,6 +128,12 @@ export function HomeDashboard() {
               <ArrowRight />
             </Link>
           </Button>
+          <Button asChild size="lg" variant="secondary">
+            <Link href="/reflect">
+              Reflect on Ikigai
+              <ArrowRight />
+            </Link>
+          </Button>
           {map && (
             <Button
               size="lg"

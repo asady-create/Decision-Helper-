@@ -1,0 +1,1998 @@
+<!doctype html>
+<html lang="en" class="scroll-smooth">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Decision Helper</title>
+    <meta
+      name="description"
+      content="A warm, minimal decision journal for comparing options, pros, cons, and scores."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Source+Sans+3:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap"
+      rel="stylesheet"
+    />
+    <script>
+      window.tailwind = {
+        config: {
+          theme: {
+            extend: {
+              fontFamily: {
+                sans: ["Source Sans 3", "ui-sans-serif", "sans-serif"],
+                serif: ["Cormorant Garamond", "Georgia", "serif"],
+              },
+              boxShadow: {
+                soft: "0 10px 30px -22px rgba(92, 62, 40, 0.22)",
+                calm: "0 8px 22px -18px rgba(92, 62, 40, 0.18)",
+              },
+              colors: {
+                linen: "#f6efe6",
+                sand: "#efe4d6",
+                clay: "#9a6432",
+                ink: "#3a2e26",
+              },
+            },
+          },
+        },
+      };
+    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      :root {
+        color-scheme: light;
+        --bg-0: #f8f3ec;
+        --bg-1: #f3ebe3;
+        --surface: #fffcf8;
+        --surface-inset: #f7f0e8;
+        --border: #e7ddd2;
+        --ink: #3a2e26;
+        --muted: #7a6a5c;
+        --accent: #8f5e30;
+        --accent-soft: #c49862;
+        --accent-wash: #fff3e6;
+        --shadow: 0 12px 36px -28px rgba(74, 48, 28, 0.35);
+        --radius: 1.15rem;
+      }
+
+      body {
+        min-height: 100vh;
+        font-family: "Source Sans 3", ui-sans-serif, sans-serif;
+        font-weight: 400;
+        letter-spacing: 0.01em;
+        color: var(--ink);
+        background:
+          radial-gradient(ellipse 80% 50% at 10% -10%, rgba(232, 188, 140, 0.34), transparent 55%),
+          radial-gradient(ellipse 60% 40% at 95% 0%, rgba(214, 170, 130, 0.18), transparent 50%),
+          linear-gradient(180deg, #fbf6ef 0%, #f4ebe2 55%, #efe6db 100%);
+      }
+
+      .font-serif,
+      h1,
+      h2,
+      h3 {
+        font-family: "Cormorant Garamond", Georgia, serif;
+        font-weight: 500;
+        letter-spacing: 0.015em;
+      }
+
+      .app-shell {
+        width: min(100%, 46rem);
+        margin-inline: auto;
+      }
+
+      .glass-panel {
+        background-color: rgba(255, 252, 248, 0.94);
+        border-color: var(--border);
+        box-shadow: var(--shadow);
+        border-radius: var(--radius);
+      }
+
+      .reveal {
+        animation: fade-up 520ms cubic-bezier(0.22, 1, 0.36, 1) both;
+      }
+
+      .app-section.is-entering {
+        animation: section-in 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
+      }
+
+      .interactive-surface {
+        transition: border-color 180ms ease, background-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+      }
+
+      button,
+      input,
+      textarea,
+      select {
+        min-height: 46px;
+      }
+
+      button {
+        touch-action: manipulation;
+      }
+
+      input[type="range"] {
+        accent-color: var(--accent);
+        min-height: 32px;
+      }
+
+      input[type="text"],
+      input[type="date"],
+      textarea,
+      select {
+        color: var(--ink);
+        transition: border-color 160ms ease, box-shadow 160ms ease, background-color 160ms ease;
+      }
+
+      input::placeholder,
+      textarea::placeholder {
+        color: #9a8776;
+        opacity: 1;
+      }
+
+      .brand-mark {
+        background: linear-gradient(145deg, #b07a45 0%, #8b5a2b 100%);
+      }
+
+      .recommendation-card {
+        background: linear-gradient(145deg, #fff7ed 0%, #f8ead8 100%);
+        border: 1px solid #e4cfb8;
+      }
+
+      .warm-inset {
+        background: var(--surface-inset);
+        border: 1px solid var(--border);
+        border-radius: 1rem;
+      }
+
+      .warm-panel {
+        background: #fffaf5;
+        border: 1px solid var(--border);
+      }
+
+      .app-section[hidden] {
+        display: none !important;
+      }
+
+      .top-chrome {
+        position: sticky;
+        top: 0;
+        z-index: 30;
+        margin: 0 -1rem 1.25rem;
+        padding: 0.85rem 1rem 0.95rem;
+        background: rgba(248, 243, 236, 0.86);
+        border-bottom: 1px solid rgba(231, 221, 210, 0.9);
+        backdrop-filter: blur(14px);
+      }
+
+      @media (min-width: 640px) {
+        .top-chrome {
+          margin-left: -1.5rem;
+          margin-right: -1.5rem;
+          padding-left: 1.5rem;
+          padding-right: 1.5rem;
+        }
+      }
+
+      .progress-track {
+        height: 0.35rem;
+        border-radius: 999px;
+        background: #ebe2d7;
+        overflow: hidden;
+      }
+
+      .progress-fill {
+        height: 100%;
+        width: 0%;
+        border-radius: inherit;
+        background: linear-gradient(90deg, #c49862, #8f5e30);
+        transition: width 320ms cubic-bezier(0.22, 1, 0.36, 1);
+      }
+
+      .nav-tab {
+        flex: 0 0 auto;
+        white-space: nowrap;
+        border-radius: 0.85rem;
+        border: 1px solid transparent;
+        background: transparent;
+        color: #7a6a5c;
+        padding: 0.45rem 0.8rem;
+        font-size: 0.8125rem;
+        font-weight: 600;
+        transition: background-color 160ms ease, border-color 160ms ease, color 160ms ease, transform 160ms ease;
+      }
+
+      .nav-tab:hover:not(:disabled) {
+        background: rgba(255, 252, 248, 0.8);
+        color: #3a2e26;
+      }
+
+      .nav-tab[aria-selected="true"] {
+        border-color: #e0c7a8;
+        background: var(--accent-wash);
+        color: #8b5a2b;
+        box-shadow: 0 1px 0 rgba(255, 255, 255, 0.7) inset;
+      }
+
+      .nav-tab.is-complete:not([aria-selected="true"]) {
+        color: #6d5a48;
+      }
+
+      .nav-tab:disabled,
+      .nav-tab[aria-disabled="true"] {
+        opacity: 0.38;
+        cursor: not-allowed;
+      }
+
+      .step-footer {
+        position: sticky;
+        bottom: 0;
+        z-index: 25;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        justify-content: space-between;
+        margin: 1.5rem -1rem 0;
+        padding: 0.9rem 1rem calc(0.9rem + env(safe-area-inset-bottom));
+        background: rgba(255, 252, 248, 0.92);
+        border-top: 1px solid var(--border);
+        backdrop-filter: blur(12px);
+        box-shadow: 0 -10px 30px -24px rgba(74, 48, 28, 0.35);
+      }
+
+      @media (min-width: 640px) {
+        .step-footer {
+          margin-left: -1.5rem;
+          margin-right: -1.5rem;
+          padding-left: 1.5rem;
+          padding-right: 1.5rem;
+          border-radius: 1rem 1rem 0 0;
+        }
+      }
+
+      .step-nav {
+        display: none;
+      }
+
+      .status-toast {
+        min-height: 1.25rem;
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--accent);
+        transition: opacity 180ms ease;
+      }
+
+      @keyframes fade-up {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+
+      @keyframes section-in {
+        from { opacity: 0; transform: translateY(14px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          animation-duration: 1ms !important;
+          scroll-behavior: auto !important;
+          transition-duration: 1ms !important;
+        }
+      }
+    </style>
+  </head>
+  <body class="font-sans text-stone-800 antialiased">
+    <div class="app-shell flex min-h-screen w-full flex-col px-4 py-5 sm:px-6 sm:py-7">
+      <header class="reveal mb-4 flex items-start justify-between gap-4">
+        <a href="#" id="brandHome" class="inline-flex items-center gap-3" aria-label="Decision Helper home">
+          <span class="brand-mark grid h-10 w-10 shrink-0 place-items-center rounded-xl font-serif text-lg font-medium text-white">D</span>
+          <span>
+            <span class="block font-serif text-2xl font-medium leading-none text-stone-800 sm:text-3xl">Decision Helper</span>
+            <span class="mt-1 block text-sm font-light text-stone-500">A calm path to clearer choices</span>
+          </span>
+        </a>
+        <button id="resetDecision" type="button" class="shrink-0 rounded-xl px-3 py-2 text-sm font-semibold text-stone-500 transition hover:bg-[#f0e7de] hover:text-stone-800 focus:outline-none focus:ring-4 focus:ring-stone-300/40">Reset</button>
+      </header>
+
+      <div class="top-chrome reveal">
+        <div class="mb-2 flex items-end justify-between gap-3">
+          <div>
+            <p id="stepProgressLabel" class="text-xs font-semibold uppercase tracking-[0.14em] text-[#8b5a2b]">Step 1 of 7</p>
+            <p id="stepHint" class="mt-1 text-sm text-stone-500"></p>
+          </div>
+          <p id="saveStatus" class="status-toast text-right" role="status"></p>
+        </div>
+        <div class="progress-track mb-3" aria-hidden="true">
+          <div id="stepProgressBar" class="progress-fill"></div>
+        </div>
+        <nav id="appNav" aria-label="App sections">
+          <div
+            id="appNavButtons"
+            class="flex gap-1.5 overflow-x-auto pb-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            role="tablist"
+          ></div>
+        </nav>
+      </div>
+
+      <main class="flex-1 pb-4">
+
+        <!-- 1. Question -->
+        <section id="section-question" class="app-section space-y-6" data-app-section="question" role="tabpanel" aria-labelledby="nav-question">
+          <section class="glass-panel interactive-surface reveal border border-[#e7ddd2] bg-white/90 p-5 sm:p-7" aria-labelledby="decisionFormTitle">
+            <div class="mb-5">
+              <p class="mb-1 text-sm font-medium text-[#8b5a2b]">Step 1</p>
+              <h2 id="decisionFormTitle" class="font-serif text-2xl font-medium text-stone-800">Your decision question</h2>
+              <p class="mt-1 text-sm leading-6 text-stone-500">Start with one clear question. You can refine details as you go.</p>
+            </div>
+            <label for="decisionQuestion" class="mb-2 block text-sm font-semibold text-stone-700">Decision question</label>
+            <input id="decisionQuestion" type="text" placeholder="Should I study abroad?" class="w-full rounded-2xl border border-[#e5dbd0] bg-[#fffaf5] px-4 py-3.5 text-base text-stone-800 outline-none transition placeholder:text-stone-500 focus:border-[#c48a4a] focus:ring-4 focus:ring-[#c48a4a]/15" />
+            <div class="warm-inset mt-5 grid gap-3 rounded-2xl p-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end">
+              <label for="decisionDeadline" class="block">
+                <span class="mb-2 block text-sm font-semibold text-stone-700">Decision deadline</span>
+                <input id="decisionDeadline" type="date" class="w-full rounded-2xl border border-[#e5dbd0] bg-[#fffaf5] px-4 py-3.5 text-base text-stone-800 outline-none transition focus:border-[#c48a4a] focus:ring-4 focus:ring-[#c48a4a]/15" />
+              </label>
+              <div id="deadlineCountdown" class="rounded-2xl border px-4 py-3 text-sm font-bold" role="status"></div>
+            </div>
+            <div class="warm-inset mt-5 space-y-5 rounded-2xl p-4">
+              <div>
+                <label for="decisionPrinciple" class="mb-1 block text-sm font-semibold text-stone-700">What principle are you relying on?</label>
+                <p class="mb-2 text-sm text-stone-500">Optional — name the value or standard guiding this choice.</p>
+                <textarea id="decisionPrinciple" rows="3" placeholder="e.g. Choose the option that protects long-term optionality" class="w-full resize-y rounded-2xl border border-[#e5dbd0] bg-[#fffaf5] px-4 py-3.5 text-base text-stone-800 outline-none transition placeholder:text-stone-500 focus:border-[#c48a4a] focus:ring-4 focus:ring-[#c48a4a]/15"></textarea>
+              </div>
+              <div>
+                <label for="desiredOutcome" class="mb-1 block text-sm font-semibold text-stone-700">What outcome do you want to achieve?</label>
+                <p class="mb-2 text-sm text-stone-500">Optional — describe the result you most want.</p>
+                <textarea id="desiredOutcome" rows="3" placeholder="e.g. Feel clear, prepared, and able to commit without lingering regret" class="w-full resize-y rounded-2xl border border-[#e5dbd0] bg-[#fffaf5] px-4 py-3.5 text-base text-stone-800 outline-none transition placeholder:text-stone-500 focus:border-[#c48a4a] focus:ring-4 focus:ring-[#c48a4a]/15"></textarea>
+              </div>
+            </div>
+            <div class="mt-6 rounded-2xl border border-[#ead7c4] bg-[#fff1e4] p-4 text-sm text-stone-700">
+              <h3 class="font-medium">How this flow works</h3>
+              <ol class="mt-2 list-decimal space-y-1 pl-5">
+                <li>Write your decision question.</li>
+                <li>Check how you feel.</li>
+                <li>List options, then factors, then pros and cons.</li>
+                <li>Pressure-test with counterarguments and bias checks.</li>
+              </ol>
+            </div>
+          </section>
+          <div class="step-nav" data-step-nav="question"></div>
+        </section>
+
+        <!-- 2. Feelings -->
+        <section id="section-feelings" class="app-section space-y-6" data-app-section="feelings" role="tabpanel" aria-labelledby="nav-feelings" hidden>
+          <section class="glass-panel interactive-surface reveal border border-[#e7ddd2] bg-white/90 p-5 sm:p-7" aria-labelledby="feelingsTitle">
+            <div class="mb-5">
+              <p class="mb-1 text-sm font-medium text-[#8b5a2b]">Step 2</p>
+              <h2 id="feelingsTitle" class="font-serif text-xl font-medium text-stone-800">How do you feel about this decision?</h2>
+              <p class="mt-1 text-sm text-stone-500">Notice stress and emotions before you compare options.</p>
+            </div>
+            <div class="grid gap-4 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
+              <label class="warm-inset block rounded-2xl p-4">
+                <span class="mb-3 flex items-center justify-between gap-4">
+                  <span class="font-semibold text-stone-800">Current stress level</span>
+                  <span id="stressValue" class="rounded-lg bg-[#f3ebe3] px-3 py-1 text-sm font-bold text-[#8b5a2b]">5</span>
+                </span>
+                <input id="stressLevel" type="range" min="1" max="10" value="5" class="w-full cursor-pointer" />
+                <span class="mt-2 flex justify-between text-xs font-semibold text-stone-500"><span>Calm</span><span>Very stressed</span></span>
+              </label>
+              <label for="emotionInput" class="block">
+                <span class="mb-2 block text-sm font-semibold text-stone-700">Emotions about this decision</span>
+                <textarea id="emotionInput" rows="4" placeholder="For example: excited, nervous, pressured, hopeful..." class="w-full resize-y rounded-2xl border border-[#e5dbd0] bg-[#fffaf5] px-4 py-3.5 text-base text-stone-800 outline-none transition placeholder:text-stone-500 focus:border-[#c48a4a] focus:ring-4 focus:ring-[#c48a4a]/15"></textarea>
+              </label>
+            </div>
+            <div id="reflectionTip" class="warm-inset mt-5 rounded-2xl p-4 text-sm font-medium leading-6 text-[#8b5a2b]" role="status"></div>
+          </section>
+          <div class="step-nav" data-step-nav="feelings"></div>
+        </section>
+
+        <!-- 3. Options (names only) -->
+        <section id="section-options" class="app-section space-y-6" data-app-section="options" role="tabpanel" aria-labelledby="nav-options" hidden>
+          <section class="glass-panel interactive-surface reveal border border-[#e7ddd2] bg-white/90 p-5 sm:p-7" aria-labelledby="optionsTitle">
+            <div class="mb-5">
+              <p class="mb-1 text-sm font-medium text-[#8b5a2b]">Step 3</p>
+              <h2 id="optionsTitle" class="font-serif text-2xl font-medium text-stone-800">Add your options</h2>
+              <p class="mt-1 text-sm text-stone-500">List the realistic choices first. Pros and cons come later.</p>
+            </div>
+            <form id="addOptionForm" class="mb-6">
+              <label for="optionName" class="mb-2 block text-sm font-semibold text-stone-700">Add an option</label>
+              <div class="flex flex-col gap-3 sm:flex-row">
+                <input id="optionName" type="text" placeholder="Go to UK" class="min-w-0 flex-1 rounded-2xl border border-[#e5dbd0] bg-[#fffaf5] px-4 py-3.5 text-base text-stone-800 outline-none transition placeholder:text-stone-500 focus:border-[#c48a4a] focus:ring-4 focus:ring-[#c48a4a]/15" />
+                <button type="submit" class="inline-flex w-full items-center justify-center rounded-2xl bg-[#9a6432] px-5 py-3.5 font-semibold text-white shadow-sm transition hover:bg-[#7a4e25] focus:outline-none focus:ring-4 focus:ring-[#c48a4a]/20 sm:w-auto">Add option</button>
+              </div>
+            </form>
+            <div id="optionsList" class="grid gap-3"></div>
+          </section>
+          <div class="step-nav" data-step-nav="options"></div>
+        </section>
+
+        <!-- 4. Factors -->
+        <section id="section-factors" class="app-section space-y-6" data-app-section="factors" role="tabpanel" aria-labelledby="nav-factors" hidden>
+          <section class="glass-panel interactive-surface reveal border border-[#e7ddd2] bg-white/90 p-5 sm:p-7" aria-labelledby="factorsTitle">
+            <div class="mb-5">
+              <p class="mb-1 text-sm font-medium text-[#8b5a2b]">Step 4</p>
+              <h2 id="factorsTitle" class="font-serif text-xl font-medium text-stone-800">Key factors</h2>
+              <p class="mt-1 text-sm text-stone-500">Name what matters and set how important each factor is (1–10).</p>
+            </div>
+            <div id="factorsList" class="space-y-3"></div>
+            <form id="addFactorForm" class="mt-5 flex flex-col gap-3 sm:flex-row">
+              <input id="factorName" type="text" placeholder="Add a factor, e.g. Career growth" class="min-w-0 flex-1 rounded-2xl border border-[#e0d5c8] bg-[#fffaf5] px-4 py-3.5 text-base font-medium text-stone-800 outline-none transition placeholder:text-stone-500 focus:border-[#c48a4a] focus:ring-4 focus:ring-[#c48a4a]/15" />
+              <button type="submit" class="inline-flex w-full items-center justify-center rounded-2xl border border-[#e4cfb8] bg-[#fff1e4] px-5 py-3.5 font-semibold text-stone-800 transition hover:bg-[#fff1e4] focus:outline-none focus:ring-4 focus:ring-[#c48a4a]/15 sm:w-auto">Add factor</button>
+            </form>
+          </section>
+          <div class="step-nav" data-step-nav="factors"></div>
+        </section>
+
+        <!-- 5. Pros/cons analysis -->
+        <section id="section-analysis" class="app-section space-y-6" data-app-section="analysis" role="tabpanel" aria-labelledby="nav-analysis" hidden>
+          <section class="glass-panel interactive-surface reveal border border-[#e7ddd2] bg-white/90 p-5 sm:p-7" aria-labelledby="analysisTitle">
+            <div class="mb-5">
+              <p class="mb-1 text-sm font-medium text-[#8b5a2b]">Step 5</p>
+              <h2 id="analysisTitle" class="font-serif text-2xl font-medium text-stone-800">Pros, cons, and scores</h2>
+              <p class="mt-1 text-sm text-stone-500">For each option, capture trade-offs and score it on your factors.</p>
+            </div>
+            <div id="analysisOptionsList" class="grid gap-4"></div>
+          </section>
+          <div class="step-nav" data-step-nav="analysis"></div>
+        </section>
+
+        <!-- 6. Counterarguments -->
+        <section id="section-counterarguments" class="app-section space-y-6" data-app-section="counterarguments" role="tabpanel" aria-labelledby="nav-counterarguments" hidden>
+          <section class="glass-panel interactive-surface reveal border border-[#e7ddd2] bg-white/90 p-5 sm:p-7" aria-labelledby="counterTitle">
+            <div class="mb-4">
+              <p class="mb-1 text-sm font-medium text-[#8b5a2b]">Step 6</p>
+              <h2 id="counterTitle" class="font-serif text-xl font-medium text-stone-800">Counterarguments</h2>
+              <p id="chosenOptionHint" class="mt-2 text-sm text-stone-500">Pressure-test the option that currently leads.</p>
+            </div>
+            <div class="mb-3 flex flex-wrap items-center justify-between gap-3">
+              <p class="text-sm text-stone-500">Write a counterargument, rate it, respond, then rate it again.</p>
+              <button id="addCounterargument" type="button" class="inline-flex items-center justify-center rounded-xl bg-[#f3ebe3] px-3 py-1.5 text-xs font-bold text-stone-700 ring-1 ring-[#e5dbd0] transition hover:bg-[#fffaf5] hover:text-[#8b5a2b] focus:outline-none focus:ring-4 focus:ring-[#c48a4a]/15">Add counterargument</button>
+            </div>
+            <div id="counterargumentsList" class="space-y-3"></div>
+          </section>
+          <div class="step-nav" data-step-nav="counterarguments"></div>
+        </section>
+
+        <!-- 7. Munger biases -->
+        <section id="section-biases" class="app-section space-y-6" data-app-section="biases" role="tabpanel" aria-labelledby="nav-biases" hidden>
+          <section class="glass-panel interactive-surface reveal border border-[#e7ddd2] bg-white/90 p-5 sm:p-7" aria-labelledby="mungerTitle">
+            <div class="mb-4">
+              <p class="mb-1 text-sm font-medium text-[#8b5a2b]">Step 7</p>
+              <h2 id="mungerTitle" class="font-serif text-xl font-medium text-stone-800">Munger's Biases Checklist</h2>
+              <p class="mt-3 font-serif text-lg italic leading-8 text-stone-600">"Reality talks to only who listen"</p>
+              <p class="mt-2 text-sm text-stone-500">Mark any psychological tendencies that may be distorting your judgment.</p>
+            </div>
+            <div id="mungerChecklistDetails" class="warm-inset rounded-2xl p-4">
+              <p class="text-xs text-stone-500">Tap any tendency that may be shaping this decision. Hover for the full name.</p>
+              <div id="mungerChecklist" class="mt-3 flex flex-wrap gap-2"></div>
+            </div>
+          </section>
+          <div class="step-nav" data-step-nav="biases"></div>
+        </section>
+
+        <!-- Results -->
+        <section id="section-results" class="app-section space-y-6" data-app-section="results" role="tabpanel" aria-labelledby="nav-results" hidden>
+          <div class="mb-2">
+            <p class="mb-1 text-sm font-medium text-[#8b5a2b]">Results</p>
+            <p class="text-sm text-stone-500">Review the recommendation and save a snapshot when you are ready.</p>
+          </div>
+          <div class="grid gap-6 lg:grid-cols-2">
+            <section class="glass-panel interactive-surface reveal border border-[#e7ddd2] bg-white/90 p-5 sm:p-7" aria-labelledby="recommendationTitle">
+              <h2 id="recommendationTitle" class="font-serif text-xl font-medium text-stone-800">Recommendation</h2>
+              <div id="recommendation" class="mt-5"></div>
+            </section>
+            <section class="glass-panel interactive-surface reveal border border-[#e7ddd2] bg-white/90 p-5 sm:p-7" aria-labelledby="savedTitle">
+              <div class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <h2 id="savedTitle" class="font-serif text-lg font-medium text-stone-800">Saved decisions</h2>
+                  <p class="text-sm text-stone-500">Stored locally on this device.</p>
+                </div>
+                <button id="saveSnapshot" type="button" class="inline-flex w-full items-center justify-center rounded-xl bg-[#9a6432] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#7a4e25] focus:outline-none focus:ring-4 focus:ring-[#c48a4a]/15 sm:w-auto">Save</button>
+              </div>
+              <div id="savedDecisions" class="space-y-3"></div>
+            </section>
+          </div>
+          <div class="step-nav" data-step-nav="results"></div>
+        </section>
+
+        <div id="stepFooter" class="step-footer" aria-label="Step controls"></div>
+      </main>
+    </div>
+
+    <template id="simpleOptionTemplate">
+      <article class="glass-panel interactive-surface reveal rounded-2xl border border-[#e8dfd4] bg-white/90 p-4 shadow-calm sm:p-5">
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <input type="text" class="option-title min-w-0 flex-1 rounded-xl border border-[#e5dbd0] bg-[#fffaf5] px-3 py-2.5 font-serif text-xl font-medium text-stone-800 outline-none transition focus:border-[#c48a4a] focus:ring-4 focus:ring-[#c48a4a]/15" />
+          <button type="button" class="delete-option inline-flex items-center justify-center rounded-xl px-4 py-2.5 text-sm font-semibold text-rose-600 transition hover:bg-rose-50 focus:outline-none focus:ring-4 focus:ring-rose-300/30">Remove</button>
+        </div>
+      </article>
+    </template>
+
+    <template id="optionTemplate">
+      <article
+        class="glass-panel interactive-surface reveal rounded-2xl border border-[#e8dfd4] bg-white/90 p-5 shadow-calm bg-white/90 sm:p-6"
+      >
+        <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <div class="min-w-0">
+            <input
+              type="text"
+              class="option-title w-full rounded-xl border border-transparent bg-transparent px-0 py-1 font-serif text-2xl font-medium text-stone-800 outline-none transition focus:border-[#c48a4a] focus:bg-[#fffaf5] focus:px-3 focus:ring-4 focus:ring-[#c48a4a]/15 text-stone-800"
+            />
+            <p class="score-summary mt-1 text-sm font-semibold text-stone-500"></p>
+          </div>
+          <button
+            type="button"
+            class="delete-option inline-flex w-full items-center justify-center rounded-xl px-4 py-2.5 text-sm font-semibold text-rose-600 transition hover:bg-rose-50 focus:outline-none focus:ring-4 focus:ring-rose-300/30 sm:w-auto"
+          >
+            Remove
+          </button>
+        </div>
+
+        <div class="mt-5 grid gap-4 md:grid-cols-2">
+          <div class="warm-inset rounded-2xl p-4">
+            <h3 class="font-medium text-stone-800">Pros</h3>
+            <ul class="pros-list mt-3 space-y-2"></ul>
+            <form class="add-item-form mt-3 flex flex-col gap-2 sm:flex-row" data-type="pros">
+              <input
+                type="text"
+                placeholder="Add a positive point"
+                class="min-w-0 flex-1 rounded-xl border border-[#e0d5c8] bg-[#fffaf5] px-3 py-2.5 text-sm font-medium text-stone-800 outline-none transition placeholder:text-stone-500 focus:border-[#c48a4a] focus:ring-4 focus:ring-[#c48a4a]/15 bg-[#fffaf5] text-stone-800"
+              />
+              <button type="submit" class="inline-flex items-center justify-center rounded-xl bg-[#9a6432] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#8b5a2b] focus:outline-none focus:ring-4 focus:ring-[#c48a4a]/15">Add</button>
+            </form>
+          </div>
+          <div class="rounded-2xl border border-[#ead7c4] bg-[#fffaf5] p-4">
+            <h3 class="font-medium text-stone-700">Cons</h3>
+            <ul class="cons-list mt-3 space-y-2"></ul>
+            <form class="add-item-form mt-3 flex flex-col gap-2 sm:flex-row" data-type="cons">
+              <input
+                type="text"
+                placeholder="Add a concern"
+                class="min-w-0 flex-1 rounded-xl border border-[#dfc7ad] bg-[#fffaf5] px-3 py-2.5 text-sm font-medium text-stone-800 outline-none transition placeholder:text-stone-500 focus:border-[#c48a4a] focus:ring-4 focus:ring-[#c48a4a]/15 bg-[#fffaf5] text-stone-800"
+              />
+              <button type="submit" class="inline-flex items-center justify-center rounded-xl bg-[#9a6432] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#8b5a2b] focus:outline-none focus:ring-4 focus:ring-[#c48a4a]/15">Add</button>
+            </form>
+          </div>
+        </div>
+
+        <details class="option-evidence-details warm-inset mt-5 rounded-2xl p-4">
+          <summary class="cursor-pointer select-none text-sm font-bold text-stone-700 transition hover:text-[#8b5a2b] text-stone-800">
+            Evidence / notes for this option
+          </summary>
+          <label class="mt-4 block">
+            <span class="mb-2 block text-sm font-semibold text-stone-700">
+              Links, notes, or supporting material
+            </span>
+            <textarea
+              class="option-evidence min-h-28 w-full resize-y rounded-2xl border border-[#e0d5c8] bg-[#fffaf5] px-4 py-3 text-sm font-medium text-stone-800 outline-none transition placeholder:text-stone-500 focus:border-[#c48a4a] focus:ring-4 focus:ring-[#c48a4a]/15 bg-[#fffaf5] text-stone-800"
+              placeholder="Paste links, research notes, quotes, reminders, or source material for this option..."
+            ></textarea>
+          </label>
+        </details>
+
+        <div class="scores mt-5 space-y-3"></div>
+      </article>
+    </template>
+
+    <script>
+      const STORAGE_KEY = "decision-helper-current";
+      const SAVED_KEY = "decision-helper-saved";
+
+      const MUNGER_TENDENCIES = [
+        { id: "reward-punishment", name: "Reward and Punishment Super-response Tendency", shortLabel: "Reward & Punishment", category: "incentives" },
+        { id: "liking-loving", name: "Liking/Loving Tendency", shortLabel: "Liking/Loving", category: "emotion" },
+        { id: "disliking-hating", name: "Disliking/Hating Tendency", shortLabel: "Disliking/Hating", category: "emotion" },
+        { id: "doubt-avoidance", name: "Doubt-Avoidance Tendency", shortLabel: "Doubt Avoidance", category: "avoidance" },
+        { id: "inconsistency-avoidance", name: "Inconsistency-Avoidance Tendency", shortLabel: "Inconsistency Avoidance", category: "avoidance" },
+        { id: "curiosity", name: "Curiosity Tendency", shortLabel: "Curiosity", category: "cognition" },
+        { id: "kantian-fairness", name: "Kantian Fairness Tendency", shortLabel: "Kantian Fairness", category: "social" },
+        { id: "envy-jealousy", name: "Envy/Jealously Tendency", shortLabel: "Envy/Jealousy", category: "emotion" },
+        { id: "reciprocation", name: "Reciprocation Tendency", shortLabel: "Reciprocation", category: "social" },
+        { id: "mere-association", name: "Influence-from-Mere-Association Tendency", shortLabel: "Mere Association", category: "influence" },
+        { id: "psychological-denial", name: "Simple, Pain-Avoiding Psychological Denial", shortLabel: "Psychological Denial", category: "avoidance" },
+        { id: "excessive-self-regard", name: "Excessive Self-Regard Tendency", shortLabel: "Self-Regard", category: "cognition" },
+        { id: "overoptimism", name: "Overoptimism Tendency", shortLabel: "Overoptimism", category: "cognition" },
+        { id: "deprival-superreaction", name: "Deprival-Superreaction Tendency", shortLabel: "Deprival Superreaction", category: "emotion" },
+        { id: "social-proof", name: "Social-Proof Tendency", shortLabel: "Social Proof", category: "social" },
+        { id: "contrast-misreaction", name: "Contrast-Misreaction Tendency", shortLabel: "Contrast Misreaction", category: "cognition" },
+        { id: "stress-influence", name: "Stress-Influence Tendency", shortLabel: "Stress Influence", category: "influence" },
+        { id: "availability-misweighing", name: "Availability-Misweighing Tendency", shortLabel: "Availability", category: "cognition" },
+        { id: "use-it-or-lose-it", name: "Use-It-or-Lose-It Tendency", shortLabel: "Use It or Lose It", category: "cognition" },
+        { id: "drug-misinfluence", name: "Drug-Misinfluence Tendency", shortLabel: "Drug Misinfluence", category: "influence" },
+        { id: "senescence-misinfluence", name: "Senescence-Misinfluence Tendency", shortLabel: "Senescence", category: "influence" },
+        { id: "authority-misinfluence", name: "Authority-Misinfluence Tendency", shortLabel: "Authority", category: "influence" },
+        { id: "twaddle", name: "Twaddle Tendency", shortLabel: "Twaddle", category: "cognition" },
+        { id: "reason-respecting", name: "Reason-Respecting Tendency", shortLabel: "Reason Respecting", category: "cognition" },
+        { id: "lollapalooza", name: "Lollapalooza Tendency", shortLabel: "Lollapalooza", category: "compound" },
+      ];
+
+      function createDefaultMungerState() {
+        return Object.fromEntries(
+          MUNGER_TENDENCIES.map((tendency) => [tendency.id, { checked: false, note: "" }])
+        );
+      }
+
+      const APP_SECTIONS = [
+        { id: "question", label: "Question", hint: "Write the decision you are working through." },
+        { id: "feelings", label: "Feelings", hint: "Check your stress and emotions before comparing." },
+        { id: "options", label: "Options", hint: "Add the realistic choices — no pros/cons yet." },
+        { id: "factors", label: "Factors", hint: "Define what matters and how important each factor is." },
+        { id: "analysis", label: "Pros & cons", hint: "Analyze trade-offs and score each option." },
+        { id: "counterarguments", label: "Counterarguments", hint: "Pressure-test the leading option." },
+        { id: "biases", label: "Biases", hint: "Scan Munger's checklist for distorted judgment." },
+        { id: "results", label: "Results", hint: "See the recommendation and save your work." },
+      ];
+
+      const SECTION_ALIASES = {
+        decision: "question",
+      };
+
+      const defaultState = {
+        question: "",
+        deadline: "",
+        principle: "",
+        desiredOutcome: "",
+        mood: {
+          stress: 5,
+          emotions: "",
+        },
+        mungerTendencies: createDefaultMungerState(),
+        counterarguments: [],
+        activeSection: "question",
+        furthestStep: "question",
+        factors: [
+          { id: "impact", name: "Impact", weight: 8 },
+          { id: "cost-fit", name: "Cost fit", weight: 6 },
+          { id: "confidence", name: "Confidence", weight: 7 },
+        ],
+        options: [],
+      };
+
+      let state = loadState();
+      let savedDecisions = loadSavedDecisions();
+      let saveTimer;
+
+      const elements = {
+        brandHome: document.querySelector("#brandHome"),
+        appNavButtons: document.querySelector("#appNavButtons"),
+        question: document.querySelector("#decisionQuestion"),
+        deadline: document.querySelector("#decisionDeadline"),
+        deadlineCountdown: document.querySelector("#deadlineCountdown"),
+        principle: document.querySelector("#decisionPrinciple"),
+        desiredOutcome: document.querySelector("#desiredOutcome"),
+        addOptionForm: document.querySelector("#addOptionForm"),
+        optionName: document.querySelector("#optionName"),
+        stressLevel: document.querySelector("#stressLevel"),
+        stressValue: document.querySelector("#stressValue"),
+        emotionInput: document.querySelector("#emotionInput"),
+        reflectionTip: document.querySelector("#reflectionTip"),
+        mungerChecklist: document.querySelector("#mungerChecklist"),
+        mungerChecklistDetails: document.querySelector("#mungerChecklistDetails"),
+        counterargumentsList: document.querySelector("#counterargumentsList"),
+        addCounterargument: document.querySelector("#addCounterargument"),
+        factorsList: document.querySelector("#factorsList"),
+        addFactorForm: document.querySelector("#addFactorForm"),
+        factorName: document.querySelector("#factorName"),
+        optionsList: document.querySelector("#optionsList"),
+        analysisOptionsList: document.querySelector("#analysisOptionsList"),
+        optionTemplate: document.querySelector("#optionTemplate"),
+        simpleOptionTemplate: document.querySelector("#simpleOptionTemplate"),
+        recommendation: document.querySelector("#recommendation"),
+        saveStatus: document.querySelector("#saveStatus"),
+        stepHint: document.querySelector("#stepHint"),
+        stepProgressLabel: document.querySelector("#stepProgressLabel"),
+        stepProgressBar: document.querySelector("#stepProgressBar"),
+        stepFooter: document.querySelector("#stepFooter"),
+        chosenOptionHint: document.querySelector("#chosenOptionHint"),
+        resetDecision: document.querySelector("#resetDecision"),
+        saveSnapshot: document.querySelector("#saveSnapshot"),
+        savedDecisions: document.querySelector("#savedDecisions"),
+      };
+
+      renderNav();
+      showSection(state.activeSection, { persist: false, scroll: false });
+      render();
+
+      elements.brandHome.addEventListener("click", (event) => {
+        event.preventDefault();
+        showSection("question");
+      });
+
+      elements.question.addEventListener("input", (event) => {
+        state.question = event.target.value;
+        persistCurrentState();
+      });
+
+      elements.deadline.addEventListener("input", (event) => {
+        state.deadline = event.target.value;
+        persistCurrentState();
+        renderDeadlineCountdown();
+      });
+
+      elements.principle.addEventListener("input", (event) => {
+        state.principle = event.target.value;
+        persistCurrentState();
+      });
+
+      elements.desiredOutcome.addEventListener("input", (event) => {
+        state.desiredOutcome = event.target.value;
+        persistCurrentState();
+      });
+
+      elements.stressLevel.addEventListener("input", (event) => {
+        state.mood.stress = clampScore(event.target.value);
+        persistCurrentState();
+        elements.stressValue.textContent = state.mood.stress;
+        elements.reflectionTip.textContent = getReflectionTip(state.mood);
+      });
+
+      elements.emotionInput.addEventListener("input", (event) => {
+        state.mood.emotions = event.target.value;
+        persistCurrentState();
+        elements.reflectionTip.textContent = getReflectionTip(state.mood);
+      });
+
+      elements.addOptionForm.addEventListener("submit", (event) => {
+        event.preventDefault();
+        const name = elements.optionName.value.trim();
+        if (!name) return;
+
+        state.options.push({
+          id: createId(),
+          name,
+          evidence: "",
+          pros: [],
+          cons: [],
+          scores: Object.fromEntries(state.factors.map((factor) => [factor.id, 5])),
+        });
+        elements.optionName.value = "";
+        persistAndRender();
+      });
+
+      elements.addFactorForm.addEventListener("submit", (event) => {
+        event.preventDefault();
+        const factorName = elements.factorName.value.trim();
+        if (!factorName || state.factors.some((existing) => existing.name.toLowerCase() === factorName.toLowerCase())) return;
+
+        const factor = { id: createUniqueFactorId(factorName), name: factorName, weight: 5 };
+        state.factors.push(factor);
+        state.options.forEach((option) => {
+          option.scores[factor.id] = 5;
+        });
+        elements.factorName.value = "";
+        persistAndRender();
+      });
+
+      elements.addCounterargument.addEventListener("click", () => {
+        state.counterarguments.push(createCounterargument());
+        persistAndRender();
+      });
+
+      elements.resetDecision.addEventListener("click", () => {
+        if (!confirm("Reset the current decision workspace? Saved decisions will stay available.")) return;
+        state = createDefaultState();
+        persistAndRender("Workspace reset");
+      });
+
+      elements.saveSnapshot.addEventListener("click", () => {
+        const snapshot = {
+          ...deepClone(state),
+          savedAt: new Date().toISOString(),
+          title: state.question.trim() || "Untitled decision",
+        };
+        savedDecisions = [snapshot, ...savedDecisions].slice(0, 12);
+        localStorage.setItem(SAVED_KEY, JSON.stringify(savedDecisions));
+        showSaveStatus("Decision saved");
+        renderSavedDecisions();
+      });
+
+      function createDefaultState() {
+        const nextState = deepClone(defaultState);
+        nextState.options = nextState.options.map((option) => ({
+          ...option,
+          id: createId(),
+          scores: Object.fromEntries(nextState.factors.map((factor) => [factor.id, 5])),
+        }));
+        return nextState;
+      }
+
+      function loadState() {
+        try {
+          const stored = JSON.parse(localStorage.getItem(STORAGE_KEY));
+          if (!stored || !Array.isArray(stored.options) || !Array.isArray(stored.factors)) {
+            return createDefaultState();
+          }
+          return normalizeState(stored);
+        } catch {
+          return createDefaultState();
+        }
+      }
+
+      function loadSavedDecisions() {
+        try {
+          const stored = JSON.parse(localStorage.getItem(SAVED_KEY));
+          return Array.isArray(stored) ? stored : [];
+        } catch {
+          return [];
+        }
+      }
+
+      function normalizeState(rawState) {
+        const rawFactors = rawState.factors.length
+          ? rawState.factors
+          : [
+              { id: "impact", name: "Impact", weight: 8 },
+              { id: "cost-fit", name: "Cost fit", weight: 6 },
+              { id: "confidence", name: "Confidence", weight: 7 },
+            ];
+        const factors = rawFactors.map(normalizeFactor);
+        const options = rawState.options.map((option) => ({
+          id: option.id || createId(),
+          name: option.name || "Untitled option",
+          evidence: option.evidence || "",
+          pros: normalizeEvidenceItems(option.pros),
+          cons: normalizeEvidenceItems(option.cons),
+          scores: Object.fromEntries(
+            factors.map((factor) => [
+              factor.id,
+              clampScore(option.scores?.[factor.id] ?? option.scores?.[factor.name] ?? 5),
+            ])
+          ),
+        }));
+        const normalized = {
+          question: rawState.question || "",
+          deadline: normalizeDeadline(rawState.deadline),
+          principle: rawState.principle || "",
+          desiredOutcome: rawState.desiredOutcome || "",
+          mood: normalizeMood(rawState.mood),
+          mungerTendencies: normalizeMungerTendencies(rawState.mungerTendencies),
+          counterarguments: normalizeCounterarguments(rawState.counterarguments),
+          activeSection: normalizeActiveSection(rawState.activeSection),
+          furthestStep: normalizeActiveSection(rawState.furthestStep || rawState.activeSection),
+          factors,
+          options,
+        };
+        normalized.furthestStep = inferFurthestStep(normalized);
+        if (getSectionIndex(normalized.activeSection) > getSectionIndex(normalized.furthestStep)) {
+          normalized.activeSection = normalized.furthestStep;
+        }
+        return normalized;
+      }
+
+      function normalizeActiveSection(sectionId) {
+        const mapped = SECTION_ALIASES[sectionId] || sectionId;
+        return APP_SECTIONS.some((section) => section.id === mapped) ? mapped : "question";
+      }
+
+      function maxStep(a, b) {
+        return getSectionIndex(a) >= getSectionIndex(b) ? normalizeActiveSection(a) : normalizeActiveSection(b);
+      }
+
+      function inferFurthestStep(draft) {
+        let furthest = normalizeActiveSection(draft.furthestStep || draft.activeSection || "question");
+        furthest = maxStep(furthest, normalizeActiveSection(draft.activeSection));
+        if (draft.question?.trim()) {
+          furthest = maxStep(furthest, "feelings");
+          furthest = maxStep(furthest, "options");
+        }
+        if ((draft.options || []).length >= 2) furthest = maxStep(furthest, "factors");
+        if ((draft.options || []).length >= 2 && (draft.factors || []).length >= 1) {
+          furthest = maxStep(furthest, "analysis");
+        }
+        const hasTradeoffs = (draft.options || []).some(
+          (option) => (option.pros && option.pros.length) || (option.cons && option.cons.length)
+        );
+        if (hasTradeoffs) {
+          furthest = maxStep(furthest, "counterarguments");
+          furthest = maxStep(furthest, "biases");
+          furthest = maxStep(furthest, "results");
+        }
+        if ((draft.counterarguments || []).length > 0) {
+          furthest = maxStep(furthest, "biases");
+          furthest = maxStep(furthest, "results");
+        }
+        return furthest;
+      }
+
+      function getSectionIndex(sectionId) {
+        return APP_SECTIONS.findIndex((section) => section.id === normalizeActiveSection(sectionId));
+      }
+
+      function syncFurthestStep() {
+        const current = normalizeActiveSection(state.furthestStep || "question");
+        const active = normalizeActiveSection(state.activeSection);
+        if (getSectionIndex(active) > getSectionIndex(current)) {
+          state.furthestStep = active;
+        } else {
+          state.furthestStep = current;
+        }
+      }
+
+      function isStepUnlocked(sectionId) {
+        const id = normalizeActiveSection(sectionId);
+        syncFurthestStep();
+        return getSectionIndex(id) <= getSectionIndex(state.furthestStep);
+      }
+
+      function canContinueFrom(sectionId) {
+        const id = normalizeActiveSection(sectionId);
+        if (id === "question") return Boolean(state.question.trim());
+        if (id === "feelings") return true;
+        if (id === "options") return state.options.length >= 2;
+        if (id === "factors") return state.factors.length >= 1;
+        if (id === "analysis") {
+          return state.options.some(
+            (option) => (option.pros && option.pros.length) || (option.cons && option.cons.length)
+          );
+        }
+        if (id === "counterarguments") return state.counterarguments.length > 0;
+        if (id === "biases") return true;
+        return true;
+      }
+
+      function continueBlockedReason(sectionId) {
+        const id = normalizeActiveSection(sectionId);
+        if (id === "question") return "Enter a decision question to continue.";
+        if (id === "options") return "Add at least two options to continue.";
+        if (id === "factors") return "Keep at least one factor to continue.";
+        if (id === "analysis") return "Add at least one pro or con before continuing.";
+        if (id === "counterarguments") return "Add at least one counterargument to continue.";
+        return "";
+      }
+
+      function getLeadingOption() {
+        if (!state.options.length) return null;
+        return [...state.options]
+          .map((option) => ({ option, score: calculateOptionScore(option) }))
+          .sort((a, b) => b.score.weightedTotal - a.score.weightedTotal)[0].option;
+      }
+
+      function createCounterargument() {
+        return {
+          id: createId(),
+          text: "",
+          initialRating: null,
+          response: "",
+          revisedRating: null,
+        };
+      }
+
+      function normalizeOptionalRating(value) {
+        if (value === null || value === undefined || value === "") return null;
+        const rating = Number(value);
+        if (!Number.isFinite(rating)) return null;
+        return Math.min(10, Math.max(1, Math.round(rating)));
+      }
+
+      function normalizeCounterarguments(items) {
+        if (!Array.isArray(items)) return [];
+        return items.map((item) => ({
+          id: item?.id || createId(),
+          text: typeof item?.text === "string" ? item.text : "",
+          initialRating: normalizeOptionalRating(item?.initialRating),
+          response: typeof item?.response === "string" ? item.response : "",
+          revisedRating: normalizeOptionalRating(item?.revisedRating),
+        }));
+      }
+
+      function formatConvincingDelta(initialRating, revisedRating) {
+        if (initialRating == null || revisedRating == null) return "";
+        const delta = revisedRating - initialRating;
+        if (delta < 0) return `Convincing power decreased by ${Math.abs(delta)}`;
+        if (delta > 0) return `Convincing power increased by ${delta}`;
+        return "No change in convincing power";
+      }
+
+      function normalizeMood(mood) {
+        return {
+          stress: clampScore(mood?.stress ?? 5),
+          emotions: mood?.emotions || "",
+        };
+      }
+
+      function normalizeEvidenceItems(items) {
+        if (!Array.isArray(items)) return [];
+
+        return items.map((item) => {
+          if (typeof item === "string") {
+            return { text: item, evidence: "" };
+          }
+
+          return {
+            text: item?.text || "",
+            evidence: item?.evidence || "",
+          };
+        }).filter((item) => item.text || item.evidence);
+      }
+
+      function normalizeDeadline(deadline) {
+        return /^\d{4}-\d{2}-\d{2}$/.test(deadline || "") ? deadline : "";
+      }
+
+      function normalizeMungerTendencies(tendencies) {
+        const source = tendencies && typeof tendencies === "object" ? tendencies : {};
+        const next = createDefaultMungerState();
+
+        MUNGER_TENDENCIES.forEach((tendency) => {
+          const byId = source[tendency.id];
+          const byName = source[tendency.name];
+          const raw = byId !== undefined ? byId : byName;
+
+          if (raw && typeof raw === "object") {
+            next[tendency.id] = {
+              checked: Boolean(raw.checked),
+              note: typeof raw.note === "string" ? raw.note : "",
+            };
+          } else if (typeof raw === "boolean") {
+            next[tendency.id] = { checked: raw, note: "" };
+          }
+        });
+
+        return next;
+      }
+
+      function persistAndRender(message = "Saved locally") {
+        persistCurrentState(message);
+        render();
+      }
+
+      function persistCurrentState(message = "Saved locally") {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        showSaveStatus(message);
+      }
+
+      function showSaveStatus(message) {
+        clearTimeout(saveTimer);
+        elements.saveStatus.textContent = message;
+        saveTimer = setTimeout(() => {
+          elements.saveStatus.textContent = "";
+        }, 2200);
+      }
+
+      function render() {
+        elements.question.value = state.question;
+        elements.principle.value = state.principle;
+        elements.desiredOutcome.value = state.desiredOutcome;
+        renderNav();
+        showSection(state.activeSection, { persist: false, scroll: false });
+        renderDeadlineCountdown();
+        renderMoodCheckIn();
+        renderMungerChecklist();
+        renderCounterarguments();
+        renderFactors();
+        renderOptions();
+        renderAnalysisOptions();
+        renderRecommendation();
+        renderSavedDecisions();
+        updateChosenOptionHint();
+      }
+
+      function renderNav() {
+        elements.appNavButtons.replaceChildren();
+        const activeId = normalizeActiveSection(state.activeSection);
+        syncFurthestStep();
+        const furthestIndex = getSectionIndex(state.furthestStep);
+
+        APP_SECTIONS.forEach((section, index) => {
+          const unlocked = isStepUnlocked(section.id);
+          const button = document.createElement("button");
+          button.type = "button";
+          button.id = `nav-${section.id}`;
+          button.className = "nav-tab" + (index < furthestIndex ? " is-complete" : "");
+          button.textContent = section.label;
+          button.disabled = !unlocked;
+          button.setAttribute("role", "tab");
+          button.setAttribute("aria-selected", String(section.id === activeId));
+          button.setAttribute("aria-disabled", String(!unlocked));
+          button.setAttribute("aria-controls", `section-${section.id}`);
+          button.title = unlocked ? section.hint : "Finish earlier steps to unlock this one.";
+          button.addEventListener("click", () => {
+            if (!isStepUnlocked(section.id)) return;
+            showSection(section.id);
+          });
+          elements.appNavButtons.append(button);
+        });
+
+        const activeButton = elements.appNavButtons.querySelector(`[aria-selected="true"]`);
+        if (activeButton?.scrollIntoView) {
+          activeButton.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+        }
+        updateStepProgress();
+      }
+
+      function updateStepProgress() {
+        const activeId = normalizeActiveSection(state.activeSection);
+        const index = Math.max(0, getSectionIndex(activeId));
+        const guidedTotal = 7;
+        const percent = activeId === "results" ? 100 : ((Math.min(index, guidedTotal - 1) + 1) / guidedTotal) * 100;
+        if (elements.stepProgressLabel) {
+          elements.stepProgressLabel.textContent =
+            activeId === "results" ? "Results" : `Step ${Math.min(index + 1, guidedTotal)} of ${guidedTotal}`;
+        }
+        if (elements.stepProgressBar) {
+          elements.stepProgressBar.style.width = `${percent}%`;
+        }
+      }
+
+      function showSection(sectionId, { persist = true, scroll = true } = {}) {
+        let nextId = normalizeActiveSection(sectionId);
+        if (!isStepUnlocked(nextId)) {
+          nextId = normalizeActiveSection(state.furthestStep || "question");
+        }
+        state.activeSection = nextId;
+        syncFurthestStep();
+
+        document.querySelectorAll("[data-app-section]").forEach((panel) => {
+          const isActive = panel.dataset.appSection === nextId;
+          panel.hidden = !isActive;
+        });
+
+        const sectionMeta = APP_SECTIONS.find((section) => section.id === nextId);
+        if (elements.stepHint) {
+          elements.stepHint.textContent = sectionMeta?.hint || "";
+        }
+
+        document.querySelectorAll("[data-app-section]").forEach((panel) => {
+          panel.classList.remove("is-entering");
+          if (panel.dataset.appSection === nextId) {
+            // restart enter animation
+            void panel.offsetWidth;
+            panel.classList.add("is-entering");
+          }
+        });
+
+        renderStepNavs();
+        updateStepProgress();
+        updateChosenOptionHint();
+
+        elements.appNavButtons.querySelectorAll('[role="tab"]').forEach((button) => {
+          const isActive = button.id === `nav-${nextId}`;
+          button.setAttribute("aria-selected", String(isActive));
+        });
+        const activeButton = elements.appNavButtons.querySelector(`[aria-selected="true"]`);
+        if (activeButton?.scrollIntoView) {
+          activeButton.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+        }
+
+        if (persist) persistCurrentState();
+        if (scroll) window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+
+      function renderStepNavs() {
+        const stepId = normalizeActiveSection(state.activeSection);
+        const index = getSectionIndex(stepId);
+        const host = elements.stepFooter || document.querySelector("[data-step-nav='" + stepId + "']");
+        if (!host) return;
+        host.replaceChildren();
+
+        const back = document.createElement("button");
+        back.type = "button";
+        back.textContent = "Back";
+        back.className =
+          "inline-flex min-w-[7rem] items-center justify-center rounded-xl border border-[#e5dbd0] bg-white px-4 py-2.5 text-sm font-semibold text-stone-600 transition hover:bg-[#f7efe6] hover:text-stone-800 focus:outline-none focus:ring-4 focus:ring-stone-300/40";
+        back.disabled = index <= 0;
+        if (back.disabled) back.classList.add("cursor-not-allowed", "opacity-40");
+        back.addEventListener("click", () => {
+          if (index <= 0) return;
+          showSection(APP_SECTIONS[index - 1].id);
+        });
+
+        const next = document.createElement("button");
+        next.type = "button";
+        const isLast = index >= APP_SECTIONS.length - 1;
+        next.textContent = isLast ? "Finish" : "Continue";
+        next.className =
+          "inline-flex min-w-[9rem] flex-1 items-center justify-center rounded-xl bg-[#8f5e30] px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#7a4e25] focus:outline-none focus:ring-4 focus:ring-[#c48a4a]/15 sm:flex-none";
+        next.addEventListener("click", () => {
+          if (isLast) {
+            showSaveStatus("Nice work — your results are ready whenever you need them.");
+            return;
+          }
+          if (!canContinueFrom(stepId)) {
+            showSaveStatus(continueBlockedReason(stepId) || "Complete this step to continue.");
+            return;
+          }
+          const upcoming = APP_SECTIONS[index + 1].id;
+          state.furthestStep =
+            getSectionIndex(upcoming) > getSectionIndex(state.furthestStep)
+              ? upcoming
+              : state.furthestStep;
+          showSection(upcoming);
+          renderNav();
+        });
+
+        host.append(back, next);
+      }
+
+      function updateChosenOptionHint() {
+        if (!elements.chosenOptionHint) return;
+        const leading = getLeadingOption();
+        elements.chosenOptionHint.textContent = leading
+          ? `Focus on counterarguments against: ${leading.name || "Untitled option"}`
+          : "Add and analyze options first, then pressure-test the leading choice.";
+      }
+
+      function renderCounterarguments() {
+        state.counterarguments = normalizeCounterarguments(state.counterarguments);
+        elements.counterargumentsList.replaceChildren();
+
+        if (!state.counterarguments.length) {
+          const empty = document.createElement("p");
+          empty.className = "text-sm text-stone-500";
+          empty.textContent = "No counterarguments yet. Add one to pressure-test your thinking.";
+          elements.counterargumentsList.append(empty);
+          return;
+        }
+
+        state.counterarguments.forEach((item, index) => {
+          const card = document.createElement("article");
+          card.className = "warm-inset space-y-3 rounded-2xl p-4";
+
+          const header = document.createElement("div");
+          header.className = "flex items-center justify-between gap-3";
+
+          const title = document.createElement("p");
+          title.className = "text-xs font-medium uppercase tracking-[0.14em] text-stone-500";
+          title.textContent = `Counterargument ${index + 1}`;
+
+          const removeButton = document.createElement("button");
+          removeButton.type = "button";
+          removeButton.textContent = "Remove";
+          removeButton.className =
+            "inline-flex items-center justify-center rounded-xl px-2.5 py-1 text-xs font-bold text-stone-500 transition hover:bg-[#f3ebe3] hover:text-rose-600 focus:outline-none focus:ring-4 focus:ring-rose-300/30";
+          removeButton.addEventListener("click", () => {
+            state.counterarguments.splice(index, 1);
+            persistAndRender();
+          });
+
+          header.append(title, removeButton);
+
+          const textField = createLabeledTextarea(
+            "Possible counterargument",
+            item.text,
+            "What might someone argue against your preferred choice?",
+            (value) => {
+              item.text = value;
+              persistCurrentState();
+            }
+          );
+
+          const initialRatingField = createRatingSelect(
+            "How convincing is this right now?",
+            item.initialRating,
+            (value) => {
+              item.initialRating = value;
+              persistCurrentState();
+              updateDeltaLine();
+            }
+          );
+
+          const responseField = createLabeledTextarea(
+            "Your response",
+            item.response,
+            "How would you answer this counterargument?",
+            (value) => {
+              item.response = value;
+              persistCurrentState();
+            }
+          );
+
+          const revisedRatingField = createRatingSelect(
+            "How convincing is it after your response?",
+            item.revisedRating,
+            (value) => {
+              item.revisedRating = value;
+              persistCurrentState();
+              updateDeltaLine();
+            }
+          );
+
+          const deltaLine = document.createElement("p");
+          deltaLine.className = "text-sm font-medium text-[#8b5a2b]";
+
+          function updateDeltaLine() {
+            const message = formatConvincingDelta(item.initialRating, item.revisedRating);
+            deltaLine.textContent = message;
+            deltaLine.classList.toggle("hidden", !message);
+          }
+
+          updateDeltaLine();
+
+          card.append(header, textField, initialRatingField, responseField, revisedRatingField, deltaLine);
+          elements.counterargumentsList.append(card);
+        });
+      }
+
+      function createLabeledTextarea(labelText, value, placeholder, onInput) {
+        const wrapper = document.createElement("label");
+        wrapper.className = "block space-y-1.5";
+
+        const label = document.createElement("span");
+        label.className = "text-sm font-semibold text-stone-700";
+        label.textContent = labelText;
+
+        const textarea = document.createElement("textarea");
+        textarea.rows = 2;
+        textarea.value = value;
+        textarea.placeholder = placeholder;
+        textarea.className =
+          "w-full resize-y rounded-xl border border-[#e5dbd0] bg-[#fffaf5] px-3 py-2 text-sm text-stone-800 placeholder:text-stone-500 focus:border-[#c48a4a] focus:outline-none focus:ring-4 focus:ring-[#c48a4a]/10";
+        textarea.addEventListener("input", () => onInput(textarea.value));
+
+        wrapper.append(label, textarea);
+        return wrapper;
+      }
+
+      function createRatingSelect(labelText, value, onChange) {
+        const wrapper = document.createElement("label");
+        wrapper.className = "block space-y-1.5";
+
+        const label = document.createElement("span");
+        label.className = "text-sm font-semibold text-stone-700";
+        label.textContent = labelText;
+
+        const select = document.createElement("select");
+        select.className =
+          "w-full rounded-xl border border-[#e5dbd0] bg-[#fffaf5] px-3 py-2 text-sm text-stone-800 focus:border-[#c48a4a] focus:outline-none focus:ring-4 focus:ring-[#c48a4a]/10 sm:w-40";
+
+        const blank = document.createElement("option");
+        blank.value = "";
+        blank.textContent = "Rate 1–10";
+        select.append(blank);
+
+        for (let rating = 1; rating <= 10; rating += 1) {
+          const option = document.createElement("option");
+          option.value = String(rating);
+          option.textContent = String(rating);
+          select.append(option);
+        }
+
+        select.value = value == null ? "" : String(value);
+        select.addEventListener("change", () => {
+          onChange(normalizeOptionalRating(select.value));
+        });
+
+        wrapper.append(label, select);
+        return wrapper;
+      }
+
+      function renderMungerChecklist() {
+        elements.mungerChecklist.replaceChildren();
+        state.mungerTendencies = normalizeMungerTendencies(state.mungerTendencies);
+
+        MUNGER_TENDENCIES.forEach((tendency) => {
+          const entry = state.mungerTendencies[tendency.id];
+          const checked = Boolean(entry.checked);
+          const label = document.createElement("label");
+          label.title = tendency.name;
+          label.className = checked
+            ? "inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-[#c4a27a] bg-[#fff1e4] px-2.5 py-1.5 text-xs font-medium text-[#8b5a2b] transition hover:border-[#b07a45]"
+            : "inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-[#e5dbd0] bg-[#fffdf9] px-2.5 py-1.5 text-xs font-medium text-stone-600 transition hover:border-[#d8ccbe] hover:bg-[#fffaf5]";
+
+          const checkbox = document.createElement("input");
+          checkbox.type = "checkbox";
+          checkbox.checked = checked;
+          checkbox.className =
+            "h-3.5 w-3.5 shrink-0 rounded border-[#d8ccbe] bg-white text-[#9a6432] focus:ring-2 focus:ring-[#c48a4a]/25";
+          checkbox.ariaLabel = tendency.name;
+          checkbox.addEventListener("change", () => {
+            state.mungerTendencies[tendency.id].checked = checkbox.checked;
+            persistCurrentState();
+            renderMungerChecklist();
+          });
+
+          const text = document.createElement("span");
+          text.className = "leading-none";
+          text.textContent = tendency.shortLabel;
+
+          label.append(checkbox, text);
+          elements.mungerChecklist.append(label);
+        });
+      }
+
+      function renderMoodCheckIn() {
+        elements.stressLevel.value = state.mood.stress;
+        elements.stressValue.textContent = state.mood.stress;
+        elements.emotionInput.value = state.mood.emotions;
+        elements.reflectionTip.textContent = getReflectionTip(state.mood);
+      }
+
+      function renderDeadlineCountdown() {
+        elements.deadline.value = state.deadline;
+        const countdown = getDeadlineCountdown(state.deadline);
+        elements.deadlineCountdown.textContent = countdown.text;
+        elements.deadlineCountdown.className = countdown.className;
+      }
+
+      function renderFactors() {
+        elements.factorsList.replaceChildren();
+
+        state.factors.forEach((factor, index) => {
+          const row = document.createElement("div");
+          row.className =
+            "warm-inset grid gap-3 rounded-2xl p-3 shadow-sm md:grid-cols-[minmax(0,1fr)_auto] md:items-center";
+
+          const input = document.createElement("input");
+          input.type = "text";
+          input.value = factor.name;
+          input.className =
+            "w-full min-w-0 rounded-xl border border-[#e5dbd0] bg-[#fffaf5] px-3 py-2 text-sm font-semibold text-stone-800 outline-none focus:border-[#c48a4a] focus:bg-[#fff7ef] focus:ring-4 focus:ring-[#c48a4a]/15 md:col-span-2";
+          input.ariaLabel = `Factor ${index + 1}`;
+          input.addEventListener("change", () => renameFactor(index, input.value.trim()));
+
+          const weightWrapper = document.createElement("label");
+          weightWrapper.className = "warm-inset block rounded-xl px-3 py-2";
+
+          const weightHeader = document.createElement("span");
+          weightHeader.className = "mb-1 flex items-center justify-between gap-3 text-xs font-bold text-stone-700";
+
+          const weightLabel = document.createElement("span");
+          weightLabel.textContent = "Importance";
+
+          const weightValue = document.createElement("span");
+          weightValue.className = "rounded-xl bg-[#fff1e4] px-2 py-0.5 text-stone-700 text-[#8b5a2b]";
+          weightValue.textContent = factor.weight;
+
+          const weightRange = document.createElement("input");
+          weightRange.type = "range";
+          weightRange.min = "1";
+          weightRange.max = "10";
+          weightRange.value = factor.weight;
+          weightRange.className = "w-full cursor-pointer";
+          weightRange.ariaLabel = `${factor.name} importance weight`;
+          weightRange.addEventListener("input", () => {
+            factor.weight = clampScore(weightRange.value);
+            weightValue.textContent = factor.weight;
+            persistCurrentState();
+            renderOptions();
+            renderRecommendation();
+          });
+
+          weightHeader.append(weightLabel, weightValue);
+          weightWrapper.append(weightHeader, weightRange);
+
+          const button = document.createElement("button");
+          button.type = "button";
+          button.textContent = "Remove";
+          button.className =
+            "inline-flex w-full items-center justify-center rounded-xl px-3 py-2 text-xs font-bold text-stone-600 transition hover:bg-[#f3ebe3] hover:text-rose-600 focus:outline-none focus:ring-4 focus:ring-rose-300/30 text-stone-500 md:w-auto";
+          button.addEventListener("click", () => removeFactor(index));
+          button.disabled = state.factors.length === 1;
+          if (button.disabled) {
+            button.classList.add("cursor-not-allowed", "opacity-40");
+          }
+
+          row.append(input, weightWrapper, button);
+          elements.factorsList.append(row);
+        });
+      }
+
+      function renameFactor(index, nextName) {
+        const oldName = state.factors[index].name;
+        if (!nextName || nextName === oldName) {
+          renderFactors();
+          return;
+        }
+        if (state.factors.some((factor, factorIndex) => factorIndex !== index && factor.name.toLowerCase() === nextName.toLowerCase())) {
+          renderFactors();
+          return;
+        }
+
+        state.factors[index].name = nextName;
+        persistAndRender();
+      }
+
+      function removeFactor(index) {
+        if (state.factors.length === 1) return;
+        const [removedFactor] = state.factors.splice(index, 1);
+        state.options.forEach((option) => delete option.scores[removedFactor.id]);
+        persistAndRender();
+      }
+
+      function renderOptions() {
+        elements.optionsList.replaceChildren();
+
+        if (!state.options.length) {
+          const emptyState = document.createElement("div");
+          emptyState.className =
+            "reveal rounded-2xl border border-dashed border-[#e5dbd0] bg-[#fffaf5] p-8 text-center font-medium text-stone-500";
+          emptyState.textContent = "Add at least two options to continue.";
+          elements.optionsList.append(emptyState);
+          return;
+        }
+
+        state.options.forEach((option) => {
+          const node = elements.simpleOptionTemplate.content.firstElementChild.cloneNode(true);
+          const title = node.querySelector(".option-title");
+          title.value = option.name;
+          title.addEventListener("input", () => {
+            option.name = title.value;
+            persistCurrentState();
+            updateChosenOptionHint();
+            renderRecommendation();
+          });
+
+          node.querySelector(".delete-option").addEventListener("click", () => {
+            state.options = state.options.filter((candidate) => candidate.id !== option.id);
+            persistAndRender();
+          });
+
+          elements.optionsList.append(node);
+        });
+      }
+
+      function renderAnalysisOptions() {
+        if (!elements.analysisOptionsList) return;
+        elements.analysisOptionsList.replaceChildren();
+
+        if (!state.options.length) {
+          const emptyState = document.createElement("div");
+          emptyState.className =
+            "reveal rounded-2xl border border-dashed border-[#e5dbd0] bg-[#fffaf5] p-8 text-center font-medium text-stone-500";
+          emptyState.textContent = "Add options in Step 3 before analyzing pros and cons.";
+          elements.analysisOptionsList.append(emptyState);
+          return;
+        }
+
+        state.options.forEach((option) => {
+          const node = elements.optionTemplate.content.firstElementChild.cloneNode(true);
+          const title = node.querySelector(".option-title");
+          const scoreSummary = node.querySelector(".score-summary");
+          const optionEvidence = node.querySelector(".option-evidence");
+
+          title.value = option.name;
+          title.addEventListener("input", () => {
+            option.name = title.value;
+            persistCurrentState();
+            scoreSummary.textContent = formatScoreSummary(option);
+            updateChosenOptionHint();
+            renderRecommendation();
+          });
+          scoreSummary.textContent = formatScoreSummary(option);
+
+          optionEvidence.value = option.evidence;
+          optionEvidence.addEventListener("input", () => {
+            option.evidence = optionEvidence.value;
+            persistCurrentState();
+          });
+
+          node.querySelector(".delete-option").addEventListener("click", () => {
+            state.options = state.options.filter((candidate) => candidate.id !== option.id);
+            persistAndRender();
+          });
+
+          renderItems(node.querySelector(".pros-list"), option, "pros");
+          renderItems(node.querySelector(".cons-list"), option, "cons");
+          renderScoreControls(node.querySelector(".scores"), option, () => {
+            scoreSummary.textContent = formatScoreSummary(option);
+            updateChosenOptionHint();
+            renderRecommendation();
+          });
+
+          node.querySelectorAll(".add-item-form").forEach((form) => {
+            form.addEventListener("submit", (event) => {
+              event.preventDefault();
+              const input = form.querySelector("input");
+              const value = input.value.trim();
+              if (!value) return;
+              option[form.dataset.type].push({ text: value, evidence: "" });
+              input.value = "";
+              persistAndRender();
+            });
+          });
+
+          elements.analysisOptionsList.append(node);
+        });
+      }
+
+      function renderItems(list, option, type) {
+        list.replaceChildren();
+        const items = option[type];
+
+        if (!items.length) {
+          const empty = document.createElement("li");
+          empty.className = "text-sm font-medium text-stone-500";
+          empty.textContent = type === "pros" ? "No pros yet." : "No cons yet.";
+          list.append(empty);
+          return;
+        }
+
+        items.forEach((item, index) => {
+          const row = document.createElement("li");
+          row.className =
+            "warm-inset rounded-xl px-3 py-2.5 text-sm font-medium text-stone-800 shadow-sm";
+
+          const itemHeader = document.createElement("div");
+          itemHeader.className = "flex items-start justify-between gap-3";
+
+          const text = document.createElement("input");
+          text.type = "text";
+          text.value = item.text;
+          text.placeholder = type === "pros" ? "Edit this pro" : "Edit this con";
+          text.ariaLabel = `Edit ${type === "pros" ? "pro" : "con"}: ${item.text}`;
+          text.className =
+            "min-h-8 min-w-0 flex-1 rounded-lg border border-transparent bg-[#fffaf5] px-2 py-1 text-sm font-medium text-stone-800 outline-none transition placeholder:text-stone-500 focus:border-[#c48a4a] focus:bg-[#fff7ef] focus:ring-4 focus:ring-[#c48a4a]/15";
+          text.addEventListener("input", () => {
+            option[type][index].text = text.value;
+            button.ariaLabel = `Remove ${text.value || type.slice(0, -1)}`;
+            persistCurrentState();
+          });
+          text.addEventListener("blur", () => {
+            const trimmedValue = text.value.trim();
+            if (!trimmedValue) {
+              option[type].splice(index, 1);
+              persistAndRender();
+              return;
+            }
+            option[type][index].text = trimmedValue;
+            text.value = trimmedValue;
+            persistCurrentState();
+          });
+
+          const button = document.createElement("button");
+          button.type = "button";
+          button.textContent = "×";
+          button.ariaLabel = `Remove ${item.text}`;
+          button.className = "grid min-h-8 min-w-8 place-items-center rounded-xl text-lg font-bold leading-none text-stone-500 transition hover:bg-rose-50 hover:text-rose-600 focus:outline-none focus:ring-4 focus:ring-rose-300/30 text-stone-500";
+          button.addEventListener("click", () => {
+            option[type].splice(index, 1);
+            persistAndRender();
+          });
+
+          const evidenceDetails = document.createElement("details");
+          evidenceDetails.className =
+            "warm-inset mt-2 rounded-xl px-3 py-2";
+
+          const summary = document.createElement("summary");
+          summary.className =
+            "cursor-pointer select-none text-xs font-bold text-stone-600 transition hover:text-[#8b5a2b] text-stone-500";
+          summary.textContent = "Evidence / notes";
+
+          const evidence = document.createElement("textarea");
+          evidence.value = item.evidence;
+          evidence.rows = 3;
+          evidence.placeholder = "Add links, notes, source details, or supporting material...";
+          evidence.ariaLabel = `Evidence or notes for ${item.text || type.slice(0, -1)}`;
+          evidence.className =
+            "mt-3 w-full resize-y rounded-xl border border-[#e5dbd0] bg-[#fffaf5] px-3 py-2 text-sm font-medium text-stone-800 outline-none transition placeholder:text-stone-500 focus:border-[#c48a4a] focus:ring-4 focus:ring-[#c48a4a]/15";
+          evidence.addEventListener("input", () => {
+            option[type][index].evidence = evidence.value;
+            persistCurrentState();
+          });
+
+          itemHeader.append(text, button);
+          evidenceDetails.append(summary, evidence);
+          row.append(itemHeader, evidenceDetails);
+          list.append(row);
+        });
+      }
+
+      function renderScoreControls(container, option, onScoreChange) {
+        container.replaceChildren();
+
+        state.factors.forEach((factor) => {
+          const score = clampScore(option.scores[factor.id] ?? 5);
+          option.scores[factor.id] = score;
+
+          const wrapper = document.createElement("label");
+          wrapper.className =
+            "warm-inset block rounded-2xl p-4 shadow-sm transition hover:border-[#d2b48c]";
+
+          const header = document.createElement("span");
+          header.className = "mb-3 flex items-center justify-between gap-4";
+
+          const name = document.createElement("span");
+          name.className = "font-semibold text-stone-800";
+          name.textContent = factor.name;
+
+          const value = document.createElement("span");
+          value.className = "rounded-xl bg-[#fff1e4] px-3 py-1 text-sm font-bold text-stone-700 text-[#8b5a2b]";
+          value.textContent = `${score} × ${factor.weight}`;
+
+          const range = document.createElement("input");
+          range.type = "range";
+          range.min = "1";
+          range.max = "10";
+          range.value = score;
+          range.className = "w-full cursor-pointer";
+          range.ariaLabel = `${factor.name} score for ${option.name || "this option"}`;
+          range.addEventListener("input", () => {
+            option.scores[factor.id] = Number(range.value);
+            value.textContent = `${range.value} × ${factor.weight}`;
+            persistCurrentState();
+            onScoreChange();
+          });
+
+          header.append(name, value);
+          wrapper.append(header, range);
+          container.append(wrapper);
+        });
+      }
+
+      function renderRecommendation() {
+        const rankedOptions = [...state.options]
+          .map((option) => ({ option, score: calculateOptionScore(option) }))
+          .sort((a, b) => b.score.weightedTotal - a.score.weightedTotal);
+
+        elements.recommendation.replaceChildren();
+
+        if (!rankedOptions.length) {
+          elements.recommendation.append(createMessageCard("Add options to receive a recommendation."));
+          return;
+        }
+
+        const winner = rankedOptions[0];
+        const card = document.createElement("div");
+        card.className = "recommendation-card reveal rounded-2xl p-5 text-stone-800";
+        card.innerHTML = `
+          <p class="text-sm font-semibold uppercase tracking-[0.16em] font-medium text-[#8b5a2b]">Best recommendation</p>
+          <h3 class="mt-3 font-serif text-3xl font-medium">${escapeHtml(winner.option.name || "Untitled option")}</h3>
+          <p class="mt-3 text-stone-700">
+            Weighted score: <strong>${winner.score.normalized.toFixed(1)} / 10</strong>
+          </p>
+          <p class="mt-1 text-sm font-semibold text-stone-600">
+            ${winner.score.weightedTotal.toFixed(0)} of ${winner.score.maxTotal.toFixed(0)} weighted points
+          </p>
+          <p class="mt-4 text-sm leading-6 text-stone-600">
+            This option has the highest weighted total after multiplying each factor score by its importance.
+          </p>
+        `;
+
+        const list = document.createElement("ol");
+        list.className = "mt-5 space-y-2";
+        rankedOptions.forEach(({ option, score }, index) => {
+          const item = document.createElement("li");
+          item.className =
+            index === 0
+              ? "flex items-center justify-between gap-3 rounded-2xl border border-[#e4cfb8] bg-[#fff1e4] px-4 py-3 text-sm"
+              : "flex items-center justify-between gap-3 rounded-2xl border border-[#e5dbd0] bg-[#fffaf5] px-4 py-3 text-sm";
+          item.innerHTML = `
+            <span class="font-semibold text-stone-800">
+              ${index + 1}. ${escapeHtml(option.name || "Untitled option")}
+              ${index === 0 ? '<span class="ml-2 rounded-lg bg-[#9a6432] px-2 py-0.5 text-xs text-white">Best</span>' : ""}
+            </span>
+            <span class="text-right font-bold text-[#8b5a2b]">
+              ${score.normalized.toFixed(1)} / 10
+              <span class="block text-xs text-stone-500">${score.weightedTotal.toFixed(0)} pts</span>
+            </span>
+          `;
+          list.append(item);
+        });
+
+        elements.recommendation.append(card, list);
+      }
+
+      function renderSavedDecisions() {
+        elements.savedDecisions.replaceChildren();
+
+        if (!savedDecisions.length) {
+          elements.savedDecisions.append(createMessageCard("No saved decisions yet. Save a snapshot when you want to keep a version."));
+          return;
+        }
+
+        savedDecisions.forEach((decision, index) => {
+          const row = document.createElement("div");
+          row.className =
+            "warm-inset reveal rounded-2xl p-4 shadow-sm transition hover:border-[#d2b48c]";
+
+          const savedDate = decision.savedAt ? new Date(decision.savedAt).toLocaleString() : "Saved decision";
+          row.innerHTML = `
+            <p class="font-medium text-stone-800">${escapeHtml(decision.title || "Untitled decision")}</p>
+            <p class="mt-1 text-xs font-medium text-stone-500">${escapeHtml(savedDate)}</p>
+          `;
+
+          const actions = document.createElement("div");
+          actions.className = "mt-3 flex flex-col gap-2 sm:flex-row";
+
+          const loadButton = document.createElement("button");
+          loadButton.type = "button";
+          loadButton.textContent = "Load";
+          loadButton.className =
+            "inline-flex flex-1 items-center justify-center rounded-xl bg-[#f3ebe3] px-3 py-2.5 text-xs font-bold text-[#8b5a2b] transition hover:bg-[#ebe0d4] focus:outline-none focus:ring-4 focus:ring-[#c48a4a]/15";
+          loadButton.addEventListener("click", () => {
+            state = normalizeState(decision);
+            persistAndRender("Saved decision loaded");
+          });
+
+          const deleteButton = document.createElement("button");
+          deleteButton.type = "button";
+          deleteButton.textContent = "Delete";
+          deleteButton.className =
+            "inline-flex flex-1 items-center justify-center rounded-xl px-3 py-2.5 text-xs font-bold text-stone-600 transition hover:bg-rose-50 hover:text-rose-600 focus:outline-none focus:ring-4 focus:ring-rose-300/30 text-stone-500";
+          deleteButton.addEventListener("click", () => {
+            savedDecisions.splice(index, 1);
+            localStorage.setItem(SAVED_KEY, JSON.stringify(savedDecisions));
+            renderSavedDecisions();
+          });
+
+          actions.append(loadButton, deleteButton);
+          row.append(actions);
+          elements.savedDecisions.append(row);
+        });
+      }
+
+      function createMessageCard(message) {
+        const card = document.createElement("p");
+        card.className =
+          "warm-inset rounded-2xl border border-dashed border-[#e5dbd0] p-4 text-sm font-medium text-stone-500";
+        card.textContent = message;
+        return card;
+      }
+
+      function calculateOptionScore(option) {
+        if (!state.factors.length) {
+          return { weightedTotal: 0, maxTotal: 0, normalized: 0 };
+        }
+
+        const weightedTotal = state.factors.reduce((sum, factor) => {
+          return sum + clampScore(option.scores[factor.id] ?? 5) * clampScore(factor.weight);
+        }, 0);
+        const maxTotal = state.factors.reduce((sum, factor) => sum + 10 * clampScore(factor.weight), 0);
+
+        return {
+          weightedTotal,
+          maxTotal,
+          normalized: maxTotal ? (weightedTotal / maxTotal) * 10 : 0,
+        };
+      }
+
+      function formatScoreSummary(option) {
+        const score = calculateOptionScore(option);
+        return `${score.normalized.toFixed(1)} / 10 weighted score · ${score.weightedTotal.toFixed(0)} pts`;
+      }
+
+      function getReflectionTip(mood) {
+        const emotions = mood.emotions.trim();
+        const emotionNote = emotions
+          ? `You named: "${emotions}".`
+          : "If it helps, name 1-3 emotions before you continue.";
+
+        if (mood.stress >= 8) {
+          return `${emotionNote} Your stress is high, so pause for two slow breaths and consider stepping away briefly before making the final call.`;
+        }
+
+        if (mood.stress >= 5) {
+          return `${emotionNote} Your stress is moderate. Try separating facts from fears, then review your highest-weighted factors one at a time.`;
+        }
+
+        return `${emotionNote} You seem relatively calm right now. Use that steadiness to focus on what matters most, not just what feels most urgent.`;
+      }
+
+      function getDeadlineCountdown(deadline) {
+        const baseClass =
+          "rounded-2xl border px-4 py-3 text-sm font-bold transition-colors";
+        const emptyClass = `${baseClass} border-[#e5dbd0] bg-[#f7efe6] text-stone-500`;
+
+        if (!deadline) {
+          return {
+            text: "No deadline set",
+            className: emptyClass,
+          };
+        }
+
+        const targetDate = parseLocalDate(deadline);
+        if (!targetDate) {
+          return {
+            text: "Invalid deadline",
+            className: `${baseClass} border-rose-200 bg-rose-50 text-rose-700`,
+          };
+        }
+
+        const today = new Date();
+        const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+        const daysRemaining = Math.round((targetDate - todayStart) / 86400000);
+
+        if (daysRemaining < 0) {
+          return {
+            text: "Overdue",
+            className: `${baseClass} border-rose-200 bg-rose-50 text-rose-700`,
+          };
+        }
+
+        if (daysRemaining === 0) {
+          return {
+            text: "Decision due today",
+            className: `${baseClass} border-rose-200 bg-rose-50 text-rose-700`,
+          };
+        }
+
+        if (daysRemaining <= 3) {
+          return {
+            text: `${daysRemaining} ${daysRemaining === 1 ? "day" : "days"} remaining`,
+            className: `${baseClass} border-rose-200 bg-rose-50 text-rose-700`,
+          };
+        }
+
+        if (daysRemaining <= 7) {
+          return {
+            text: `${daysRemaining} days remaining`,
+            className: `${baseClass} border-[#e4cfb8] bg-[#fff1e4] text-[#8b5a2b]`,
+          };
+        }
+
+        return {
+          text: `${daysRemaining} days remaining`,
+          className: `${baseClass} border-emerald-200 bg-emerald-50 text-emerald-800`,
+        };
+      }
+
+      function parseLocalDate(value) {
+        const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+        if (!match) return null;
+
+        const [, year, month, day] = match.map(Number);
+        const date = new Date(year, month - 1, day);
+        if (date.getFullYear() !== year || date.getMonth() !== month - 1 || date.getDate() !== day) {
+          return null;
+        }
+        return date;
+      }
+
+      function clampScore(value) {
+        const score = Number(value);
+        if (Number.isNaN(score)) return 5;
+        return Math.min(10, Math.max(1, score));
+      }
+
+      function normalizeFactor(factor) {
+        if (typeof factor === "string") {
+          return { id: createFactorId(factor), name: factor, weight: 5 };
+        }
+
+        const name = factor?.name || "Untitled factor";
+        return {
+          id: factor?.id || createFactorId(name),
+          name,
+          weight: clampScore(factor?.weight ?? 5),
+        };
+      }
+
+      function createFactorId(name) {
+        const slug = String(name)
+          .trim()
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/^-+|-+$/g, "");
+        return slug || createId();
+      }
+
+      function createUniqueFactorId(name) {
+        const baseId = createFactorId(name);
+        let candidate = baseId;
+        let suffix = 2;
+
+        while (state.factors.some((factor) => factor.id === candidate)) {
+          candidate = `${baseId}-${suffix}`;
+          suffix += 1;
+        }
+
+        return candidate;
+      }
+
+      function escapeHtml(value) {
+        return String(value)
+          .replaceAll("&", "&amp;")
+          .replaceAll("<", "&lt;")
+          .replaceAll(">", "&gt;")
+          .replaceAll('"', "&quot;")
+          .replaceAll("'", "&#039;");
+      }
+
+      function createId() {
+        if (window.crypto?.randomUUID) {
+          return window.crypto.randomUUID();
+        }
+        return `id-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+      }
+
+      function deepClone(value) {
+        if (window.structuredClone) {
+          return window.structuredClone(value);
+        }
+        return JSON.parse(JSON.stringify(value));
+      }
+    </script>
+  </body>
+</html>

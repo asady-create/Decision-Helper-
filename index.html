@@ -165,6 +165,20 @@
         color: #8b5a2b;
       }
 
+      .nav-tab:disabled,
+      .nav-tab[aria-disabled="true"] {
+        opacity: 0.45;
+        cursor: not-allowed;
+      }
+
+      .step-nav {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        justify-content: space-between;
+        padding-top: 0.25rem;
+      }
+
       @keyframes fade-up {
         from {
           opacity: 0;
@@ -216,336 +230,200 @@
 
       <main class="flex-1">
         <p id="saveStatus" class="mb-3 min-h-5 text-sm font-semibold text-[#8b5a2b]" role="status"></p>
+        <p id="stepHint" class="mb-4 text-sm text-stone-500"></p>
 
-        <!-- Decision -->
-        <section
-          id="section-decision"
-          class="app-section space-y-6"
-          data-app-section="decision"
-          role="tabpanel"
-          aria-labelledby="nav-decision"
-        >
-          <section
-            class="glass-panel interactive-surface reveal rounded-2xl border border-[#e8dfd4] bg-white/90 p-5 shadow-calm sm:p-6"
-            aria-labelledby="feelingsTitle"
-          >
-            <div class="mb-5">
-              <h2 id="feelingsTitle" class="font-serif text-xl font-medium text-stone-800">
-                How do you feel right now?
-              </h2>
-              <p class="mt-1 text-sm text-stone-500">
-                Notice your stress and emotions before comparing options. This can help you make a calmer choice.
-              </p>
+        <!-- 1. Question -->
+        <section id="section-question" class="app-section space-y-6" data-app-section="question" role="tabpanel" aria-labelledby="nav-question">
+          <section class="glass-panel interactive-surface reveal rounded-2xl border border-[#e8dfd4] bg-white/90 p-5 shadow-calm sm:p-6" aria-labelledby="decisionFormTitle">
+            <div class="mb-5 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+              <div>
+                <p class="mb-1 text-sm font-medium text-[#8b5a2b]">Step 1</p>
+                <h2 id="decisionFormTitle" class="font-serif text-xl font-medium text-stone-800">Your decision question</h2>
+                <p class="mt-1 text-sm text-stone-500">Start with one clear question. You can refine details as you go.</p>
+              </div>
+              <button id="resetDecision" type="button" class="inline-flex w-full items-center justify-center rounded-xl px-4 py-2.5 text-sm font-semibold text-stone-500 transition hover:bg-[#f3ebe3] hover:text-stone-800 focus:outline-none focus:ring-4 focus:ring-stone-300/40 sm:w-auto">Reset</button>
             </div>
+            <label for="decisionQuestion" class="mb-2 block text-sm font-semibold text-stone-700">Decision question</label>
+            <input id="decisionQuestion" type="text" placeholder="Should I study abroad?" class="w-full rounded-2xl border border-[#e5dbd0] bg-[#fffaf5] px-4 py-3.5 text-base text-stone-800 outline-none transition placeholder:text-stone-500 focus:border-[#c48a4a] focus:ring-4 focus:ring-[#c48a4a]/15" />
+            <div class="warm-inset mt-5 grid gap-3 rounded-2xl p-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end">
+              <label for="decisionDeadline" class="block">
+                <span class="mb-2 block text-sm font-semibold text-stone-700">Decision deadline</span>
+                <input id="decisionDeadline" type="date" class="w-full rounded-2xl border border-[#e5dbd0] bg-[#fffaf5] px-4 py-3.5 text-base text-stone-800 outline-none transition focus:border-[#c48a4a] focus:ring-4 focus:ring-[#c48a4a]/15" />
+              </label>
+              <div id="deadlineCountdown" class="rounded-2xl border px-4 py-3 text-sm font-bold" role="status"></div>
+            </div>
+            <div class="warm-inset mt-5 space-y-5 rounded-2xl p-4">
+              <div>
+                <label for="decisionPrinciple" class="mb-1 block text-sm font-semibold text-stone-700">What principle are you relying on?</label>
+                <p class="mb-2 text-sm text-stone-500">Optional — name the value or standard guiding this choice.</p>
+                <textarea id="decisionPrinciple" rows="3" placeholder="e.g. Choose the option that protects long-term optionality" class="w-full resize-y rounded-2xl border border-[#e5dbd0] bg-[#fffaf5] px-4 py-3.5 text-base text-stone-800 outline-none transition placeholder:text-stone-500 focus:border-[#c48a4a] focus:ring-4 focus:ring-[#c48a4a]/15"></textarea>
+              </div>
+              <div>
+                <label for="desiredOutcome" class="mb-1 block text-sm font-semibold text-stone-700">What outcome do you want to achieve?</label>
+                <p class="mb-2 text-sm text-stone-500">Optional — describe the result you most want.</p>
+                <textarea id="desiredOutcome" rows="3" placeholder="e.g. Feel clear, prepared, and able to commit without lingering regret" class="w-full resize-y rounded-2xl border border-[#e5dbd0] bg-[#fffaf5] px-4 py-3.5 text-base text-stone-800 outline-none transition placeholder:text-stone-500 focus:border-[#c48a4a] focus:ring-4 focus:ring-[#c48a4a]/15"></textarea>
+              </div>
+            </div>
+            <div class="mt-6 rounded-2xl border border-[#ead7c4] bg-[#fff1e4] p-4 text-sm text-stone-700">
+              <h3 class="font-medium">How this flow works</h3>
+              <ol class="mt-2 list-decimal space-y-1 pl-5">
+                <li>Write your decision question.</li>
+                <li>Check how you feel.</li>
+                <li>List options, then factors, then pros and cons.</li>
+                <li>Pressure-test with counterarguments and bias checks.</li>
+              </ol>
+            </div>
+          </section>
+          <div class="step-nav" data-step-nav="question"></div>
+        </section>
 
+        <!-- 2. Feelings -->
+        <section id="section-feelings" class="app-section space-y-6" data-app-section="feelings" role="tabpanel" aria-labelledby="nav-feelings" hidden>
+          <section class="glass-panel interactive-surface reveal rounded-2xl border border-[#e8dfd4] bg-white/90 p-5 shadow-calm sm:p-6" aria-labelledby="feelingsTitle">
+            <div class="mb-5">
+              <p class="mb-1 text-sm font-medium text-[#8b5a2b]">Step 2</p>
+              <h2 id="feelingsTitle" class="font-serif text-xl font-medium text-stone-800">How do you feel about this decision?</h2>
+              <p class="mt-1 text-sm text-stone-500">Notice stress and emotions before you compare options.</p>
+            </div>
             <div class="grid gap-4 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
               <label class="warm-inset block rounded-2xl p-4">
                 <span class="mb-3 flex items-center justify-between gap-4">
                   <span class="font-semibold text-stone-800">Current stress level</span>
-                  <span
-                    id="stressValue"
-                    class="rounded-lg bg-[#f3ebe3] px-3 py-1 text-sm font-bold text-[#8b5a2b]"
-                    >5</span
-                  >
+                  <span id="stressValue" class="rounded-lg bg-[#f3ebe3] px-3 py-1 text-sm font-bold text-[#8b5a2b]">5</span>
                 </span>
                 <input id="stressLevel" type="range" min="1" max="10" value="5" class="w-full cursor-pointer" />
-                <span class="mt-2 flex justify-between text-xs font-semibold text-stone-500">
-                  <span>Calm</span>
-                  <span>Very stressed</span>
-                </span>
+                <span class="mt-2 flex justify-between text-xs font-semibold text-stone-500"><span>Calm</span><span>Very stressed</span></span>
               </label>
-
               <label for="emotionInput" class="block">
-                <span class="mb-2 block text-sm font-semibold text-stone-700">
-                  Emotions about this decision
-                </span>
-                <textarea
-                  id="emotionInput"
-                  rows="4"
-                  placeholder="For example: excited, nervous, pressured, hopeful..."
-                  class="w-full resize-y rounded-2xl border border-[#e5dbd0] bg-[#fffaf5] px-4 py-3.5 text-base text-stone-800 outline-none transition placeholder:text-stone-500 focus:border-[#c48a4a] focus:ring-4 focus:ring-[#c48a4a]/15"
-                ></textarea>
+                <span class="mb-2 block text-sm font-semibold text-stone-700">Emotions about this decision</span>
+                <textarea id="emotionInput" rows="4" placeholder="For example: excited, nervous, pressured, hopeful..." class="w-full resize-y rounded-2xl border border-[#e5dbd0] bg-[#fffaf5] px-4 py-3.5 text-base text-stone-800 outline-none transition placeholder:text-stone-500 focus:border-[#c48a4a] focus:ring-4 focus:ring-[#c48a4a]/15"></textarea>
               </label>
             </div>
-
-            <div
-              id="reflectionTip"
-              class="warm-inset mt-5 rounded-2xl p-4 text-sm font-medium leading-6 text-[#8b5a2b]"
-              role="status"
-            ></div>
+            <div id="reflectionTip" class="warm-inset mt-5 rounded-2xl p-4 text-sm font-medium leading-6 text-[#8b5a2b]" role="status"></div>
           </section>
-
-          <section
-            class="glass-panel interactive-surface reveal rounded-2xl border border-[#e8dfd4] bg-white/90 p-5 shadow-calm sm:p-6"
-            aria-labelledby="decisionFormTitle"
-          >
-            <div class="mb-5 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-              <div>
-                <h2 id="decisionFormTitle" class="font-serif text-xl font-medium text-stone-800">
-                  Frame the decision
-                </h2>
-                <p class="mt-1 text-sm text-stone-500">
-                  Keep the question specific and time-bound if you can.
-                </p>
-              </div>
-              <button
-                id="resetDecision"
-                type="button"
-                class="inline-flex w-full items-center justify-center rounded-xl px-4 py-2.5 text-sm font-semibold text-stone-500 transition hover:bg-[#f3ebe3] hover:text-stone-800 focus:outline-none focus:ring-4 focus:ring-stone-300/40 sm:w-auto"
-              >
-                Reset
-              </button>
-            </div>
-
-            <label for="decisionQuestion" class="mb-2 block text-sm font-semibold text-stone-700">
-              Decision question
-            </label>
-            <input
-              id="decisionQuestion"
-              type="text"
-              placeholder="Should I study abroad?"
-              class="w-full rounded-2xl border border-[#e5dbd0] bg-[#fffaf5] px-4 py-3.5 text-base text-stone-800 outline-none transition placeholder:text-stone-500 focus:border-[#c48a4a] focus:ring-4 focus:ring-[#c48a4a]/15"
-            />
-
-            <div class="warm-inset mt-5 grid gap-3 rounded-2xl p-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end">
-              <label for="decisionDeadline" class="block">
-                <span class="mb-2 block text-sm font-semibold text-stone-700">
-                  Decision deadline
-                </span>
-                <input
-                  id="decisionDeadline"
-                  type="date"
-                  class="w-full rounded-2xl border border-[#e5dbd0] bg-[#fffaf5] px-4 py-3.5 text-base text-stone-800 outline-none transition focus:border-[#c48a4a] focus:ring-4 focus:ring-[#c48a4a]/15"
-                />
-              </label>
-              <div
-                id="deadlineCountdown"
-                class="rounded-2xl border px-4 py-3 text-sm font-bold"
-                role="status"
-              ></div>
-            </div>
-
-            <div class="warm-inset mt-5 space-y-5 rounded-2xl p-4">
-              <div>
-                <label for="decisionPrinciple" class="mb-1 block text-sm font-semibold text-stone-700">
-                  What principle are you relying on?
-                </label>
-                <p class="mb-2 text-sm text-stone-500">
-                  Name the rule, value, or standard guiding this choice.
-                </p>
-                <textarea
-                  id="decisionPrinciple"
-                  rows="3"
-                  placeholder="e.g. Choose the option that protects long-term optionality"
-                  class="w-full resize-y rounded-2xl border border-[#e5dbd0] bg-[#fffaf5] px-4 py-3.5 text-base text-stone-800 outline-none transition placeholder:text-stone-500 focus:border-[#c48a4a] focus:ring-4 focus:ring-[#c48a4a]/15"
-                ></textarea>
-              </div>
-              <div>
-                <label for="desiredOutcome" class="mb-1 block text-sm font-semibold text-stone-700">
-                  What outcome do you want to achieve?
-                </label>
-                <p class="mb-2 text-sm text-stone-500">
-                  Describe the result you most want this decision to produce.
-                </p>
-                <textarea
-                  id="desiredOutcome"
-                  rows="3"
-                  placeholder="e.g. Feel clear, prepared, and able to commit without lingering regret"
-                  class="w-full resize-y rounded-2xl border border-[#e5dbd0] bg-[#fffaf5] px-4 py-3.5 text-base text-stone-800 outline-none transition placeholder:text-stone-500 focus:border-[#c48a4a] focus:ring-4 focus:ring-[#c48a4a]/15"
-                ></textarea>
-              </div>
-            </div>
-
-            <div class="mt-6 rounded-2xl border border-[#ead7c4] bg-[#fff1e4] p-4 text-sm text-stone-700">
-              <h3 class="font-medium">How to use it</h3>
-              <ol class="mt-2 list-decimal space-y-1 pl-5">
-                <li>Write one clear decision question.</li>
-                <li>Add two or more realistic options.</li>
-                <li>List the most important pros and cons for each option.</li>
-                <li>Rate every factor from 1 to 10, then review the recommendation.</li>
-              </ol>
-            </div>
-          </section>
+          <div class="step-nav" data-step-nav="feelings"></div>
         </section>
 
-        <!-- Options -->
-        <section
-          id="section-options"
-          class="app-section space-y-6"
-          data-app-section="options"
-          role="tabpanel"
-          aria-labelledby="nav-options"
-          hidden
-        >
-          <section
-            class="glass-panel interactive-surface reveal rounded-2xl border border-[#e8dfd4] bg-white/90 p-5 shadow-calm sm:p-6"
-            aria-labelledby="optionsTitle"
-          >
+        <!-- 3. Options (names only) -->
+        <section id="section-options" class="app-section space-y-6" data-app-section="options" role="tabpanel" aria-labelledby="nav-options" hidden>
+          <section class="glass-panel interactive-surface reveal rounded-2xl border border-[#e8dfd4] bg-white/90 p-5 shadow-calm sm:p-6" aria-labelledby="optionsTitle">
             <div class="mb-5">
-              <h2 id="optionsTitle" class="font-serif text-2xl font-medium text-stone-800">
-                Compare options
-              </h2>
-              <p class="mt-1 text-sm text-stone-500">
-                Pros and cons help you qualify the numbers; scores help you compare consistently.
-              </p>
+              <p class="mb-1 text-sm font-medium text-[#8b5a2b]">Step 3</p>
+              <h2 id="optionsTitle" class="font-serif text-2xl font-medium text-stone-800">Add your options</h2>
+              <p class="mt-1 text-sm text-stone-500">List the realistic choices first. Pros and cons come later.</p>
             </div>
-
             <form id="addOptionForm" class="mb-6">
-              <label for="optionName" class="mb-2 block text-sm font-semibold text-stone-700">
-                Add an option
-              </label>
+              <label for="optionName" class="mb-2 block text-sm font-semibold text-stone-700">Add an option</label>
               <div class="flex flex-col gap-3 sm:flex-row">
-                <input
-                  id="optionName"
-                  type="text"
-                  placeholder="Go to UK"
-                  class="min-w-0 flex-1 rounded-2xl border border-[#e5dbd0] bg-[#fffaf5] px-4 py-3.5 text-base text-stone-800 outline-none transition placeholder:text-stone-500 focus:border-[#c48a4a] focus:ring-4 focus:ring-[#c48a4a]/15"
-                />
-                <button
-                  type="submit"
-                  class="inline-flex w-full items-center justify-center rounded-2xl bg-[#9a6432] px-5 py-3.5 font-semibold text-white shadow-sm transition hover:bg-[#7a4e25] focus:outline-none focus:ring-4 focus:ring-[#c48a4a]/20 sm:w-auto"
-                >
-                  Add option
-                </button>
+                <input id="optionName" type="text" placeholder="Go to UK" class="min-w-0 flex-1 rounded-2xl border border-[#e5dbd0] bg-[#fffaf5] px-4 py-3.5 text-base text-stone-800 outline-none transition placeholder:text-stone-500 focus:border-[#c48a4a] focus:ring-4 focus:ring-[#c48a4a]/15" />
+                <button type="submit" class="inline-flex w-full items-center justify-center rounded-2xl bg-[#9a6432] px-5 py-3.5 font-semibold text-white shadow-sm transition hover:bg-[#7a4e25] focus:outline-none focus:ring-4 focus:ring-[#c48a4a]/20 sm:w-auto">Add option</button>
               </div>
             </form>
-
-            <div id="optionsList" class="grid gap-4"></div>
+            <div id="optionsList" class="grid gap-3"></div>
           </section>
+          <div class="step-nav" data-step-nav="options"></div>
         </section>
 
-        <!-- Factor analysis -->
-        <section
-          id="section-factors"
-          class="app-section space-y-6"
-          data-app-section="factors"
-          role="tabpanel"
-          aria-labelledby="nav-factors"
-          hidden
-        >
-          <section
-            class="glass-panel interactive-surface reveal rounded-2xl border border-[#e8dfd4] bg-white/90 p-5 shadow-calm sm:p-6"
-            aria-labelledby="factorsTitle"
-          >
+        <!-- 4. Factors -->
+        <section id="section-factors" class="app-section space-y-6" data-app-section="factors" role="tabpanel" aria-labelledby="nav-factors" hidden>
+          <section class="glass-panel interactive-surface reveal rounded-2xl border border-[#e8dfd4] bg-white/90 p-5 shadow-calm sm:p-6" aria-labelledby="factorsTitle">
             <div class="mb-5">
-              <h2 id="factorsTitle" class="font-serif text-xl font-medium text-stone-800">
-                Factor analysis
-              </h2>
-              <p class="mt-1 text-sm text-stone-500">
-                Adjust factor names and importance weights to match your decision. Score each option under Options.
-              </p>
+              <p class="mb-1 text-sm font-medium text-[#8b5a2b]">Step 4</p>
+              <h2 id="factorsTitle" class="font-serif text-xl font-medium text-stone-800">Key factors</h2>
+              <p class="mt-1 text-sm text-stone-500">Name what matters and set how important each factor is (1–10).</p>
             </div>
             <div id="factorsList" class="space-y-3"></div>
             <form id="addFactorForm" class="mt-5 flex flex-col gap-3 sm:flex-row">
-              <input
-                id="factorName"
-                type="text"
-                placeholder="Add a factor, e.g. Career growth"
-                class="min-w-0 flex-1 rounded-2xl border border-[#e0d5c8] bg-[#fffaf5] px-4 py-3.5 text-base font-medium text-stone-800 outline-none transition placeholder:text-stone-500 focus:border-[#c48a4a] focus:ring-4 focus:ring-[#c48a4a]/15"
-              />
-              <button
-                type="submit"
-                class="inline-flex w-full items-center justify-center rounded-2xl border border-[#e4cfb8] bg-[#fff1e4] px-5 py-3.5 font-semibold text-stone-800 transition hover:bg-[#fff1e4] focus:outline-none focus:ring-4 focus:ring-[#c48a4a]/15 sm:w-auto"
-              >
-                Add factor
-              </button>
+              <input id="factorName" type="text" placeholder="Add a factor, e.g. Career growth" class="min-w-0 flex-1 rounded-2xl border border-[#e0d5c8] bg-[#fffaf5] px-4 py-3.5 text-base font-medium text-stone-800 outline-none transition placeholder:text-stone-500 focus:border-[#c48a4a] focus:ring-4 focus:ring-[#c48a4a]/15" />
+              <button type="submit" class="inline-flex w-full items-center justify-center rounded-2xl border border-[#e4cfb8] bg-[#fff1e4] px-5 py-3.5 font-semibold text-stone-800 transition hover:bg-[#fff1e4] focus:outline-none focus:ring-4 focus:ring-[#c48a4a]/15 sm:w-auto">Add factor</button>
             </form>
           </section>
+          <div class="step-nav" data-step-nav="factors"></div>
         </section>
 
-        <!-- Munger biases -->
-        <section
-          id="section-biases"
-          class="app-section space-y-6"
-          data-app-section="biases"
-          role="tabpanel"
-          aria-labelledby="nav-biases"
-          hidden
-        >
-          <section
-            class="glass-panel interactive-surface reveal rounded-2xl border border-[#e8dfd4] bg-white/90 p-5 shadow-calm sm:p-6"
-            aria-labelledby="mungerTitle"
-          >
-            <div class="mb-4">
-              <p class="mb-1 text-sm font-medium text-[#8b5a2b]">Bias awareness check</p>
-              <h2 id="mungerTitle" class="font-serif text-xl font-medium text-stone-800">
-                Munger's Biases Checklist
-              </h2>
-              <p class="mt-3 font-serif text-lg italic leading-8 text-stone-600">
-                "Reality talks to only who listen"
-              </p>
-              <p class="mt-2 text-sm text-stone-500">
-                After comparing your options, mark any tendencies that may be distorting your judgment.
-              </p>
+        <!-- 5. Pros/cons analysis -->
+        <section id="section-analysis" class="app-section space-y-6" data-app-section="analysis" role="tabpanel" aria-labelledby="nav-analysis" hidden>
+          <section class="glass-panel interactive-surface reveal rounded-2xl border border-[#e8dfd4] bg-white/90 p-5 shadow-calm sm:p-6" aria-labelledby="analysisTitle">
+            <div class="mb-5">
+              <p class="mb-1 text-sm font-medium text-[#8b5a2b]">Step 5</p>
+              <h2 id="analysisTitle" class="font-serif text-2xl font-medium text-stone-800">Pros, cons, and scores</h2>
+              <p class="mt-1 text-sm text-stone-500">For each option, capture trade-offs and score it on your factors.</p>
             </div>
+            <div id="analysisOptionsList" class="grid gap-4"></div>
+          </section>
+          <div class="step-nav" data-step-nav="analysis"></div>
+        </section>
 
+        <!-- 6. Counterarguments -->
+        <section id="section-counterarguments" class="app-section space-y-6" data-app-section="counterarguments" role="tabpanel" aria-labelledby="nav-counterarguments" hidden>
+          <section class="glass-panel interactive-surface reveal rounded-2xl border border-[#e8dfd4] bg-white/90 p-5 shadow-calm sm:p-6" aria-labelledby="counterTitle">
+            <div class="mb-4">
+              <p class="mb-1 text-sm font-medium text-[#8b5a2b]">Step 6</p>
+              <h2 id="counterTitle" class="font-serif text-xl font-medium text-stone-800">Counterarguments</h2>
+              <p id="chosenOptionHint" class="mt-2 text-sm text-stone-500">Pressure-test the option that currently leads.</p>
+            </div>
+            <div class="mb-3 flex flex-wrap items-center justify-between gap-3">
+              <p class="text-sm text-stone-500">Write a counterargument, rate it, respond, then rate it again.</p>
+              <button id="addCounterargument" type="button" class="inline-flex items-center justify-center rounded-xl bg-[#f3ebe3] px-3 py-1.5 text-xs font-bold text-stone-700 ring-1 ring-[#e5dbd0] transition hover:bg-[#fffaf5] hover:text-[#8b5a2b] focus:outline-none focus:ring-4 focus:ring-[#c48a4a]/15">Add counterargument</button>
+            </div>
+            <div id="counterargumentsList" class="space-y-3"></div>
+          </section>
+          <div class="step-nav" data-step-nav="counterarguments"></div>
+        </section>
+
+        <!-- 7. Munger biases -->
+        <section id="section-biases" class="app-section space-y-6" data-app-section="biases" role="tabpanel" aria-labelledby="nav-biases" hidden>
+          <section class="glass-panel interactive-surface reveal rounded-2xl border border-[#e8dfd4] bg-white/90 p-5 shadow-calm sm:p-6" aria-labelledby="mungerTitle">
+            <div class="mb-4">
+              <p class="mb-1 text-sm font-medium text-[#8b5a2b]">Step 7</p>
+              <h2 id="mungerTitle" class="font-serif text-xl font-medium text-stone-800">Munger's Biases Checklist</h2>
+              <p class="mt-3 font-serif text-lg italic leading-8 text-stone-600">"Reality talks to only who listen"</p>
+              <p class="mt-2 text-sm text-stone-500">Mark any psychological tendencies that may be distorting your judgment.</p>
+            </div>
             <div id="mungerChecklistDetails" class="warm-inset rounded-2xl p-4">
               <p class="text-xs text-stone-500">Tap any tendency that may be shaping this decision. Hover for the full name.</p>
               <div id="mungerChecklist" class="mt-3 flex flex-wrap gap-2"></div>
             </div>
-
-            <div class="mt-5 border-t border-[#e8dfd4] pt-5">
-              <div class="mb-3 flex flex-wrap items-center justify-between gap-3">
-                <h3 class="font-serif text-base font-medium text-stone-800">Counterarguments</h3>
-                <button
-                  id="addCounterargument"
-                  type="button"
-                  class="inline-flex items-center justify-center rounded-xl bg-[#f3ebe3] px-3 py-1.5 text-xs font-bold text-stone-700 ring-1 ring-[#e5dbd0] transition hover:bg-[#fffaf5] hover:text-[#8b5a2b] focus:outline-none focus:ring-4 focus:ring-[#c48a4a]/15"
-                >
-                  Add counterargument
-                </button>
-              </div>
-              <p class="mb-3 text-sm text-stone-500">
-                Write a counterargument, rate how convincing it feels, respond to it, then rate it again.
-              </p>
-              <div id="counterargumentsList" class="space-y-3"></div>
-            </div>
           </section>
+          <div class="step-nav" data-step-nav="biases"></div>
         </section>
 
         <!-- Results -->
-        <section
-          id="section-results"
-          class="app-section space-y-6"
-          data-app-section="results"
-          role="tabpanel"
-          aria-labelledby="nav-results"
-          hidden
-        >
+        <section id="section-results" class="app-section space-y-6" data-app-section="results" role="tabpanel" aria-labelledby="nav-results" hidden>
+          <div class="mb-2">
+            <p class="mb-1 text-sm font-medium text-[#8b5a2b]">Results</p>
+            <p class="text-sm text-stone-500">Review the recommendation and save a snapshot when you are ready.</p>
+          </div>
           <div class="grid gap-6 lg:grid-cols-2">
-            <section
-              class="glass-panel interactive-surface reveal rounded-2xl border border-[#e8dfd4] bg-white/90 p-5 shadow-calm sm:p-6"
-              aria-labelledby="recommendationTitle"
-            >
-              <h2 id="recommendationTitle" class="font-serif text-xl font-medium text-stone-800">
-                Recommendation
-              </h2>
+            <section class="glass-panel interactive-surface reveal rounded-2xl border border-[#e8dfd4] bg-white/90 p-5 shadow-calm sm:p-6" aria-labelledby="recommendationTitle">
+              <h2 id="recommendationTitle" class="font-serif text-xl font-medium text-stone-800">Recommendation</h2>
               <div id="recommendation" class="mt-5"></div>
             </section>
-
-            <section
-              class="glass-panel interactive-surface reveal rounded-2xl border border-[#e8dfd4] bg-white/90 p-5 shadow-calm sm:p-6"
-              aria-labelledby="savedTitle"
-            >
+            <section class="glass-panel interactive-surface reveal rounded-2xl border border-[#e8dfd4] bg-white/90 p-5 shadow-calm sm:p-6" aria-labelledby="savedTitle">
               <div class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   <h2 id="savedTitle" class="font-serif text-lg font-medium text-stone-800">Saved decisions</h2>
                   <p class="text-sm text-stone-500">Stored locally on this device.</p>
                 </div>
-                <button
-                  id="saveSnapshot"
-                  type="button"
-                  class="inline-flex w-full items-center justify-center rounded-xl bg-[#9a6432] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#7a4e25] focus:outline-none focus:ring-4 focus:ring-[#c48a4a]/15 sm:w-auto"
-                >
-                  Save
-                </button>
+                <button id="saveSnapshot" type="button" class="inline-flex w-full items-center justify-center rounded-xl bg-[#9a6432] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#7a4e25] focus:outline-none focus:ring-4 focus:ring-[#c48a4a]/15 sm:w-auto">Save</button>
               </div>
               <div id="savedDecisions" class="space-y-3"></div>
             </section>
           </div>
+          <div class="step-nav" data-step-nav="results"></div>
         </section>
       </main>
     </div>
+
+
+    <template id="simpleOptionTemplate">
+      <article class="glass-panel interactive-surface reveal rounded-2xl border border-[#e8dfd4] bg-white/90 p-4 shadow-calm sm:p-5">
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <input type="text" class="option-title min-w-0 flex-1 rounded-xl border border-[#e5dbd0] bg-[#fffaf5] px-3 py-2.5 font-serif text-xl font-medium text-stone-800 outline-none transition focus:border-[#c48a4a] focus:ring-4 focus:ring-[#c48a4a]/15" />
+          <button type="button" class="delete-option inline-flex items-center justify-center rounded-xl px-4 py-2.5 text-sm font-semibold text-rose-600 transition hover:bg-rose-50 focus:outline-none focus:ring-4 focus:ring-rose-300/30">Remove</button>
+        </div>
+      </article>
+    </template>
 
     <template id="optionTemplate">
       <article
@@ -652,12 +530,19 @@
       }
 
       const APP_SECTIONS = [
-        { id: "decision", label: "Decision" },
-        { id: "options", label: "Options" },
-        { id: "factors", label: "Factor analysis" },
-        { id: "biases", label: "Munger's Biases" },
-        { id: "results", label: "Results" },
+        { id: "question", label: "1. Question", hint: "Write the decision you are working through." },
+        { id: "feelings", label: "2. Feelings", hint: "Check your stress and emotions before comparing." },
+        { id: "options", label: "3. Options", hint: "Add the realistic choices — no pros/cons yet." },
+        { id: "factors", label: "4. Factors", hint: "Define what matters and how important each factor is." },
+        { id: "analysis", label: "5. Pros & cons", hint: "Analyze trade-offs and score each option." },
+        { id: "counterarguments", label: "6. Counterarguments", hint: "Pressure-test the leading option." },
+        { id: "biases", label: "7. Biases", hint: "Scan Munger's checklist for distorted judgment." },
+        { id: "results", label: "Results", hint: "See the recommendation and save your work." },
       ];
+
+      const SECTION_ALIASES = {
+        decision: "question",
+      };
 
       const defaultState = {
         question: "",
@@ -670,30 +555,14 @@
         },
         mungerTendencies: createDefaultMungerState(),
         counterarguments: [],
-        activeSection: "decision",
+        activeSection: "question",
+        furthestStep: "question",
         factors: [
           { id: "impact", name: "Impact", weight: 8 },
           { id: "cost-fit", name: "Cost fit", weight: 6 },
           { id: "confidence", name: "Confidence", weight: 7 },
         ],
-        options: [
-          {
-            id: createId(),
-            name: "Option A",
-            evidence: "",
-            pros: [{ text: "Clear path forward", evidence: "" }],
-            cons: [{ text: "Needs more research", evidence: "" }],
-            scores: {},
-          },
-          {
-            id: createId(),
-            name: "Option B",
-            evidence: "",
-            pros: [{ text: "Interesting opportunity", evidence: "" }],
-            cons: [{ text: "Some uncertainty", evidence: "" }],
-            scores: {},
-          },
-        ],
+        options: [],
       };
 
       let state = loadState();
@@ -722,9 +591,13 @@
         addFactorForm: document.querySelector("#addFactorForm"),
         factorName: document.querySelector("#factorName"),
         optionsList: document.querySelector("#optionsList"),
+        analysisOptionsList: document.querySelector("#analysisOptionsList"),
         optionTemplate: document.querySelector("#optionTemplate"),
+        simpleOptionTemplate: document.querySelector("#simpleOptionTemplate"),
         recommendation: document.querySelector("#recommendation"),
         saveStatus: document.querySelector("#saveStatus"),
+        stepHint: document.querySelector("#stepHint"),
+        chosenOptionHint: document.querySelector("#chosenOptionHint"),
         resetDecision: document.querySelector("#resetDecision"),
         saveSnapshot: document.querySelector("#saveSnapshot"),
         savedDecisions: document.querySelector("#savedDecisions"),
@@ -736,7 +609,7 @@
 
       elements.brandHome.addEventListener("click", (event) => {
         event.preventDefault();
-        showSection("decision");
+        showSection("question");
       });
 
       elements.question.addEventListener("input", (event) => {
@@ -880,7 +753,7 @@
             ])
           ),
         }));
-        return {
+        const normalized = {
           question: rawState.question || "",
           deadline: normalizeDeadline(rawState.deadline),
           principle: rawState.principle || "",
@@ -889,13 +762,103 @@
           mungerTendencies: normalizeMungerTendencies(rawState.mungerTendencies),
           counterarguments: normalizeCounterarguments(rawState.counterarguments),
           activeSection: normalizeActiveSection(rawState.activeSection),
+          furthestStep: normalizeActiveSection(rawState.furthestStep || rawState.activeSection),
           factors,
           options,
         };
+        normalized.furthestStep = inferFurthestStep(normalized);
+        if (getSectionIndex(normalized.activeSection) > getSectionIndex(normalized.furthestStep)) {
+          normalized.activeSection = normalized.furthestStep;
+        }
+        return normalized;
       }
 
       function normalizeActiveSection(sectionId) {
-        return APP_SECTIONS.some((section) => section.id === sectionId) ? sectionId : "decision";
+        const mapped = SECTION_ALIASES[sectionId] || sectionId;
+        return APP_SECTIONS.some((section) => section.id === mapped) ? mapped : "question";
+      }
+
+      function maxStep(a, b) {
+        return getSectionIndex(a) >= getSectionIndex(b) ? normalizeActiveSection(a) : normalizeActiveSection(b);
+      }
+
+      function inferFurthestStep(draft) {
+        let furthest = normalizeActiveSection(draft.furthestStep || draft.activeSection || "question");
+        furthest = maxStep(furthest, normalizeActiveSection(draft.activeSection));
+        if (draft.question?.trim()) {
+          furthest = maxStep(furthest, "feelings");
+          furthest = maxStep(furthest, "options");
+        }
+        if ((draft.options || []).length >= 2) furthest = maxStep(furthest, "factors");
+        if ((draft.options || []).length >= 2 && (draft.factors || []).length >= 1) {
+          furthest = maxStep(furthest, "analysis");
+        }
+        const hasTradeoffs = (draft.options || []).some(
+          (option) => (option.pros && option.pros.length) || (option.cons && option.cons.length)
+        );
+        if (hasTradeoffs) {
+          furthest = maxStep(furthest, "counterarguments");
+          furthest = maxStep(furthest, "biases");
+          furthest = maxStep(furthest, "results");
+        }
+        if ((draft.counterarguments || []).length > 0) {
+          furthest = maxStep(furthest, "biases");
+          furthest = maxStep(furthest, "results");
+        }
+        return furthest;
+      }
+
+      function getSectionIndex(sectionId) {
+        return APP_SECTIONS.findIndex((section) => section.id === normalizeActiveSection(sectionId));
+      }
+
+      function syncFurthestStep() {
+        const current = normalizeActiveSection(state.furthestStep || "question");
+        const active = normalizeActiveSection(state.activeSection);
+        if (getSectionIndex(active) > getSectionIndex(current)) {
+          state.furthestStep = active;
+        } else {
+          state.furthestStep = current;
+        }
+      }
+
+      function isStepUnlocked(sectionId) {
+        const id = normalizeActiveSection(sectionId);
+        syncFurthestStep();
+        return getSectionIndex(id) <= getSectionIndex(state.furthestStep);
+      }
+
+      function canContinueFrom(sectionId) {
+        const id = normalizeActiveSection(sectionId);
+        if (id === "question") return Boolean(state.question.trim());
+        if (id === "feelings") return true;
+        if (id === "options") return state.options.length >= 2;
+        if (id === "factors") return state.factors.length >= 1;
+        if (id === "analysis") {
+          return state.options.some(
+            (option) => (option.pros && option.pros.length) || (option.cons && option.cons.length)
+          );
+        }
+        if (id === "counterarguments") return state.counterarguments.length > 0;
+        if (id === "biases") return true;
+        return true;
+      }
+
+      function continueBlockedReason(sectionId) {
+        const id = normalizeActiveSection(sectionId);
+        if (id === "question") return "Enter a decision question to continue.";
+        if (id === "options") return "Add at least two options to continue.";
+        if (id === "factors") return "Keep at least one factor to continue.";
+        if (id === "analysis") return "Add at least one pro or con before continuing.";
+        if (id === "counterarguments") return "Add at least one counterargument to continue.";
+        return "";
+      }
+
+      function getLeadingOption() {
+        if (!state.options.length) return null;
+        return [...state.options]
+          .map((option) => ({ option, score: calculateOptionScore(option) }))
+          .sort((a, b) => b.score.weightedTotal - a.score.weightedTotal)[0].option;
       }
 
       function createCounterargument() {
@@ -1012,36 +975,58 @@
         renderCounterarguments();
         renderFactors();
         renderOptions();
+        renderAnalysisOptions();
         renderRecommendation();
         renderSavedDecisions();
+        updateChosenOptionHint();
       }
 
       function renderNav() {
         elements.appNavButtons.replaceChildren();
         const activeId = normalizeActiveSection(state.activeSection);
+        syncFurthestStep();
 
         APP_SECTIONS.forEach((section) => {
+          const unlocked = isStepUnlocked(section.id);
           const button = document.createElement("button");
           button.type = "button";
           button.id = `nav-${section.id}`;
           button.className = "nav-tab";
           button.textContent = section.label;
+          button.disabled = !unlocked;
           button.setAttribute("role", "tab");
           button.setAttribute("aria-selected", String(section.id === activeId));
+          button.setAttribute("aria-disabled", String(!unlocked));
           button.setAttribute("aria-controls", `section-${section.id}`);
-          button.addEventListener("click", () => showSection(section.id));
+          button.title = unlocked ? section.hint : "Finish earlier steps to unlock this one.";
+          button.addEventListener("click", () => {
+            if (!isStepUnlocked(section.id)) return;
+            showSection(section.id);
+          });
           elements.appNavButtons.append(button);
         });
       }
 
       function showSection(sectionId, { persist = true, scroll = true } = {}) {
-        const nextId = normalizeActiveSection(sectionId);
+        let nextId = normalizeActiveSection(sectionId);
+        if (!isStepUnlocked(nextId)) {
+          nextId = normalizeActiveSection(state.furthestStep || "question");
+        }
         state.activeSection = nextId;
+        syncFurthestStep();
 
         document.querySelectorAll("[data-app-section]").forEach((panel) => {
           const isActive = panel.dataset.appSection === nextId;
           panel.hidden = !isActive;
         });
+
+        const sectionMeta = APP_SECTIONS.find((section) => section.id === nextId);
+        if (elements.stepHint) {
+          elements.stepHint.textContent = sectionMeta?.hint || "";
+        }
+
+        renderStepNavs();
+        updateChosenOptionHint();
 
         elements.appNavButtons.querySelectorAll('[role="tab"]').forEach((button) => {
           const isActive = button.id === `nav-${nextId}`;
@@ -1050,6 +1035,60 @@
 
         if (persist) persistCurrentState();
         if (scroll) window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+
+      function renderStepNavs() {
+        document.querySelectorAll("[data-step-nav]").forEach((container) => {
+          const stepId = container.dataset.stepNav;
+          container.replaceChildren();
+          const index = getSectionIndex(stepId);
+
+          const back = document.createElement("button");
+          back.type = "button";
+          back.textContent = "Back";
+          back.className =
+            "inline-flex items-center justify-center rounded-xl px-4 py-2.5 text-sm font-semibold text-stone-500 transition hover:bg-[#f3ebe3] hover:text-stone-800 focus:outline-none focus:ring-4 focus:ring-stone-300/40";
+          back.disabled = index <= 0;
+          if (back.disabled) back.classList.add("cursor-not-allowed", "opacity-40");
+          back.addEventListener("click", () => {
+            if (index <= 0) return;
+            showSection(APP_SECTIONS[index - 1].id);
+          });
+
+          const next = document.createElement("button");
+          next.type = "button";
+          const isLast = index >= APP_SECTIONS.length - 1;
+          next.textContent = isLast ? "Done" : "Continue";
+          next.className =
+            "inline-flex items-center justify-center rounded-xl bg-[#9a6432] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#7a4e25] focus:outline-none focus:ring-4 focus:ring-[#c48a4a]/15";
+          next.addEventListener("click", () => {
+            if (isLast) {
+              showSaveStatus("Flow complete — review your results anytime.");
+              return;
+            }
+            if (!canContinueFrom(stepId)) {
+              showSaveStatus(continueBlockedReason(stepId) || "Complete this step to continue.");
+              return;
+            }
+            const upcoming = APP_SECTIONS[index + 1].id;
+            state.furthestStep =
+              getSectionIndex(upcoming) > getSectionIndex(state.furthestStep)
+                ? upcoming
+                : state.furthestStep;
+            showSection(upcoming);
+            renderNav();
+          });
+
+          container.append(back, next);
+        });
+      }
+
+      function updateChosenOptionHint() {
+        if (!elements.chosenOptionHint) return;
+        const leading = getLeadingOption();
+        elements.chosenOptionHint.textContent = leading
+          ? `Focus on counterarguments against: ${leading.name || "Untitled option"}`
+          : "Add and analyze options first, then pressure-test the leading choice.";
       }
 
       function renderCounterarguments() {
@@ -1335,9 +1374,42 @@
         if (!state.options.length) {
           const emptyState = document.createElement("div");
           emptyState.className =
-            "reveal rounded-2xl border border-dashed border-[#e5dbd0] bg-[#f3ebe3] p-8 text-center font-medium text-stone-500 bg-[#fffaf5]";
-          emptyState.textContent = "Add an option to start comparing your choices.";
+            "reveal rounded-2xl border border-dashed border-[#e5dbd0] bg-[#fffaf5] p-8 text-center font-medium text-stone-500";
+          emptyState.textContent = "Add at least two options to continue.";
           elements.optionsList.append(emptyState);
+          return;
+        }
+
+        state.options.forEach((option) => {
+          const node = elements.simpleOptionTemplate.content.firstElementChild.cloneNode(true);
+          const title = node.querySelector(".option-title");
+          title.value = option.name;
+          title.addEventListener("input", () => {
+            option.name = title.value;
+            persistCurrentState();
+            updateChosenOptionHint();
+            renderRecommendation();
+          });
+
+          node.querySelector(".delete-option").addEventListener("click", () => {
+            state.options = state.options.filter((candidate) => candidate.id !== option.id);
+            persistAndRender();
+          });
+
+          elements.optionsList.append(node);
+        });
+      }
+
+      function renderAnalysisOptions() {
+        if (!elements.analysisOptionsList) return;
+        elements.analysisOptionsList.replaceChildren();
+
+        if (!state.options.length) {
+          const emptyState = document.createElement("div");
+          emptyState.className =
+            "reveal rounded-2xl border border-dashed border-[#e5dbd0] bg-[#fffaf5] p-8 text-center font-medium text-stone-500";
+          emptyState.textContent = "Add options in Step 3 before analyzing pros and cons.";
+          elements.analysisOptionsList.append(emptyState);
           return;
         }
 
@@ -1352,6 +1424,7 @@
             option.name = title.value;
             persistCurrentState();
             scoreSummary.textContent = formatScoreSummary(option);
+            updateChosenOptionHint();
             renderRecommendation();
           });
           scoreSummary.textContent = formatScoreSummary(option);
@@ -1371,6 +1444,7 @@
           renderItems(node.querySelector(".cons-list"), option, "cons");
           renderScoreControls(node.querySelector(".scores"), option, () => {
             scoreSummary.textContent = formatScoreSummary(option);
+            updateChosenOptionHint();
             renderRecommendation();
           });
 
@@ -1386,7 +1460,7 @@
             });
           });
 
-          elements.optionsList.append(node);
+          elements.analysisOptionsList.append(node);
         });
       }
 

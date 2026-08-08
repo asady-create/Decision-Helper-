@@ -42,15 +42,18 @@
     <style>
       :root {
         color-scheme: light;
-        --bg-0: #f7f0e8;
-        --bg-1: #f3ebe1;
-        --surface: #fffdf9;
-        --surface-inset: #f7efe6;
-        --border: #e5dbd0;
+        --bg-0: #f8f3ec;
+        --bg-1: #f3ebe3;
+        --surface: #fffcf8;
+        --surface-inset: #f7f0e8;
+        --border: #e7ddd2;
         --ink: #3a2e26;
         --muted: #7a6a5c;
-        --accent: #9a6432;
-        --accent-soft: #c48a4a;
+        --accent: #8f5e30;
+        --accent-soft: #c49862;
+        --accent-wash: #fff3e6;
+        --shadow: 0 12px 36px -28px rgba(74, 48, 28, 0.35);
+        --radius: 1.15rem;
       }
 
       body {
@@ -60,9 +63,9 @@
         letter-spacing: 0.01em;
         color: var(--ink);
         background:
-          radial-gradient(circle at 12% 0%, rgba(232, 180, 130, 0.28), transparent 32rem),
-          radial-gradient(circle at 88% 8%, rgba(214, 164, 120, 0.18), transparent 28rem),
-          linear-gradient(165deg, #faf4ec 0%, #f3ebe1 52%, #efe6da 100%);
+          radial-gradient(ellipse 80% 50% at 10% -10%, rgba(232, 188, 140, 0.34), transparent 55%),
+          radial-gradient(ellipse 60% 40% at 95% 0%, rgba(214, 170, 130, 0.18), transparent 50%),
+          linear-gradient(180deg, #fbf6ef 0%, #f4ebe2 55%, #efe6db 100%);
       }
 
       .font-serif,
@@ -74,25 +77,35 @@
         letter-spacing: 0.015em;
       }
 
+      .app-shell {
+        width: min(100%, 46rem);
+        margin-inline: auto;
+      }
+
       .glass-panel {
-        background-color: rgba(255, 253, 249, 0.92);
+        background-color: rgba(255, 252, 248, 0.94);
         border-color: var(--border);
-        box-shadow: 0 8px 24px -20px rgba(92, 62, 40, 0.2);
+        box-shadow: var(--shadow);
+        border-radius: var(--radius);
       }
 
       .reveal {
-        animation: fade-up 480ms cubic-bezier(0.22, 1, 0.36, 1) both;
+        animation: fade-up 520ms cubic-bezier(0.22, 1, 0.36, 1) both;
+      }
+
+      .app-section.is-entering {
+        animation: section-in 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
       }
 
       .interactive-surface {
-        transition: border-color 180ms ease, background-color 180ms ease, box-shadow 180ms ease;
+        transition: border-color 180ms ease, background-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
       }
 
       button,
       input,
       textarea,
       select {
-        min-height: 44px;
+        min-height: 46px;
       }
 
       button {
@@ -109,6 +122,7 @@
       textarea,
       select {
         color: var(--ink);
+        transition: border-color 160ms ease, box-shadow 160ms ease, background-color 160ms ease;
       }
 
       input::placeholder,
@@ -122,13 +136,14 @@
       }
 
       .recommendation-card {
-        background: linear-gradient(145deg, #fff6ec 0%, #f8ead8 100%);
+        background: linear-gradient(145deg, #fff7ed 0%, #f8ead8 100%);
         border: 1px solid #e4cfb8;
       }
 
       .warm-inset {
         background: var(--surface-inset);
         border: 1px solid var(--border);
+        border-radius: 1rem;
       }
 
       .warm-panel {
@@ -140,54 +155,122 @@
         display: none !important;
       }
 
+      .top-chrome {
+        position: sticky;
+        top: 0;
+        z-index: 30;
+        margin: 0 -1rem 1.25rem;
+        padding: 0.85rem 1rem 0.95rem;
+        background: rgba(248, 243, 236, 0.86);
+        border-bottom: 1px solid rgba(231, 221, 210, 0.9);
+        backdrop-filter: blur(14px);
+      }
+
+      @media (min-width: 640px) {
+        .top-chrome {
+          margin-left: -1.5rem;
+          margin-right: -1.5rem;
+          padding-left: 1.5rem;
+          padding-right: 1.5rem;
+        }
+      }
+
+      .progress-track {
+        height: 0.35rem;
+        border-radius: 999px;
+        background: #ebe2d7;
+        overflow: hidden;
+      }
+
+      .progress-fill {
+        height: 100%;
+        width: 0%;
+        border-radius: inherit;
+        background: linear-gradient(90deg, #c49862, #8f5e30);
+        transition: width 320ms cubic-bezier(0.22, 1, 0.36, 1);
+      }
+
       .nav-tab {
         flex: 0 0 auto;
         white-space: nowrap;
-        border-radius: 0.75rem;
-        border: 1px solid #e5dbd0;
-        background: #fffdf9;
-        color: #5c5046;
-        padding: 0.55rem 0.95rem;
-        font-size: 0.875rem;
+        border-radius: 0.85rem;
+        border: 1px solid transparent;
+        background: transparent;
+        color: #7a6a5c;
+        padding: 0.45rem 0.8rem;
+        font-size: 0.8125rem;
         font-weight: 600;
-        transition: background-color 160ms ease, border-color 160ms ease, color 160ms ease;
+        transition: background-color 160ms ease, border-color 160ms ease, color 160ms ease, transform 160ms ease;
       }
 
-      .nav-tab:hover {
-        border-color: #d8ccbe;
-        background: #fffaf5;
+      .nav-tab:hover:not(:disabled) {
+        background: rgba(255, 252, 248, 0.8);
         color: #3a2e26;
       }
 
       .nav-tab[aria-selected="true"] {
-        border-color: #c4a27a;
-        background: #fff1e4;
+        border-color: #e0c7a8;
+        background: var(--accent-wash);
         color: #8b5a2b;
+        box-shadow: 0 1px 0 rgba(255, 255, 255, 0.7) inset;
+      }
+
+      .nav-tab.is-complete:not([aria-selected="true"]) {
+        color: #6d5a48;
       }
 
       .nav-tab:disabled,
       .nav-tab[aria-disabled="true"] {
-        opacity: 0.45;
+        opacity: 0.38;
         cursor: not-allowed;
       }
 
-      .step-nav {
+      .step-footer {
+        position: sticky;
+        bottom: 0;
+        z-index: 25;
         display: flex;
         flex-wrap: wrap;
         gap: 0.75rem;
         justify-content: space-between;
-        padding-top: 0.25rem;
+        margin: 1.5rem -1rem 0;
+        padding: 0.9rem 1rem calc(0.9rem + env(safe-area-inset-bottom));
+        background: rgba(255, 252, 248, 0.92);
+        border-top: 1px solid var(--border);
+        backdrop-filter: blur(12px);
+        box-shadow: 0 -10px 30px -24px rgba(74, 48, 28, 0.35);
+      }
+
+      @media (min-width: 640px) {
+        .step-footer {
+          margin-left: -1.5rem;
+          margin-right: -1.5rem;
+          padding-left: 1.5rem;
+          padding-right: 1.5rem;
+          border-radius: 1rem 1rem 0 0;
+        }
+      }
+
+      .step-nav {
+        display: none;
+      }
+
+      .status-toast {
+        min-height: 1.25rem;
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--accent);
+        transition: opacity 180ms ease;
       }
 
       @keyframes fade-up {
-        from {
-          opacity: 0;
-          transform: translateY(10px);
-        }
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+
+      @keyframes section-in {
+        from { opacity: 0; transform: translateY(14px); }
+        to { opacity: 1; transform: translateY(0); }
       }
 
       @media (prefers-reduced-motion: reduce) {
@@ -202,46 +285,47 @@
     </style>
   </head>
   <body class="font-sans text-stone-800 antialiased">
-    <div class="mx-auto flex min-h-screen w-full max-w-7xl flex-col px-4 py-5 sm:px-6 sm:py-6 lg:px-8">
-      <header class="reveal mb-5">
+    <div class="app-shell flex min-h-screen w-full flex-col px-4 py-5 sm:px-6 sm:py-7">
+      <header class="reveal mb-4 flex items-start justify-between gap-4">
         <a href="#" id="brandHome" class="inline-flex items-center gap-3" aria-label="Decision Helper home">
-          <span
-            class="brand-mark grid h-11 w-11 shrink-0 place-items-center rounded-xl font-serif text-xl font-medium text-white"
-            >D</span
-          >
-          <span class="font-serif text-3xl font-medium text-stone-800 sm:text-4xl">Decision Helper</span>
+          <span class="brand-mark grid h-10 w-10 shrink-0 place-items-center rounded-xl font-serif text-lg font-medium text-white">D</span>
+          <span>
+            <span class="block font-serif text-2xl font-medium leading-none text-stone-800 sm:text-3xl">Decision Helper</span>
+            <span class="mt-1 block text-sm font-light text-stone-500">A calm path to clearer choices</span>
+          </span>
         </a>
-        <p class="mt-3 max-w-2xl text-base font-light leading-7 text-stone-600 sm:text-lg">
-          Compare options with a calmer framework. Capture pros, cons, and scores — saved locally in this browser.
-        </p>
+        <button id="resetDecision" type="button" class="shrink-0 rounded-xl px-3 py-2 text-sm font-semibold text-stone-500 transition hover:bg-[#f0e7de] hover:text-stone-800 focus:outline-none focus:ring-4 focus:ring-stone-300/40">Reset</button>
       </header>
 
-      <nav
-        id="appNav"
-        class="reveal sticky top-0 z-20 -mx-4 mb-6 border-b border-[#e8dfd4] bg-[#f7f0e8]/92 px-4 py-3 backdrop-blur-md sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8"
-        aria-label="App sections"
-      >
-        <div
-          id="appNavButtons"
-          class="flex gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-          role="tablist"
-        ></div>
-      </nav>
+      <div class="top-chrome reveal">
+        <div class="mb-2 flex items-end justify-between gap-3">
+          <div>
+            <p id="stepProgressLabel" class="text-xs font-semibold uppercase tracking-[0.14em] text-[#8b5a2b]">Step 1 of 7</p>
+            <p id="stepHint" class="mt-1 text-sm text-stone-500"></p>
+          </div>
+          <p id="saveStatus" class="status-toast text-right" role="status"></p>
+        </div>
+        <div class="progress-track mb-3" aria-hidden="true">
+          <div id="stepProgressBar" class="progress-fill"></div>
+        </div>
+        <nav id="appNav" aria-label="App sections">
+          <div
+            id="appNavButtons"
+            class="flex gap-1.5 overflow-x-auto pb-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            role="tablist"
+          ></div>
+        </nav>
+      </div>
 
-      <main class="flex-1">
-        <p id="saveStatus" class="mb-3 min-h-5 text-sm font-semibold text-[#8b5a2b]" role="status"></p>
-        <p id="stepHint" class="mb-4 text-sm text-stone-500"></p>
+      <main class="flex-1 pb-4">
 
         <!-- 1. Question -->
         <section id="section-question" class="app-section space-y-6" data-app-section="question" role="tabpanel" aria-labelledby="nav-question">
-          <section class="glass-panel interactive-surface reveal rounded-2xl border border-[#e8dfd4] bg-white/90 p-5 shadow-calm sm:p-6" aria-labelledby="decisionFormTitle">
-            <div class="mb-5 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-              <div>
-                <p class="mb-1 text-sm font-medium text-[#8b5a2b]">Step 1</p>
-                <h2 id="decisionFormTitle" class="font-serif text-xl font-medium text-stone-800">Your decision question</h2>
-                <p class="mt-1 text-sm text-stone-500">Start with one clear question. You can refine details as you go.</p>
-              </div>
-              <button id="resetDecision" type="button" class="inline-flex w-full items-center justify-center rounded-xl px-4 py-2.5 text-sm font-semibold text-stone-500 transition hover:bg-[#f3ebe3] hover:text-stone-800 focus:outline-none focus:ring-4 focus:ring-stone-300/40 sm:w-auto">Reset</button>
+          <section class="glass-panel interactive-surface reveal border border-[#e7ddd2] bg-white/90 p-5 sm:p-7" aria-labelledby="decisionFormTitle">
+            <div class="mb-5">
+              <p class="mb-1 text-sm font-medium text-[#8b5a2b]">Step 1</p>
+              <h2 id="decisionFormTitle" class="font-serif text-2xl font-medium text-stone-800">Your decision question</h2>
+              <p class="mt-1 text-sm leading-6 text-stone-500">Start with one clear question. You can refine details as you go.</p>
             </div>
             <label for="decisionQuestion" class="mb-2 block text-sm font-semibold text-stone-700">Decision question</label>
             <input id="decisionQuestion" type="text" placeholder="Should I study abroad?" class="w-full rounded-2xl border border-[#e5dbd0] bg-[#fffaf5] px-4 py-3.5 text-base text-stone-800 outline-none transition placeholder:text-stone-500 focus:border-[#c48a4a] focus:ring-4 focus:ring-[#c48a4a]/15" />
@@ -279,7 +363,7 @@
 
         <!-- 2. Feelings -->
         <section id="section-feelings" class="app-section space-y-6" data-app-section="feelings" role="tabpanel" aria-labelledby="nav-feelings" hidden>
-          <section class="glass-panel interactive-surface reveal rounded-2xl border border-[#e8dfd4] bg-white/90 p-5 shadow-calm sm:p-6" aria-labelledby="feelingsTitle">
+          <section class="glass-panel interactive-surface reveal border border-[#e7ddd2] bg-white/90 p-5 sm:p-7" aria-labelledby="feelingsTitle">
             <div class="mb-5">
               <p class="mb-1 text-sm font-medium text-[#8b5a2b]">Step 2</p>
               <h2 id="feelingsTitle" class="font-serif text-xl font-medium text-stone-800">How do you feel about this decision?</h2>
@@ -306,7 +390,7 @@
 
         <!-- 3. Options (names only) -->
         <section id="section-options" class="app-section space-y-6" data-app-section="options" role="tabpanel" aria-labelledby="nav-options" hidden>
-          <section class="glass-panel interactive-surface reveal rounded-2xl border border-[#e8dfd4] bg-white/90 p-5 shadow-calm sm:p-6" aria-labelledby="optionsTitle">
+          <section class="glass-panel interactive-surface reveal border border-[#e7ddd2] bg-white/90 p-5 sm:p-7" aria-labelledby="optionsTitle">
             <div class="mb-5">
               <p class="mb-1 text-sm font-medium text-[#8b5a2b]">Step 3</p>
               <h2 id="optionsTitle" class="font-serif text-2xl font-medium text-stone-800">Add your options</h2>
@@ -326,7 +410,7 @@
 
         <!-- 4. Factors -->
         <section id="section-factors" class="app-section space-y-6" data-app-section="factors" role="tabpanel" aria-labelledby="nav-factors" hidden>
-          <section class="glass-panel interactive-surface reveal rounded-2xl border border-[#e8dfd4] bg-white/90 p-5 shadow-calm sm:p-6" aria-labelledby="factorsTitle">
+          <section class="glass-panel interactive-surface reveal border border-[#e7ddd2] bg-white/90 p-5 sm:p-7" aria-labelledby="factorsTitle">
             <div class="mb-5">
               <p class="mb-1 text-sm font-medium text-[#8b5a2b]">Step 4</p>
               <h2 id="factorsTitle" class="font-serif text-xl font-medium text-stone-800">Key factors</h2>
@@ -343,7 +427,7 @@
 
         <!-- 5. Pros/cons analysis -->
         <section id="section-analysis" class="app-section space-y-6" data-app-section="analysis" role="tabpanel" aria-labelledby="nav-analysis" hidden>
-          <section class="glass-panel interactive-surface reveal rounded-2xl border border-[#e8dfd4] bg-white/90 p-5 shadow-calm sm:p-6" aria-labelledby="analysisTitle">
+          <section class="glass-panel interactive-surface reveal border border-[#e7ddd2] bg-white/90 p-5 sm:p-7" aria-labelledby="analysisTitle">
             <div class="mb-5">
               <p class="mb-1 text-sm font-medium text-[#8b5a2b]">Step 5</p>
               <h2 id="analysisTitle" class="font-serif text-2xl font-medium text-stone-800">Pros, cons, and scores</h2>
@@ -356,7 +440,7 @@
 
         <!-- 6. Counterarguments -->
         <section id="section-counterarguments" class="app-section space-y-6" data-app-section="counterarguments" role="tabpanel" aria-labelledby="nav-counterarguments" hidden>
-          <section class="glass-panel interactive-surface reveal rounded-2xl border border-[#e8dfd4] bg-white/90 p-5 shadow-calm sm:p-6" aria-labelledby="counterTitle">
+          <section class="glass-panel interactive-surface reveal border border-[#e7ddd2] bg-white/90 p-5 sm:p-7" aria-labelledby="counterTitle">
             <div class="mb-4">
               <p class="mb-1 text-sm font-medium text-[#8b5a2b]">Step 6</p>
               <h2 id="counterTitle" class="font-serif text-xl font-medium text-stone-800">Counterarguments</h2>
@@ -373,7 +457,7 @@
 
         <!-- 7. Munger biases -->
         <section id="section-biases" class="app-section space-y-6" data-app-section="biases" role="tabpanel" aria-labelledby="nav-biases" hidden>
-          <section class="glass-panel interactive-surface reveal rounded-2xl border border-[#e8dfd4] bg-white/90 p-5 shadow-calm sm:p-6" aria-labelledby="mungerTitle">
+          <section class="glass-panel interactive-surface reveal border border-[#e7ddd2] bg-white/90 p-5 sm:p-7" aria-labelledby="mungerTitle">
             <div class="mb-4">
               <p class="mb-1 text-sm font-medium text-[#8b5a2b]">Step 7</p>
               <h2 id="mungerTitle" class="font-serif text-xl font-medium text-stone-800">Munger's Biases Checklist</h2>
@@ -395,11 +479,11 @@
             <p class="text-sm text-stone-500">Review the recommendation and save a snapshot when you are ready.</p>
           </div>
           <div class="grid gap-6 lg:grid-cols-2">
-            <section class="glass-panel interactive-surface reveal rounded-2xl border border-[#e8dfd4] bg-white/90 p-5 shadow-calm sm:p-6" aria-labelledby="recommendationTitle">
+            <section class="glass-panel interactive-surface reveal border border-[#e7ddd2] bg-white/90 p-5 sm:p-7" aria-labelledby="recommendationTitle">
               <h2 id="recommendationTitle" class="font-serif text-xl font-medium text-stone-800">Recommendation</h2>
               <div id="recommendation" class="mt-5"></div>
             </section>
-            <section class="glass-panel interactive-surface reveal rounded-2xl border border-[#e8dfd4] bg-white/90 p-5 shadow-calm sm:p-6" aria-labelledby="savedTitle">
+            <section class="glass-panel interactive-surface reveal border border-[#e7ddd2] bg-white/90 p-5 sm:p-7" aria-labelledby="savedTitle">
               <div class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   <h2 id="savedTitle" class="font-serif text-lg font-medium text-stone-800">Saved decisions</h2>
@@ -412,9 +496,10 @@
           </div>
           <div class="step-nav" data-step-nav="results"></div>
         </section>
+
+        <div id="stepFooter" class="step-footer" aria-label="Step controls"></div>
       </main>
     </div>
-
 
     <template id="simpleOptionTemplate">
       <article class="glass-panel interactive-surface reveal rounded-2xl border border-[#e8dfd4] bg-white/90 p-4 shadow-calm sm:p-5">
@@ -530,13 +615,13 @@
       }
 
       const APP_SECTIONS = [
-        { id: "question", label: "1. Question", hint: "Write the decision you are working through." },
-        { id: "feelings", label: "2. Feelings", hint: "Check your stress and emotions before comparing." },
-        { id: "options", label: "3. Options", hint: "Add the realistic choices — no pros/cons yet." },
-        { id: "factors", label: "4. Factors", hint: "Define what matters and how important each factor is." },
-        { id: "analysis", label: "5. Pros & cons", hint: "Analyze trade-offs and score each option." },
-        { id: "counterarguments", label: "6. Counterarguments", hint: "Pressure-test the leading option." },
-        { id: "biases", label: "7. Biases", hint: "Scan Munger's checklist for distorted judgment." },
+        { id: "question", label: "Question", hint: "Write the decision you are working through." },
+        { id: "feelings", label: "Feelings", hint: "Check your stress and emotions before comparing." },
+        { id: "options", label: "Options", hint: "Add the realistic choices — no pros/cons yet." },
+        { id: "factors", label: "Factors", hint: "Define what matters and how important each factor is." },
+        { id: "analysis", label: "Pros & cons", hint: "Analyze trade-offs and score each option." },
+        { id: "counterarguments", label: "Counterarguments", hint: "Pressure-test the leading option." },
+        { id: "biases", label: "Biases", hint: "Scan Munger's checklist for distorted judgment." },
         { id: "results", label: "Results", hint: "See the recommendation and save your work." },
       ];
 
@@ -597,6 +682,9 @@
         recommendation: document.querySelector("#recommendation"),
         saveStatus: document.querySelector("#saveStatus"),
         stepHint: document.querySelector("#stepHint"),
+        stepProgressLabel: document.querySelector("#stepProgressLabel"),
+        stepProgressBar: document.querySelector("#stepProgressBar"),
+        stepFooter: document.querySelector("#stepFooter"),
         chosenOptionHint: document.querySelector("#chosenOptionHint"),
         resetDecision: document.querySelector("#resetDecision"),
         saveSnapshot: document.querySelector("#saveSnapshot"),
@@ -985,13 +1073,14 @@
         elements.appNavButtons.replaceChildren();
         const activeId = normalizeActiveSection(state.activeSection);
         syncFurthestStep();
+        const furthestIndex = getSectionIndex(state.furthestStep);
 
-        APP_SECTIONS.forEach((section) => {
+        APP_SECTIONS.forEach((section, index) => {
           const unlocked = isStepUnlocked(section.id);
           const button = document.createElement("button");
           button.type = "button";
           button.id = `nav-${section.id}`;
-          button.className = "nav-tab";
+          button.className = "nav-tab" + (index < furthestIndex ? " is-complete" : "");
           button.textContent = section.label;
           button.disabled = !unlocked;
           button.setAttribute("role", "tab");
@@ -1005,6 +1094,26 @@
           });
           elements.appNavButtons.append(button);
         });
+
+        const activeButton = elements.appNavButtons.querySelector(`[aria-selected="true"]`);
+        if (activeButton?.scrollIntoView) {
+          activeButton.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+        }
+        updateStepProgress();
+      }
+
+      function updateStepProgress() {
+        const activeId = normalizeActiveSection(state.activeSection);
+        const index = Math.max(0, getSectionIndex(activeId));
+        const guidedTotal = 7;
+        const percent = activeId === "results" ? 100 : ((Math.min(index, guidedTotal - 1) + 1) / guidedTotal) * 100;
+        if (elements.stepProgressLabel) {
+          elements.stepProgressLabel.textContent =
+            activeId === "results" ? "Results" : `Step ${Math.min(index + 1, guidedTotal)} of ${guidedTotal}`;
+        }
+        if (elements.stepProgressBar) {
+          elements.stepProgressBar.style.width = `${percent}%`;
+        }
       }
 
       function showSection(sectionId, { persist = true, scroll = true } = {}) {
@@ -1025,62 +1134,76 @@
           elements.stepHint.textContent = sectionMeta?.hint || "";
         }
 
+        document.querySelectorAll("[data-app-section]").forEach((panel) => {
+          panel.classList.remove("is-entering");
+          if (panel.dataset.appSection === nextId) {
+            // restart enter animation
+            void panel.offsetWidth;
+            panel.classList.add("is-entering");
+          }
+        });
+
         renderStepNavs();
+        updateStepProgress();
         updateChosenOptionHint();
 
         elements.appNavButtons.querySelectorAll('[role="tab"]').forEach((button) => {
           const isActive = button.id === `nav-${nextId}`;
           button.setAttribute("aria-selected", String(isActive));
         });
+        const activeButton = elements.appNavButtons.querySelector(`[aria-selected="true"]`);
+        if (activeButton?.scrollIntoView) {
+          activeButton.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+        }
 
         if (persist) persistCurrentState();
         if (scroll) window.scrollTo({ top: 0, behavior: "smooth" });
       }
 
       function renderStepNavs() {
-        document.querySelectorAll("[data-step-nav]").forEach((container) => {
-          const stepId = container.dataset.stepNav;
-          container.replaceChildren();
-          const index = getSectionIndex(stepId);
+        const stepId = normalizeActiveSection(state.activeSection);
+        const index = getSectionIndex(stepId);
+        const host = elements.stepFooter || document.querySelector("[data-step-nav='" + stepId + "']");
+        if (!host) return;
+        host.replaceChildren();
 
-          const back = document.createElement("button");
-          back.type = "button";
-          back.textContent = "Back";
-          back.className =
-            "inline-flex items-center justify-center rounded-xl px-4 py-2.5 text-sm font-semibold text-stone-500 transition hover:bg-[#f3ebe3] hover:text-stone-800 focus:outline-none focus:ring-4 focus:ring-stone-300/40";
-          back.disabled = index <= 0;
-          if (back.disabled) back.classList.add("cursor-not-allowed", "opacity-40");
-          back.addEventListener("click", () => {
-            if (index <= 0) return;
-            showSection(APP_SECTIONS[index - 1].id);
-          });
-
-          const next = document.createElement("button");
-          next.type = "button";
-          const isLast = index >= APP_SECTIONS.length - 1;
-          next.textContent = isLast ? "Done" : "Continue";
-          next.className =
-            "inline-flex items-center justify-center rounded-xl bg-[#9a6432] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#7a4e25] focus:outline-none focus:ring-4 focus:ring-[#c48a4a]/15";
-          next.addEventListener("click", () => {
-            if (isLast) {
-              showSaveStatus("Flow complete — review your results anytime.");
-              return;
-            }
-            if (!canContinueFrom(stepId)) {
-              showSaveStatus(continueBlockedReason(stepId) || "Complete this step to continue.");
-              return;
-            }
-            const upcoming = APP_SECTIONS[index + 1].id;
-            state.furthestStep =
-              getSectionIndex(upcoming) > getSectionIndex(state.furthestStep)
-                ? upcoming
-                : state.furthestStep;
-            showSection(upcoming);
-            renderNav();
-          });
-
-          container.append(back, next);
+        const back = document.createElement("button");
+        back.type = "button";
+        back.textContent = "Back";
+        back.className =
+          "inline-flex min-w-[7rem] items-center justify-center rounded-xl border border-[#e5dbd0] bg-white px-4 py-2.5 text-sm font-semibold text-stone-600 transition hover:bg-[#f7efe6] hover:text-stone-800 focus:outline-none focus:ring-4 focus:ring-stone-300/40";
+        back.disabled = index <= 0;
+        if (back.disabled) back.classList.add("cursor-not-allowed", "opacity-40");
+        back.addEventListener("click", () => {
+          if (index <= 0) return;
+          showSection(APP_SECTIONS[index - 1].id);
         });
+
+        const next = document.createElement("button");
+        next.type = "button";
+        const isLast = index >= APP_SECTIONS.length - 1;
+        next.textContent = isLast ? "Finish" : "Continue";
+        next.className =
+          "inline-flex min-w-[9rem] flex-1 items-center justify-center rounded-xl bg-[#8f5e30] px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#7a4e25] focus:outline-none focus:ring-4 focus:ring-[#c48a4a]/15 sm:flex-none";
+        next.addEventListener("click", () => {
+          if (isLast) {
+            showSaveStatus("Nice work — your results are ready whenever you need them.");
+            return;
+          }
+          if (!canContinueFrom(stepId)) {
+            showSaveStatus(continueBlockedReason(stepId) || "Complete this step to continue.");
+            return;
+          }
+          const upcoming = APP_SECTIONS[index + 1].id;
+          state.furthestStep =
+            getSectionIndex(upcoming) > getSectionIndex(state.furthestStep)
+              ? upcoming
+              : state.furthestStep;
+          showSection(upcoming);
+          renderNav();
+        });
+
+        host.append(back, next);
       }
 
       function updateChosenOptionHint() {

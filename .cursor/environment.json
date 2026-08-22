@@ -1,0 +1,18 @@
+{
+  "name": "Ikigai",
+  "install": "cd ikigai && npm install",
+  "start": "true",
+  "terminals": [
+    {
+      "name": "Ikigai",
+      "command": "cd ikigai && npm run dev",
+      "description": "Ikigai Next.js app on http://localhost:3000. Bind 0.0.0.0 so Cursor Ports View can forward it. Wait for the ready message before opening the preview."
+    }
+  ],
+  "ports": [
+    {
+      "name": "Ikigai",
+      "port": 3000
+    }
+  ]
+}

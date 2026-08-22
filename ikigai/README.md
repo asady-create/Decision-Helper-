@@ -34,7 +34,17 @@ npm install
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000).
+The app listens on `0.0.0.0:3000` so Cursor can forward it.
+
+### Ports View (Cursor / VS Code)
+
+1. Command palette → **Ports: Focus on Ports View**
+2. Find port **3000** labeled **Ikigai**
+3. Open it in the Simple Browser (globe / Open in Browser)
+
+In a Cloud Agent, the same port is declared in `.cursor/environment.json`. Once the terminal prints `Ready`, the Ports panel should list it automatically.
+
+Open [http://localhost:3000](http://localhost:3000) locally.
 
 ## Routes
 
